@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kasir Nasi Kuning Digital</title>
+    <title>Toko n-Dhonk</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .uang-100k { background-color: #fee2e2; color: #991b1b; border: 2px solid #fca5a5; }
@@ -18,15 +18,15 @@
     <div id="notif-box" class="hidden fixed top-4 left-1/2 -translate-x-1/2 w-11/2 max-w-sm z-50 p-4 rounded-xl shadow-xl text-white text-center font-bold transition-all duration-300"></div>
 
     <div class="bg-amber-500 text-white p-4 shadow-md sticky top-0 z-40 flex justify-between items-center">
-        <h1 class="text-lg font-bold tracking-wide">🍛 KASIR NASI KUNING</h1>
+        <h1 class="text-lg font-bold tracking-wide">🍛 Aplikasi Kasir By Awal</h1>
         <button onclick="muatMenu()" class="text-xs bg-amber-700 px-3 py-1.5 rounded-lg font-medium active:scale-95 transition">🔄 Refresh Menu</button>
     </div>
 
     <div class="max-w-md mx-auto p-4 space-y-4">
         
         <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
-            <h2 class="text-sm font-bold text-slate-500 uppercase mb-3 tracking-wider">🛒 Pilihan Menu & Lauk</h2>
-            <div id="loading-text" class="text-center py-6 text-slate-400 text-sm italic">Sedang menyinkronkan data dengan Google Sheets...</div>
+            <h2 class="text-sm font-bold text-slate-500 uppercase mb-3 tracking-wider">🛒 Pilihan Menu & Lauk/Barang</h2>
+            <div id="loading-text" class="text-center py-6 text-slate-400 text-sm italic">Sedang menyinkronkan data, harap tunggu...</div>
             <div id="menu-list" class="space-y-3 divide-y divide-slate-100"></div>
         </div>
 
@@ -44,7 +44,7 @@
         </div>
 
         <div id="area-tunai" class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 space-y-4">
-            <h2 class="text-sm font-bold text-slate-500 uppercase tracking-wider">💵 Visualisasi Lembar Uang (Pilih)</h2>
+            <h2 class="text-sm font-bold text-slate-500 uppercase tracking-wider">💵 (Pilih Nominal Uang Yang Digunakan)</h2>
             <div id="rupiah-grid" class="grid grid-cols-2 gap-2.5"></div>
             
             <div class="border-t pt-3 flex justify-between items-center">
@@ -59,12 +59,12 @@
 
         <div id="area-qris" class="hidden bg-white p-4 rounded-xl shadow-sm border border-slate-100 text-center space-y-3">
             <div class="bg-slate-100 py-8 rounded-lg font-mono text-xs text-slate-400 border border-dashed border-slate-300">
-                📸 [Tampilkan Gambar / QRIS Statis Anda Di Sini]
+                📸 [Periksa Transaksi QRISnya, Apakah Sudah Berhasil?]
             </div>
         </div>
 
         <button onclick="bayarSekarang()" class="w-full bg-emerald-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-emerald-700 active:scale-95 transition text-center text-lg">
-            Selesaikan Transaksi & Simpan Data
+            Simpan Data
         </button>
     </div>
 
