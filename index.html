@@ -11,11 +11,12 @@
         .uang-20k { background-color: #dcfce7; color: #166534; border: 2px solid #86efac; }
         .uang-10k { background-color: #f3e8ff; color: #6b21a8; border: 2px solid #d8b4fe; }
         .uang-5k { background-color: #fef3c7; color: #92400e; border: 2px solid #fcd34d; }
+        .uang-custom { background-color: #f1f5f9; color: #334155; border: 2px solid #cbd5e1; }
     </style>
 </head>
 <body class="bg-slate-50 font-sans pb-12 text-slate-800">
 
-    <div id="notif-box" class="hidden fixed top-4 left-1/2 -translate-x-1/2 w-11/2 max-w-sm z-50 p-4 rounded-xl shadow-xl text-white text-center font-bold transition-all duration-300"></div>
+    <div id="notif-box" class="hidden fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-50 p-4 rounded-xl shadow-xl text-white text-center font-bold transition-all duration-300"></div>
 
     <div class="bg-amber-500 text-white p-4 shadow-md sticky top-0 z-40 flex justify-between items-center">
         <h1 class="text-lg font-bold tracking-wide">🍛 Aplikasi Kasir By Awal</h1>
@@ -24,17 +25,20 @@
 
     <div class="max-w-md mx-auto p-4 space-y-4">
         
+        <!-- Pilihan Menu -->
         <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
             <h2 class="text-sm font-bold text-slate-500 uppercase mb-3 tracking-wider">🛒 Pilihan Menu & Lauk/Barang</h2>
             <div id="loading-text" class="text-center py-6 text-slate-400 text-sm italic">Sedang menyinkronkan data, harap tunggu...</div>
             <div id="menu-list" class="space-y-3 divide-y divide-slate-100"></div>
         </div>
 
+        <!-- Total Layar -->
         <div class="bg-amber-600 text-white p-4 rounded-xl shadow-inner flex justify-between items-center">
             <span class="text-xs font-bold uppercase tracking-wider text-amber-200">Total Tagihan</span>
             <span id="total-screen" class="text-2xl font-black">Rp 0</span>
         </div>
 
+        <!-- Metode Pembayaran -->
         <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 space-y-3">
             <h2 class="text-sm font-bold text-slate-500 uppercase tracking-wider">💳 Metode Pembayaran</h2>
             <div class="grid grid-cols-2 gap-3">
@@ -43,6 +47,7 @@
             </div>
         </div>
 
+        <!-- Area Pembayaran Tunai -->
         <div id="area-tunai" class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 space-y-4">
             <h2 class="text-sm font-bold text-slate-500 uppercase tracking-wider">💵 (Pilih Nominal Uang Yang Digunakan)</h2>
             <div id="rupiah-grid" class="grid grid-cols-2 gap-2.5"></div>
@@ -57,9 +62,17 @@
             </div>
         </div>
 
-        <div id="area-qris" class="hidden bg-white p-4 rounded-xl shadow-sm border border-slate-100 text-center space-y-3">
-            <div class="bg-slate-100 py-8 rounded-lg font-mono text-xs text-slate-400 border border-dashed border-slate-300">
-                📸 [Periksa Transaksi QRISnya, Apakah Sudah Berhasil?]
+        <!-- Area Pembayaran QRIS -->
+        <div id="area-qris" class="hidden bg-white p-4 rounded-xl shadow-sm border border-slate-100 text-center space-y-4">
+            <div class="flex flex-col items-center justify-center p-3 bg-slate-50 rounded-xl border border-slate-200">
+                <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Total Scan QRIS</p>
+                <p id="qris-amount-text" class="text-xl font-black text-amber-600 mb-3">Rp 0</p>
+                
+                <div class="bg-white p-3 rounded-xl shadow-md border border-slate-100 flex items-center justify-center">
+                    <!-- Ganti src="qris.png" dengan file gambar QRIS Anda jika memakai QRIS Statis -->
+                    <img id="qris-image" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=Toko-n-Dhonk" alt="QRIS Toko n-Dhonk" class="w-48 h-48 object-contain" />
+                </div>
+                <p class="text-[11px] text-slate-400 mt-3 leading-relaxed">Silakan scan QRIS di atas, periksa nama akun <b>Toko n-Dhonk</b> dan pastikan statusnya berhasil.</p>
             </div>
         </div>
 
@@ -69,7 +82,6 @@
     </div>
 
     <script>
-        // MASUKKAN URL HASIL DEPLOY APPS SCRIPT ANDA DI SINI
         const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwo4Be97S21PHDVAsijxPLKWW2PDQRzwy8DtMblKo7pPMgAhnmeNLypOwyMN3vf3zZZ2A/exec"; 
 
         let itemMenu = [];
@@ -110,7 +122,7 @@
                     </div>
                     <div class="flex items-center space-x-2.5">
                         <button onclick="ubahQty('${item.nama}', -1)" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 font-bold active:scale-90 transition shadow-sm text-center">-</button>
-                        <span id="qty-${item.nama.replace(/\s+/g, '')}" class="w-6 text-center text-sm font-bold text-slate-700">0</span>
+                        <span id="qty-${item.nama.replace(/\s+/g, '')}" class="w-6 text-center text-sm font-bold text-slate-700">${orderan[item.nama]}</span>
                         <button onclick="ubahQty('${item.nama}', 1)" class="w-8 h-8 rounded-lg bg-amber-500 text-white font-bold active:scale-90 transition shadow-sm text-center">+</button>
                     </div>
                 </div>`;
@@ -130,6 +142,7 @@
                 grandTotal += orderan[item.nama] * item.harga;
             });
             document.getElementById("total-screen").innerText = "Rp " + grandTotal.toLocaleString('id-ID');
+            document.getElementById("qris-amount-text").innerText = "Rp " + grandTotal.toLocaleString('id-ID');
             renderUangRupiah();
         }
 
@@ -140,15 +153,35 @@
                 setUangFisik(0);
                 return;
             }
-            let lembaran = [5000, 10000, 20000, 50000, 100000];
+
             let html = `<button onclick="setUangFisik(${grandTotal})" class="p-3 text-xs font-bold rounded-xl border-2 border-dashed border-slate-300 text-slate-600 active:scale-95 transition bg-slate-50">💵 UANG PAS</button>`;
             
-            lembaran.forEach(nominal => {
-                if(nominal >= grandTotal) {
+            // Logika Pembulatan Pecahan Pintar (Menampilkan kelipatan terdekat, contoh: 15rb jika total 13rb)
+            let lembaranStatis = [5000, 10000, 20000, 50000, 100000];
+            let pilihanUang = [];
+
+            // 1. Tambahkan pembulatan ke atas kelipatan 5.000 terdekat (Misal: 13.000 -> 15.000)
+            let kelipatan5k = Math.ceil(grandTotal / 5000) * 5000;
+            if (kelipatan5k !== grandTotal) {
+                pilihanUang.push({ nominal: kelipatan5k, style: 'uang-custom' });
+            }
+
+            // 2. Tambahkan lembaran standar rupiah yang nilainya di atas grandTotal
+            lembaranStatis.forEach(nominal => {
+                if (nominal > grandTotal && nominal !== kelipatan5k) {
                     let cssStyle = nominal === 100000 ? 'uang-100k' : (nominal === 50000 ? 'uang-50k' : (nominal === 20000 ? 'uang-20k' : (nominal === 10000 ? 'uang-10k' : 'uang-5k')));
-                    html += `<button onclick="setUangFisik(${nominal})" class="p-3 text-xs font-black rounded-xl shadow-sm active:scale-95 transition ${cssStyle}">Rp ${nominal.toLocaleString('id-ID')}</button>`;
+                    pilihanUang.push({ nominal: nominal, style: cssStyle });
                 }
             });
+
+            // Urutkan pilihan nominal dari kecil ke besar agar rapi
+            pilihanUang.sort((a, b) => a.nominal - b.nominal);
+
+            // Batasi maksimal menampilkan 5 pilihan tombol agar layar HP tidak penuh sesak
+            pilihanUang.slice(0, 5).forEach(item => {
+                html += `<button onclick="setUangFisik(${item.nominal})" class="p-3 text-xs font-black rounded-xl shadow-sm active:scale-95 transition ${item.style}">Rp ${item.nominal.toLocaleString('id-ID')}</button>`;
+            });
+            
             container.innerHTML = html;
             setUangFisik(grandTotal);
         }
@@ -172,6 +205,12 @@
                 document.getElementById("area-qris").classList.remove("hidden");
                 document.getElementById("tab-qris").className = "p-3 font-bold rounded-xl border-2 border-amber-500 bg-amber-50 text-amber-700 transition shadow-sm";
                 document.getElementById("tab-tunai").className = "p-3 font-bold rounded-xl border border-slate-200 text-slate-600 transition";
+                
+                // Set isi generator QRIS otomatis berbasis teks total bayar
+                let qrisImg = document.getElementById("qris-image");
+                if(grandTotal > 0){
+                    qrisImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=TokoNDhonk_Total_${grandTotal}`;
+                }
             }
         }
 
@@ -198,7 +237,6 @@
             triggerNotif("⏳ Mengirim transaksi ke Google Sheets...", "success");
 
             try {
-                // Skema Kirim Paksa JSON text untuk menghindari blokir CORS di HP
                 await fetch(APPS_SCRIPT_URL, {
                     method: "POST",
                     mode: "no-cors", 
@@ -208,7 +246,6 @@
 
                 triggerNotif("🎉 Berhasil! Transaksi tercatat di Spreadsheet.", "success");
                 
-                // Reset State Aplikasi
                 orderan = {};
                 grandTotal = 0;
                 kalkulasiNota();
@@ -218,8 +255,7 @@
             }
         }
 
-        // Boot otomatis aplikasi saat halaman dibuka
-        window.onload = muatMenu;
+        document.addEventListener("DOMContentLoaded", muatMenu);
     </script>
 </body>
 </html>
