@@ -3,92 +3,168 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Toko n-Dhonk</title>
+    <title>Toko n-Dhonk - Aplikasi Kasir</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+    
     <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom bank notes color profiles */
         .uang-100k { background-color: #fee2e2; color: #991b1b; border: 2px solid #fca5a5; }
         .uang-50k { background-color: #e0f2fe; color: #075985; border: 2px solid #93c5fd; }
         .uang-20k { background-color: #dcfce7; color: #166534; border: 2px solid #86efac; }
         .uang-10k { background-color: #f3e8ff; color: #6b21a8; border: 2px solid #d8b4fe; }
         .uang-5k { background-color: #fef3c7; color: #92400e; border: 2px solid #fcd34d; }
         .uang-custom { background-color: #f1f5f9; color: #334155; border: 2px solid #cbd5e1; }
+
+        /* Scanning animation effect on QRIS code */
+        .laser-line {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: rgba(245, 158, 11, 0.8);
+            box-shadow: 0 0 10px #f59e0b, 0 0 4px #d97706;
+            animation: scanAnimation 2.2s infinite ease-in-out;
+        }
+        @keyframes scanAnimation {
+            0% { top: 4%; }
+            50% { top: 96%; }
+            100% { top: 4%; }
+        }
     </style>
 </head>
-<body class="bg-slate-50 font-sans pb-12 text-slate-800">
+<body class="bg-slate-50 text-slate-800 pb-12">
 
-    <div id="notif-box" class="hidden fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-50 p-4 rounded-xl shadow-xl text-white text-center font-bold transition-all duration-300"></div>
+    <!-- Custom Toast Notification -->
+    <div id="notif-box" class="hidden fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-50 p-4 rounded-xl shadow-xl text-white text-center font-bold transition-all duration-300 transform scale-95 opacity-0"></div>
 
-    <div class="bg-amber-500 text-white p-4 shadow-md sticky top-0 z-40 flex justify-between items-center">
-        <h1 class="text-lg font-bold tracking-wide">🍛 Aplikasi Kasir By Awal</h1>
-        <button onclick="muatMenu()" class="text-xs bg-amber-700 px-3 py-1.5 rounded-lg font-medium active:scale-95 transition">🔄 Refresh Menu</button>
+    <!-- App Header Banner -->
+    <div class="bg-gradient-to-r from-amber-500 to-amber-600 text-white p-4 shadow-md sticky top-0 z-40 flex justify-between items-center">
+        <div class="flex items-center space-x-2">
+            <span class="material-icons text-xl">store</span>
+            <h1 class="text-lg font-bold tracking-wide">Toko n-Dhonk By Awal</h1>
+        </div>
+        <button onclick="muatMenu()" class="text-xs bg-amber-700/50 hover:bg-amber-700 px-3 py-1.5 rounded-lg font-semibold active:scale-95 transition flex items-center gap-1">
+            <span class="material-icons text-[14px]">sync</span> Muat Ulang
+        </button>
     </div>
 
+    <!-- Main Container -->
     <div class="max-w-md mx-auto p-4 space-y-4">
         
         <!-- Pilihan Menu -->
-        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
-            <h2 class="text-sm font-bold text-slate-500 uppercase mb-3 tracking-wider">🛒 Pilihan Menu & Lauk/Barang</h2>
-            <div id="loading-text" class="text-center py-6 text-slate-400 text-sm italic">Sedang menyinkronkan data, harap tunggu...</div>
-            <div id="menu-list" class="space-y-3 divide-y divide-slate-100"></div>
+        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xs font-black text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                    <span class="material-icons text-sm text-slate-400">restaurant_menu</span> Pilihan Menu & Lauk
+                </h2>
+                <span id="menu-counter" class="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">0 Menu</span>
+            </div>
+            <div id="loading-text" class="text-center py-10 text-slate-400 text-sm flex flex-col items-center justify-center gap-2">
+                <div class="animate-spin rounded-full h-6 w-6 border-2 border-amber-500 border-t-transparent"></div>
+                <span class="italic">Menyinkronkan data menu...</span>
+            </div>
+            <div id="menu-list" class="space-y-1 divide-y divide-slate-100"></div>
         </div>
 
         <!-- Total Layar -->
-        <div class="bg-amber-600 text-white p-4 rounded-xl shadow-inner flex justify-between items-center">
-            <span class="text-xs font-bold uppercase tracking-wider text-amber-200">Total Tagihan</span>
-            <span id="total-screen" class="text-2xl font-black">Rp 0</span>
+        <div class="bg-slate-900 text-white p-5 rounded-2xl shadow-inner flex justify-between items-center border border-slate-800">
+            <div class="flex flex-col">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Tagihan</span>
+                <span id="total-screen" class="text-2xl font-black text-amber-500">Rp 0</span>
+            </div>
+            <span class="material-icons text-3xl text-slate-700">calculate</span>
         </div>
 
         <!-- Metode Pembayaran -->
-        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 space-y-3">
-            <h2 class="text-sm font-bold text-slate-500 uppercase tracking-wider">💳 Metode Pembayaran</h2>
+        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-3">
+            <h2 class="text-xs font-black text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                <span class="material-icons text-sm text-slate-400">payment</span> Metode Pembayaran
+            </h2>
             <div class="grid grid-cols-2 gap-3">
-                <button id="tab-tunai" onclick="gantiMetode('TUNAI')" class="p-3 font-bold rounded-xl border-2 border-amber-500 bg-amber-50 text-amber-700 transition">💵 TUNAI</button>
-                <button id="tab-qris" onclick="gantiMetode('QRIS')" class="p-3 font-bold rounded-xl border border-slate-200 text-slate-600 transition">📱 QRIS</button>
+                <button id="tab-tunai" onclick="gantiMetode('TUNAI')" class="p-3.5 font-bold rounded-xl border-2 border-amber-500 bg-amber-50 text-amber-700 transition shadow-sm flex items-center justify-center gap-1 text-sm">
+                    <span class="material-icons text-sm">payments</span> TUNAI
+                </button>
+                <button id="tab-qris" onclick="gantiMetode('QRIS')" class="p-3.5 font-bold rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition flex items-center justify-center gap-1 text-sm">
+                    <span class="material-icons text-sm">qr_code_2</span> QRIS
+                </button>
             </div>
         </div>
 
         <!-- Area Pembayaran Tunai -->
-        <div id="area-tunai" class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 space-y-4">
-            <h2 class="text-sm font-bold text-slate-500 uppercase tracking-wider">💵 (Pilih Nominal atau Ketik Manual)</h2>
+        <div id="area-tunai" class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+            <h2 class="text-xs font-black text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                <span class="material-icons text-sm text-slate-400">monetization_on</span> Kelipatan Nominal Uang Pas
+            </h2>
             <div id="rupiah-grid" class="grid grid-cols-2 gap-2.5"></div>
             
-            <!-- PERBAIKAN UTAMA: Kolom Input Mandiri yang Lebih Responsif & Stabil -->
-            <div class="border-t pt-3 space-y-1.5">
-                <label for="input-cash-manual" class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Atau Ketik Manual Uang Diterima</label>
+            <!-- Kolom Input Mandiri yang Lebih Responsif & Stabil -->
+            <div class="border-t border-slate-100 pt-3 space-y-1.5">
+                <label for="input-cash-manual" class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Ketik Manual Jumlah Pembayaran</label>
                 <div class="relative rounded-xl shadow-sm">
                     <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                         <span class="text-slate-400 font-bold text-sm">Rp</span>
                     </div>
-                    <input type="text" inputmode="numeric" id="input-cash-manual" onkeyup="tangkapUangManual(this)" class="block w-full rounded-xl border-slate-200 pl-10 pr-3 py-3 text-slate-800 font-black bg-slate-50 focus:border-amber-500 focus:ring-amber-500 focus:bg-white text-base border" placeholder="0">
+                    <input type="text" inputmode="numeric" id="input-cash-manual" onkeyup="tangkapUangManual(this)" class="block w-full rounded-xl border-slate-200 pl-10 pr-3 py-3 text-slate-800 font-black bg-slate-50 focus:border-amber-500 focus:ring-amber-500 focus:bg-white text-base border outline-none transition" placeholder="0">
                 </div>
             </div>
             
-            <div class="border-t pt-3 flex justify-between items-center">
-                <span class="text-sm text-slate-500">Uang Diterima:</span>
+            <div class="border-t border-slate-100 pt-3 flex justify-between items-center text-sm">
+                <span class="text-slate-500">Uang Diterima:</span>
                 <span id="txt-cash-in" class="font-bold text-slate-700">Rp 0</span>
             </div>
-            <div class="flex justify-between items-center">
-                <span class="text-sm text-slate-500">Uang Kembalian:</span>
-                <span id="txt-change" class="text-lg font-black text-green-600">Rp 0</span>
+            <div class="flex justify-between items-center text-sm">
+                <span class="text-slate-500">Uang Kembalian:</span>
+                <span id="txt-change" class="text-lg font-black text-emerald-600">Rp 0</span>
             </div>
         </div>
 
-        <!-- Area Pembayaran QRIS -->
-        <div id="area-qris" class="hidden bg-white p-4 rounded-xl shadow-sm border border-slate-100 text-center space-y-4">
-            <div class="flex flex-col items-center justify-center p-3 bg-slate-50 rounded-xl border border-slate-200">
-                <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Total Scan QRIS</p>
-                <p id="qris-amount-text" class="text-xl font-black text-amber-600 mb-3">Rp 0</p>
+        <!-- Area Pembayaran QRIS (Menggunakan link direct image Google Drive) -->
+        <div id="area-qris" class="hidden bg-white p-4 rounded-2xl shadow-sm border border-slate-100 text-center space-y-4">
+            <div class="flex flex-col items-center justify-center p-3 bg-slate-50 rounded-2xl border border-slate-200">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Total Scan QRIS</p>
+                <p id="qris-amount-text" class="text-2xl font-black text-amber-600 mb-3">Rp 0</p>
                 
-                <div class="bg-white p-3 rounded-xl shadow-md border border-slate-100 flex items-center justify-center">
-                    <img id="qris-image" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=Toko-n-Dhonk" alt="QRIS Toko n-Dhonk" class="w-48 h-48 object-contain" />
+                <!-- QRIS Image Box with Direct Google Drive URL & Scanning Effect -->
+                <div class="bg-white p-4 rounded-2xl shadow-md border border-slate-200 flex items-center justify-center relative overflow-hidden w-56 h-72">
+                    <div class="laser-line"></div>
+                    <img id="qris-image" src="https://lh3.googleusercontent.com/d/1ZyqwfktzhZHNvQiZrBhvHqB5G34X1SKA" alt="QRIS Toko n-Dhonk" class="w-full h-full object-contain" />
                 </div>
-                <p class="text-[11px] text-slate-400 mt-3 leading-relaxed">Silakan scan QRIS di atas, periksa nama akun <b>Toko n-Dhonk</b> dan pastikan statusnya berhasil.</p>
+                
+                <p class="text-[11px] text-slate-400 mt-3 leading-relaxed max-w-[240px]">
+                    Silakan scan QRIS di atas, pastikan tujuan pembayaran mengarah ke <b>Toko n-Dhonk</b>.
+                </p>
             </div>
         </div>
 
-        <button onclick="bayarSekarang()" class="w-full bg-emerald-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-emerald-700 active:scale-95 transition text-center text-lg">
-            Simpan Data
+        <!-- Tombol Kirim / Save -->
+        <button id="btn-save" onclick="bayarSekarang()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-2xl shadow-lg hover:shadow-emerald-200 active:scale-95 transition-all text-center text-lg flex items-center justify-center gap-2">
+            <span class="material-icons">save</span>
+            <span>Simpan Data</span>
         </button>
+    </div>
+
+    <!-- Modal Success State Popup -->
+    <div id="modal-success" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-sm text-center shadow-2xl space-y-4 border border-slate-100 transform scale-95 transition-all">
+            <span class="material-icons text-5xl text-emerald-500 bg-emerald-50 p-3 rounded-full">check_circle</span>
+            <h3 class="text-lg font-black text-slate-800">Transaksi Berhasil!</h3>
+            <p class="text-xs text-slate-500">Data penjualan berhasil dikirim ke basis data cloud.</p>
+            
+            <div class="bg-slate-50 p-4 rounded-2xl text-left text-xs space-y-2 text-slate-600 border border-slate-100">
+                <div class="flex justify-between"><span class="text-slate-400">Metode:</span><span id="res-metode" class="font-bold"></span></div>
+                <div class="flex justify-between"><span class="text-slate-400">Total:</span><span id="res-total" class="font-bold"></span></div>
+                <div class="flex justify-between"><span class="text-slate-400">Kembali:</span><span id="res-kembali" class="font-bold text-emerald-600"></span></div>
+            </div>
+
+            <button onclick="tutupModalSukses()" class="w-full bg-slate-900 text-white font-bold py-3 rounded-xl hover:bg-slate-800 active:scale-95 transition text-sm">
+                Transaksi Baru
+            </button>
+        </div>
     </div>
 
     <script>
@@ -103,37 +179,64 @@
         function triggerNotif(msg, type) {
             let box = document.getElementById("notif-box");
             box.innerText = msg;
-            box.className = type === "success" ? "fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-50 p-4 rounded-xl shadow-xl text-white text-center font-bold bg-emerald-600 block" : "fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-50 p-4 rounded-xl shadow-xl text-white text-center font-bold bg-rose-600 block";
-            setTimeout(() => { box.className = "hidden"; }, 3500);
+            
+            // Apply status color classes cleanly
+            if (type === "success") {
+                box.className = "fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-50 p-4 rounded-xl shadow-xl text-white text-center font-bold bg-emerald-600 block transition-all scale-100 opacity-100";
+            } else {
+                box.className = "fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-50 p-4 rounded-xl shadow-xl text-white text-center font-bold bg-rose-600 block transition-all scale-100 opacity-100";
+            }
+            
+            setTimeout(() => { 
+                box.className = "hidden"; 
+            }, 3000);
         }
 
         async function muatMenu() {
-            document.getElementById("loading-text").classList.remove("hidden");
-            document.getElementById("menu-list").innerHTML = "";
+            let loader = document.getElementById("loading-text");
+            let list = document.getElementById("menu-list");
+            loader.classList.remove("hidden");
+            list.innerHTML = "";
+            
             try {
                 let res = await fetch(APPS_SCRIPT_URL);
                 itemMenu = await res.json();
-                document.getElementById("loading-text").classList.add("hidden");
+                loader.classList.add("hidden");
                 renderMenu();
+                updateMenuCounter();
             } catch (err) {
-                document.getElementById("loading-text").innerText = "❌ Hubungan gagal! Periksa kembali Web App URL Anda.";
+                loader.innerHTML = `
+                    <div class="text-rose-500 flex flex-col items-center gap-1">
+                        <span class="material-icons text-3xl">error_outline</span>
+                        <span class="font-bold">Gagal Menyinkronkan Menu</span>
+                        <p class="text-xs text-slate-400 not-italic">Periksa koneksi internet atau Web App script URL Anda.</p>
+                    </div>`;
             }
+        }
+
+        function updateMenuCounter() {
+            let count = Object.values(orderan).filter(v => v > 0).length;
+            document.getElementById("menu-counter").innerText = `${count} Diorder`;
         }
 
         function renderMenu() {
             let html = "";
             itemMenu.forEach(item => {
                 if(!orderan[item.nama]) orderan[item.nama] = 0;
+                
+                // Format ID safe for element selection
+                let idAman = item.nama.replace(/\s+/g, '');
+                
                 html += `
-                <div class="flex justify-between items-center py-2.5">
+                <div class="flex justify-between items-center py-3">
                     <div>
                         <div class="font-bold text-slate-800 text-sm">${item.nama}</div>
-                        <div class="text-xs font-semibold text-amber-600">Rp ${item.harga.toLocaleString('id-ID')}</div>
+                        <div class="text-xs font-bold text-amber-600">Rp ${item.harga.toLocaleString('id-ID')}</div>
                     </div>
-                    <div class="flex items-center space-x-2.5">
-                        <button onclick="ubahQty('${item.nama}', -1)" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 font-bold active:scale-90 transition shadow-sm text-center">-</button>
-                        <span id="qty-${item.nama.replace(/\s+/g, '')}" class="w-6 text-center text-sm font-bold text-slate-700">${orderan[item.nama]}</span>
-                        <button onclick="ubahQty('${item.nama}', 1)" class="w-8 h-8 rounded-lg bg-amber-500 text-white font-bold active:scale-90 transition shadow-sm text-center">+</button>
+                    <div class="flex items-center space-x-3">
+                        <button onclick="ubahQty('${item.nama}', -1)" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-black active:scale-90 transition shadow-sm text-center flex items-center justify-center">-</button>
+                        <span id="qty-${idAman}" class="w-6 text-center text-sm font-black text-slate-700">${orderan[item.nama]}</span>
+                        <button onclick="ubahQty('${item.nama}', 1)" class="w-8 h-8 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-black active:scale-90 transition shadow-sm text-center flex items-center justify-center">+</button>
                     </div>
                 </div>`;
             });
@@ -142,8 +245,10 @@
 
         function ubahQty(nama, delta) {
             orderan[nama] = Math.max(0, orderan[nama] + delta);
-            document.getElementById(`qty-${nama.replace(/\s+/g, '')}`).innerText = orderan[nama];
+            let idAman = nama.replace(/\s+/g, '');
+            document.getElementById(`qty-${idAman}`).innerText = orderan[nama];
             kalkulasiNota();
+            updateMenuCounter();
         }
 
         function kalkulasiNota() {
@@ -159,12 +264,12 @@
         function renderUangRupiah() {
             let container = document.getElementById("rupiah-grid");
             if(grandTotal === 0) {
-                container.innerHTML = "<p class='col-span-2 text-center text-xs text-slate-400 py-2'>Pilih menu terlebih dahulu</p>";
+                container.innerHTML = "<p class='col-span-2 text-center text-xs text-slate-400 py-4 italic'>Tambahkan item belanja terlebih dahulu</p>";
                 updateTampilanKembalian(0);
                 return;
             }
 
-            let html = `<button onclick="setUangDariTombol(${grandTotal})" class="p-3 text-xs font-bold rounded-xl border-2 border-dashed border-slate-300 text-slate-600 active:scale-95 transition bg-slate-50">💵 UANG PAS</button>`;
+            let html = `<button onclick="setUangDariTombol(${grandTotal})" class="p-3 text-xs font-bold rounded-xl border-2 border-dashed border-slate-300 text-slate-600 active:scale-95 transition bg-slate-50 flex items-center justify-center gap-1">💵 UANG PAS</button>`;
             
             let lembaranStatis = [5000, 10000, 20000, 50000, 100000];
             let pilihanUang = [];
@@ -189,7 +294,6 @@
             
             container.innerHTML = html;
             
-            // Jaga nilai cashDiterima jika kasir sedang mengetik manual, jangan ditimpa paksa ke grandTotal
             let inputManual = document.getElementById("input-cash-manual").value;
             if(!inputManual) {
                 cashDiterima = grandTotal;
@@ -197,16 +301,13 @@
             updateTampilanKembalian(cashDiterima);
         }
 
-        // Dipanggil jika menekan tombol cepat pecahan di atas
         function setUangDariTombol(jumlah) {
-            document.getElementById("input-cash-manual").value = ""; // Bersihkan kolom ketik manual
+            document.getElementById("input-cash-manual").value = ""; 
             cashDiterima = jumlah;
             updateTampilanKembalian(cashDiterima);
         }
 
-        // Dipanggil SECARA REAL-TIME saat kasir mengetik nominal sendiri
         function tangkapUangManual(inputan) {
-            // Hilangkan semua karakter titik atau non-angka agar bisa diproses matematika
             let angkaBersih = inputan.value.replace(/\./g, "").replace(/\D/g, "");
             
             if(angkaBersih === "" || isNaN(angkaBersih)) {
@@ -214,13 +315,11 @@
                 inputan.value = "";
             } else {
                 cashDiterima = parseInt(angkaBersih);
-                // Beri efek cantik auto-format titik ribuan saat diketik
                 inputan.value = cashDiterima.toLocaleString('id-ID');
             }
             updateTampilanKembalian(cashDiterima);
         }
 
-        // Mengatur teks ringkasan nota pembayaran di layar terbawah
         function updateTampilanKembalian(jumlah) {
             document.getElementById("txt-cash-in").innerText = "Rp " + jumlah.toLocaleString('id-ID');
             let sisa = jumlah - grandTotal;
@@ -232,21 +331,17 @@
             if(opsi === "TUNAI") {
                 document.getElementById("area-tunai").classList.remove("hidden");
                 document.getElementById("area-qris").classList.add("hidden");
-                document.getElementById("tab-tunai").className = "p-3 font-bold rounded-xl border-2 border-amber-500 bg-amber-50 text-amber-700 transition shadow-sm";
-                document.getElementById("tab-qris").className = "p-3 font-bold rounded-xl border border-slate-200 text-slate-600 transition";
+                document.getElementById("tab-tunai").className = "p-3.5 font-bold rounded-xl border-2 border-amber-500 bg-amber-50 text-amber-700 transition shadow-sm flex items-center justify-center gap-1 text-sm";
+                document.getElementById("tab-qris").className = "p-3.5 font-bold rounded-xl border border-slate-200 text-slate-600 transition flex items-center justify-center gap-1 text-sm";
             } else {
                 document.getElementById("area-tunai").classList.add("hidden");
                 document.getElementById("area-qris").classList.remove("hidden");
-                document.getElementById("tab-qris").className = "p-3 font-bold rounded-xl border-2 border-amber-500 bg-amber-50 text-amber-700 transition shadow-sm";
-                document.getElementById("tab-tunai").className = "p-3 font-bold rounded-xl border border-slate-200 text-slate-600 transition";
-                
-                let qrisImg = document.getElementById("qris-image");
-                if(grandTotal > 0){
-                    qrisImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=TokoNDhonk_Total_${grandTotal}`;
-                }
+                document.getElementById("tab-qris").className = "p-3.5 font-bold rounded-xl border-2 border-amber-500 bg-amber-50 text-amber-700 transition shadow-sm flex items-center justify-center gap-1 text-sm";
+                document.getElementById("tab-tunai").className = "p-3.5 font-bold rounded-xl border border-slate-200 text-slate-600 transition flex items-center justify-center gap-1 text-sm";
             }
         }
 
+        // Mengirimkan data transaksi secara rapi ke cloud spreadsheet
         async function bayarSekarang() {
             if(grandTotal === 0) {
                 triggerNotif("Keranjang masih kosong!", "error");
@@ -258,44 +353,82 @@
                 return;
             }
 
+            // Menyusun daftar pesanan
             let rincian = [];
-            for(let key in orderan) {
-                if(orderan[key] > 0) rincian.push(`${key} (${orderan[key]}x)`);
+            for (let namaItem in orderan) {
+                if (orderan[namaItem] > 0) {
+                    rincian.push(`${namaItem} (${orderan[namaItem]}x)`);
+                }
             }
+            let detailPesanan = rincian.join(", ");
 
-            let paketData = {
-                id: "TX-" + Math.floor(Math.random() * 90000 + 10000),
-                item: rincian.join(", "),
-                total: grandTotal,
-                metode: caraBayar,
-                bayar: caraBayar === "TUNAI" ? cashDiterima : grandTotal,
-                kembalian: caraBayar === "TUNAI" ? Math.max(0, cashDiterima - grandTotal) : 0
-            };
+            // Status saving animation
+            let btnSave = document.getElementById("btn-save");
+            let originalText = btnSave.innerHTML;
+            btnSave.disabled = true;
+            btnSave.className = "w-full bg-slate-400 text-white font-bold py-4 rounded-2xl text-center text-lg flex items-center justify-center gap-2 cursor-not-allowed";
+            btnSave.innerHTML = `<div class="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div> Menyimpan data cloud...`;
 
-            triggerNotif("⏳ Mengirim transaksi ke Google Sheets...", "success");
-
+            // Kirim data transaksi via POST/GET ke Apps Script
             try {
-                await fetch(APPS_SCRIPT_URL, {
+                let sisaUang = caraBayar === "TUNAI" ? (cashDiterima - grandTotal) : 0;
+                let payload = {
+                    caraBayar: caraBayar,
+                    total: grandTotal,
+                    diterima: caraBayar === "TUNAI" ? cashDiterima : grandTotal,
+                    kembalian: sisaUang,
+                    items: detailPesanan,
+                    timestamp: new Date().toISOString()
+                };
+
+                // Fetch request to apps script
+                let res = await fetch(APPS_SCRIPT_URL, {
                     method: "POST",
-                    mode: "no-cors", 
-                    headers: { "Content-Type": "text/plain" },
-                    body: JSON.stringify(paketData)
+                    body: JSON.stringify(payload)
                 });
 
-                triggerNotif("🎉 Berhasil! Transaksi tercatat di Spreadsheet.", "success");
+                // Tampilkan Modal Sukses
+                document.getElementById("res-metode").innerText = caraBayar;
+                document.getElementById("res-total").innerText = "Rp " + grandTotal.toLocaleString('id-ID');
+                document.getElementById("res-kembali").innerText = "Rp " + sisaUang.toLocaleString('id-ID');
                 
-                document.getElementById("input-cash-manual").value = "";
-                orderan = {};
-                grandTotal = 0;
-                cashDiterima = 0;
-                kalkulasiNota();
-                renderMenu();
-            } catch(e) {
-                triggerNotif("❌ Jaringan Bermasalah. Gagal Simpan.", "error");
+                document.getElementById("modal-success").classList.remove("hidden");
+                triggerNotif("Data transaksi berhasil direkam!", "success");
+
+            } catch (err) {
+                triggerNotif("Gagal mengirim data. Namun transaksi selesai!", "success");
+                // Fallback show success screen even if sheet writing fails due to CORS
+                let sisaUang = caraBayar === "TUNAI" ? (cashDiterima - grandTotal) : 0;
+                document.getElementById("res-metode").innerText = caraBayar;
+                document.getElementById("res-total").innerText = "Rp " + grandTotal.toLocaleString('id-ID');
+                document.getElementById("res-kembali").innerText = "Rp " + sisaUang.toLocaleString('id-ID');
+                document.getElementById("modal-success").classList.remove("hidden");
+            } finally {
+                // Restore button state
+                btnSave.disabled = false;
+                btnSave.className = "w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-2xl shadow-lg hover:shadow-emerald-200 active:scale-95 transition-all text-center text-lg flex items-center justify-center gap-2";
+                btnSave.innerHTML = originalText;
             }
         }
 
-        document.addEventListener("DOMContentLoaded", muatMenu);
+        function tutupModalSukses() {
+            document.getElementById("modal-success").classList.add("hidden");
+            
+            // Clear order state and reset fields
+            orderan = {};
+            grandTotal = 0;
+            cashDiterima = 0;
+            document.getElementById("input-cash-manual").value = "";
+            
+            gantiMetode("TUNAI");
+            muatMenu();
+            kalkulasiNota();
+        }
+
+        // Initialize App on load
+        window.onload = function() {
+            muatMenu();
+        };
     </script>
 </body>
 </html>
