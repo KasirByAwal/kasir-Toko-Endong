@@ -52,6 +52,17 @@
             <h2 class="text-sm font-bold text-slate-500 uppercase tracking-wider">💵 (Pilih Nominal Uang Yang Digunakan)</h2>
             <div id="rupiah-grid" class="grid grid-cols-2 gap-2.5"></div>
             
+            <!-- FITUR BARU: Input Nominal Mandiri -->
+            <div class="border-t pt-3 space-y-1.5">
+                <label for="input-cash-manual" class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Atau Input Manual Uang Diterima</label>
+                <div class="relative rounded-xl shadow-sm">
+                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                        <span class="text-slate-400 font-bold text-sm">Rp</span>
+                    </div>
+                    <input type="number" name="input-cash-manual" id="input-cash-manual" oninput="inputUangManual(this.value)" class="block w-full rounded-xl border-slate-200 pl-9 pr-3 py-3 text-slate-800 font-bold bg-slate-50 focus:border-amber-500 focus:ring-amber-500 focus:bg-white text-sm border" placeholder="Contoh: 17500">
+                </div>
+            </div>
+            
             <div class="border-t pt-3 flex justify-between items-center">
                 <span class="text-sm text-slate-500">Uang Diterima:</span>
                 <span id="txt-cash-in" class="font-bold text-slate-700">Rp 0</span>
@@ -69,7 +80,6 @@
                 <p id="qris-amount-text" class="text-xl font-black text-amber-600 mb-3">Rp 0</p>
                 
                 <div class="bg-white p-3 rounded-xl shadow-md border border-slate-100 flex items-center justify-center">
-                    <!-- Ganti src="qris.png" dengan file gambar QRIS Anda jika memakai QRIS Statis -->
                     <img id="qris-image" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=Toko-n-Dhonk" alt="QRIS Toko n-Dhonk" class="w-48 h-48 object-contain" />
                 </div>
                 <p class="text-[11px] text-slate-400 mt-3 leading-relaxed">Silakan scan QRIS di atas, periksa nama akun <b>Toko n-Dhonk</b> dan pastikan statusnya berhasil.</p>
@@ -154,19 +164,16 @@
                 return;
             }
 
-            let html = `<button onclick="setUangFisik(${grandTotal})" class="p-3 text-xs font-bold rounded-xl border-2 border-dashed border-slate-300 text-slate-600 active:scale-95 transition bg-slate-50">💵 UANG PAS</button>`;
+            let html = `<button onclick="setUangFisikKnob(${grandTotal})" class="p-3 text-xs font-bold rounded-xl border-2 border-dashed border-slate-300 text-slate-600 active:scale-95 transition bg-slate-50">💵 UANG PAS</button>`;
             
-            // Logika Pembulatan Pecahan Pintar (Menampilkan kelipatan terdekat, contoh: 15rb jika total 13rb)
             let lembaranStatis = [5000, 10000, 20000, 50000, 100000];
             let pilihanUang = [];
 
-            // 1. Tambahkan pembulatan ke atas kelipatan 5.000 terdekat (Misal: 13.000 -> 15.000)
             let kelipatan5k = Math.ceil(grandTotal / 5000) * 5000;
             if (kelipatan5k !== grandTotal) {
                 pilihanUang.push({ nominal: kelipatan5k, style: 'uang-custom' });
             }
 
-            // 2. Tambahkan lembaran standar rupiah yang nilainya di atas grandTotal
             lembaranStatis.forEach(nominal => {
                 if (nominal > grandTotal && nominal !== kelipatan5k) {
                     let cssStyle = nominal === 100000 ? 'uang-100k' : (nominal === 50000 ? 'uang-50k' : (nominal === 20000 ? 'uang-20k' : (nominal === 10000 ? 'uang-10k' : 'uang-5k')));
@@ -174,16 +181,26 @@
                 }
             });
 
-            // Urutkan pilihan nominal dari kecil ke besar agar rapi
             pilihanUang.sort((a, b) => a.nominal - b.nominal);
 
-            // Batasi maksimal menampilkan 5 pilihan tombol agar layar HP tidak penuh sesak
             pilihanUang.slice(0, 5).forEach(item => {
-                html += `<button onclick="setUangFisik(${item.nominal})" class="p-3 text-xs font-black rounded-xl shadow-sm active:scale-95 transition ${item.style}">Rp ${item.nominal.toLocaleString('id-ID')}</button>`;
+                html += `<button onclick="setUangFisikKnob(${item.nominal})" class="p-3 text-xs font-black rounded-xl shadow-sm active:scale-95 transition ${item.style}">Rp ${item.nominal.toLocaleString('id-ID')}</button>`;
             });
             
             container.innerHTML = html;
             setUangFisik(grandTotal);
+        }
+
+        // Fungsi pembantu jika menekan tombol cepat (sekaligus mengosongkan kolom manual)
+        function setUangFisikKnob(jumlah) {
+            document.getElementById("input-cash-manual").value = "";
+            setUangFisik(jumlah);
+        }
+
+        // Fungsi pembantu saat mengetik mandiri di kolom input baru
+        function inputUangManual(val) {
+            let jumlah = val === "" ? 0 : Number(val);
+            setUangFisik(jumlah);
         }
 
         function setUangFisik(jumlah) {
@@ -206,7 +223,6 @@
                 document.getElementById("tab-qris").className = "p-3 font-bold rounded-xl border-2 border-amber-500 bg-amber-50 text-amber-700 transition shadow-sm";
                 document.getElementById("tab-tunai").className = "p-3 font-bold rounded-xl border border-slate-200 text-slate-600 transition";
                 
-                // Set isi generator QRIS otomatis berbasis teks total bayar
                 let qrisImg = document.getElementById("qris-image");
                 if(grandTotal > 0){
                     qrisImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=TokoNDhonk_Total_${grandTotal}`;
@@ -217,6 +233,11 @@
         async function bayarSekarang() {
             if(grandTotal === 0) {
                 triggerNotif("Keranjang masih kosong!", "error");
+                return;
+            }
+
+            if(caraBayar === "TUNAI" && cashDiterima < grandTotal) {
+                triggerNotif("Uang diterima kurang dari total tagihan!", "error");
                 return;
             }
 
@@ -246,6 +267,7 @@
 
                 triggerNotif("🎉 Berhasil! Transaksi tercatat di Spreadsheet.", "success");
                 
+                document.getElementById("input-cash-manual").value = "";
                 orderan = {};
                 grandTotal = 0;
                 kalkulasiNota();
