@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kasir Nasi Kuning Sentosa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .money-100k { background: #fca5a5; color: #7f1d1d; } /* Merah */
+        .money-50k { background: #93c5fd; color: #1e3a8a; }  /* Biru */
+        .money-20k { background: #86efac; color: #14532d; }  /* Hijau */
+        .money-10k { background: #d8b4fe; color: #581c87; }  /* Ungu */
+    </style>
+</head>
+<body class="bg-amber-50 font-sans pb-10">
+
+    <!-- Header & Notifikasi -->
+    <div class="bg-amber-400 p-4 shadow-md text-center sticky top-0 z-50">
+        <h1 class="text-xl font-bold text-amber-900">🍛 KASIR NASI KUNING</h1>
+        <div id="notification" class="hidden mt-2 p-2 bg-green-500 text-white text-sm font-semibold rounded-lg shadow animate-bounce"></div>
+    </div>
+
+    <div class="max-w-md mx-auto p-4 space-y-6">
+        <!-- Bagian Belanjaan / Total -->
+        <div class="bg-white p-4 rounded-xl shadow">
+            <h2 class="text-gray-500 text-xs font-bold uppercase mb-1">Total Tagihan</h2>
+            <div class="text-3xl font-black text-amber-600" id="display-total">Rp 16.000</div>
+        </div>
+
+        <!-- Metode Pembayaran -->
+        <div class="bg-white p-4 rounded-xl shadow space-y-3">
+            <h3 class="font-bold text-sm text-gray-700">Metode Pembayaran</h3>
+            <div class="grid grid-cols-2 gap-2">
+                <button onclick="setMethod('TUNAI')" id="btn-tunai" class="p-3 border-2 border-amber-400 bg-amber-100 text-amber-900 font-bold rounded-lg transition">💵 TUNAI</button>
+                <button onclick="setMethod('QRIS')" id="btn-qris" class="p-3 border border-gray-200 text-gray-700 font-bold rounded-lg transition">📱 QRIS</button>
+            </div>
+        </div>
+
+        <!-- Panel Kasir Tunai (Pintar) -->
+        <div id="panel-tunai" class="bg-white p-4 rounded-xl shadow space-y-4">
+            <h3 class="font-bold text-sm text-gray-700">Rekomendasi Uang Diterima</h3>
+            <div class="grid grid-cols-2 gap-2" id="rekomendasi-uang">
+                <!-- Tombol Uang Otomatis Muncul Di Sini -->
+            </div>
+
+            <div class="border-t pt-3">
+                <div class="flex justify-between text-sm font-medium text-gray-500">
+                    <span>Kembalian:</span>
+                    <span id="txt-kembalian" class="font-bold text-gray-900">Rp 0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel QRIS -->
+        <div id="panel-qris" class="hidden bg-white p-4 rounded-xl shadow text-center space-y-3">
+            <p class="text-xs text-gray-500 font-semibold">Silakan scan kode QRIS berikut:</p>
+            <div class="w-48 h-48 bg-gray-200 mx-auto flex items-center justify-center font-bold text-gray-400 border border-dashed border-gray-400">
+                [ TEMPEL QRIS ANDA ]
+            </div>
+        </div>
+
+        <!-- Tombol Selesai -->
+        <button onclick="prosesTransaksi()" class="w-full bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-bold py-4 rounded-xl shadow-lg transition text-center text-lg">
+            Selesaikan Transaksi & Cetak
+        </button>
+    </div>
+
+    <script>
+        // Contoh data kalkulasi internal
+        let totalBelanja = 16000; 
+        let metodePembayaran = 'TUNAI';
+        let uangDiterima = 0;
+        let URL_API_SPREADSHEET = "https://script.google.com/macros/s/AKfycbwo4Be97S21PHDVAsijxPLKWW2PDQRzwy8DtMblKo7pPMgAhnmeNLypOwyMN3vf3zZZ2A/exec";
+
+        function initTunai() {
+            const pilihan = [20000, 50000, 100000];
+            let html = `<button onclick="pilihUang(${totalBelanja})" class="p-3 rounded-lg border bg-gray-100 font-bold text-center text-xs text-gray-700">UANG PAS</button>`;
+            
+            pilihan.forEach(nominal => {
+                if(nominal > totalBelanja) {
+                    let kelasWarna = nominal === 100000 ? 'money-100k' : (nominal === 50000 ? 'money-50k' : 'money-20k');
+                    html += `<button onclick="pilihUang(${nominal})" class="p-3 rounded-lg font-bold text-center text-xs ${kelasWarna} shadow-sm active:scale-95 transition">Rp ${nominal.toLocaleString('id-ID')}</button>`;
+                }
+            });
+            document.getElementById('rekomendasi-uang').innerHTML = html;
+        }
+
+        function setMethod(method) {
+            metodePembayaran = method;
+            if(method === 'TUNAI') {
+                document.getElementById('panel-tunai').classList.remove('hidden');
+                document.getElementById('panel-qris').classList.add('hidden');
+                document.getElementById('btn-tunai').className = "p-3 border-2 border-amber-400 bg-amber-100 text-amber-900 font-bold rounded-lg";
+                document.getElementById('btn-qris').className = "p-3 border border-gray-200 text-gray-700 font-bold rounded-lg";
+            } else {
+                document.getElementById('panel-tunai').classList.add('hidden');
+                document.getElementById('panel-qris').classList.remove('hidden');
+                document.getElementById('btn-qris').className = "p-3 border-2 border-amber-400 bg-amber-100 text-amber-900 font-bold rounded-lg";
+                document.getElementById('btn-tunai').className = "p-3 border border-gray-200 text-gray-700 font-bold rounded-lg";
+            }
+        }
+
+        function pilihUang(jumlah) {
+            uangDiterima = jumlah;
+            let kembalian = uangDiterima - totalBelanja;
+            document.getElementById('txt-kembalian').innerText = "Rp " + kembalian.toLocaleString('id-ID');
+        }
+
+        function prosesTransaksi() {
+            let infoNotif = document.getElementById('notification');
+            infoNotif.innerText = "🎉 Sukses! Transaksi tercatat ke Spreadsheet.";
+            infoNotif.classList.remove('hidden');
+            
+            // Logika pengiriman data menggunakan fetch() ke URL_API_SPREADSHEET bisa ditambahkan disini
+            
+            setTimeout(() => { infoNotif.classList.add('hidden'); }, 4000);
+        }
+
+        // Jalankan saat load awal
+        initTunai();
+    </script>
+</body>
+</html>
