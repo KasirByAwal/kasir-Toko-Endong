@@ -6,10 +6,10 @@
     <title>Kasir Nasi Kuning Sentosa</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .money-100k { background: #fca5a5; color: #7f1d1d; } /* Merah */
-        .money-50k { background: #93c5fd; color: #1e3a8a; }  /* Biru */
-        .money-20k { background: #86efac; color: #14532d; }  /* Hijau */
-        .money-10k { background: #d8b4fe; color: #581c87; }  /* Ungu */
+        .money-100k { background: #fca5a5; color: #7f1d1d; }
+        .money-50k { background: #93c5fd; color: #1e3a8a; }
+        .money-20k { background: #86efac; color: #14532d; }
+        .money-10k { background: #d8b4fe; color: #581c87; }
     </style>
 </head>
 <body class="bg-amber-50 font-sans pb-10">
@@ -21,13 +21,23 @@
     </div>
 
     <div class="max-w-md mx-auto p-4 space-y-6">
-        <!-- Bagian Belanjaan / Total -->
-        <div class="bg-white p-4 rounded-xl shadow">
-            <h2 class="text-gray-500 text-xs font-bold uppercase mb-1">Total Tagihan</h2>
-            <div class="text-3xl font-black text-amber-600" id="display-total">Rp 16.000</div>
+        
+        <!-- 🛒 BAGIAN DAFTAR MENU (DIAMBIL DARI SPREADSHEET) -->
+        <div class="bg-white p-4 rounded-xl shadow space-y-3">
+            <h3 class="font-bold text-sm text-gray-700 uppercase tracking-wider">📋 Pilih Menu & Lauk</h3>
+            <div id="loading-menu" class="text-sm text-gray-500 italic text-center py-4">Memuat menu dari Spreadsheet...</div>
+            <div id="container-menu" class="space-y-3 divide-y divide-gray-100">
+                <!-- Menu otomatis muncul di sini lewat JavaScript -->
+            </div>
         </div>
 
-        <!-- Metode Pembayaran -->
+        <!-- 💰 BAGIAN TOTAL TAGIHAN -->
+        <div class="bg-white p-4 rounded-xl shadow">
+            <h2 class="text-gray-500 text-xs font-bold uppercase mb-1">Total Tagihan</h2>
+            <div class="text-3xl font-black text-amber-600" id="display-total">Rp 0</div>
+        </div>
+
+        <!-- 💳 METODE PEMBAYARAN -->
         <div class="bg-white p-4 rounded-xl shadow space-y-3">
             <h3 class="font-bold text-sm text-gray-700">Metode Pembayaran</h3>
             <div class="grid grid-cols-2 gap-2">
@@ -36,53 +46,134 @@
             </div>
         </div>
 
-        <!-- Panel Kasir Tunai (Pintar) -->
+        <!-- 💵 PANEL TUNAI (REKOMENDASI UANG) -->
         <div id="panel-tunai" class="bg-white p-4 rounded-xl shadow space-y-4">
             <h3 class="font-bold text-sm text-gray-700">Rekomendasi Uang Diterima</h3>
             <div class="grid grid-cols-2 gap-2" id="rekomendasi-uang">
-                <!-- Tombol Uang Otomatis Muncul Di Sini -->
+                <!-- Tombol pecahan uang muncul otomatis berdasarkan total belanja -->
             </div>
 
-            <div class="border-t pt-3">
-                <div class="flex justify-between text-sm font-medium text-gray-500">
-                    <span>Kembalian:</span>
-                    <span id="txt-kembalian" class="font-bold text-gray-900">Rp 0</span>
-                </div>
+            <div class="border-t pt-3 flex justify-between text-sm font-medium text-gray-500">
+                <span>Kembalian:</span>
+                <span id="txt-kembalian" class="font-bold text-green-600 text-base">Rp 0</span>
             </div>
         </div>
 
-        <!-- Panel QRIS -->
+        <!-- 📱 PANEL QRIS -->
         <div id="panel-qris" class="hidden bg-white p-4 rounded-xl shadow text-center space-y-3">
             <p class="text-xs text-gray-500 font-semibold">Silakan scan kode QRIS berikut:</p>
-            <div class="w-48 h-48 bg-gray-200 mx-auto flex items-center justify-center font-bold text-gray-400 border border-dashed border-gray-400">
-                [ TEMPEL QRIS ANDA ]
+            <div class="w-48 h-48 bg-gray-200 mx-auto flex items-center justify-center font-bold text-gray-400 border border-dashed border-gray-400 rounded-lg">
+                [ SCAN QRIS DI SINI ]
             </div>
         </div>
 
-        <!-- Tombol Selesai -->
+        <!-- 🚀 TOMBOL PROSES -->
         <button onclick="prosesTransaksi()" class="w-full bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-bold py-4 rounded-xl shadow-lg transition text-center text-lg">
-            Selesaikan Transaksi & Cetak
+            Selesaikan Transaksi & Simpan
         </button>
     </div>
 
     <script>
-        // Contoh data kalkulasi internal
-        let totalBelanja = 16000; 
+        // --- 1. PENGATURAN UTAMA ---
+        // GANTI teks di bawah ini dengan URL Web App milik Anda yang didapatkan dari Google Apps Script
+        const URL_API_SPREADSHEET = "https://script.google.com/macros/s/AKfycbwo4Be97S21PHDVAsijxPLKWW2PDQRzwy8DtMblKo7pPMgAhnmeNLypOwyMN3vf3zZZ2A/exec"; 
+
+        let databaseMenu = [];
+        let keranjang = {};
+        let totalBelanja = 0; 
         let metodePembayaran = 'TUNAI';
         let uangDiterima = 0;
-        let URL_API_SPREADSHEET = "https://script.google.com/macros/s/AKfycbwo4Be97S21PHDVAsijxPLKWW2PDQRzwy8DtMblKo7pPMgAhnmeNLypOwyMN3vf3zZZ2A/exec";
 
-        function initTunai() {
-            const pilihan = [20000, 50000, 100000];
-            let html = `<button onclick="pilihUang(${totalBelanja})" class="p-3 rounded-lg border bg-gray-100 font-bold text-center text-xs text-gray-700">UANG PAS</button>`;
+        // --- 2. AMBIL DATA DARI SPREADSHEET ---
+        async function muatMenuDariSpreadsheet() {
+            try {
+                const response = await fetch(URL_API_SPREADSHEET);
+                databaseMenu = await response.json();
+                
+                document.getElementById('loading-menu').classList.add('hidden');
+                tampilkanMenuKeLayar();
+            } catch (error) {
+                document.getElementById('loading-menu').innerText = "❌ Gagal memuat data menu. Periksa URL API Anda.";
+                console.error(error);
+            }
+        }
+
+        // --- 3. TAMPILKAN MENU KE LAYAR ---
+        function tampilkanMenuKeLayar() {
+            const container = document.getElementById('container-menu');
+            container.innerHTML = "";
+
+            databaseMenu.forEach((item, index) => {
+                // Set default jumlah di keranjang adalah 0 jika belum ada
+                if (!keranjang[item.nama]) keranjang[item.nama] = 0;
+
+                const itemHtml = `
+                    <div class="flex items-center justify-between py-3 ${index !== 0 ? 'pt-3' : ''}">
+                        <div>
+                            <h4 class="font-bold text-gray-800 text-sm">${item.nama}</h4>
+                            <p class="text-xs text-amber-600 font-semibold">Rp ${item.harga.toLocaleString('id-ID')}</p>
+                        </div>
+                        <div class="flex items-center space-x-3 bg-amber-50 p-1 rounded-lg border border-amber-200">
+                            <button onclick="ubahJumlah('${item.nama}', -1)" class="w-7 h-7 bg-white text-amber-600 font-bold rounded shadow active:scale-95">-</button>
+                            <span id="qty-${item.nama.replace(/\s+/g, '-')}" class="font-bold text-gray-700 text-sm w-4 text-center">0</span>
+                            <button onclick="ubahJumlah('${item.nama}', 1)" class="w-7 h-7 bg-amber-500 text-white font-bold rounded shadow active:scale-95">+</button>
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', itemHtml);
+            });
+        }
+
+        // --- 4. HITUNG BELANJAAN ---
+        function ubahJumlah(namaItem, perubahan) {
+            let menu = databaseMenu.find(m => m.nama === namaItem);
+            if (!menu) return;
+
+            keranjang[namaItem] = Math.max(0, (keranjang[namaItem] || 0) + perubahan);
             
-            pilihan.forEach(nominal => {
-                if(nominal > totalBelanja) {
-                    let kelasWarna = nominal === 100000 ? 'money-100k' : (nominal === 50000 ? 'money-50k' : 'money-20k');
-                    html += `<button onclick="pilihUang(${nominal})" class="p-3 rounded-lg font-bold text-center text-xs ${kelasWarna} shadow-sm active:scale-95 transition">Rp ${nominal.toLocaleString('id-ID')}</button>`;
+            // Update teks angka kuantitas di layar
+            document.getElementById(`qty-${namaItem.replace(/\s+/g, '-')}`).innerText = keranjang[namaItem];
+            
+            hitungTotal();
+        }
+
+        function hitungTotal() {
+            totalBelanja = 0;
+            databaseMenu.forEach(item => {
+                totalBelanja += (keranjang[item.nama] || 0) * item.harga;
+            });
+
+            document.getElementById('display-total').innerText = "Rp " + totalBelanja.toLocaleString('id-ID');
+            
+            // Perbarui tombol rekomendasi uang tunai
+            updateRekomendasiTunai();
+        }
+
+        // --- 5. LOGIKA PECAHAN UANG & KEMBALIAN ---
+        function updateRekomendasiTunai() {
+            if (totalBelanja === 0) {
+                document.getElementById('rekomendasi-uang').innerHTML = "<p class='text-xs text-gray-400 col-span-2 text-center py-2'>Pilih menu terlebih dahulu</p>";
+                pilihUang(0);
+                return;
+            }
+
+            const pecahan = [10000, 20000, 50000, 100000];
+            let html = `<button onclick="pilihUang(${totalBelanja})" class="p-3 rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 font-bold text-center text-xs text-gray-700 active:scale-95 transition">UANG PAS</button>`;
+            
+            pecahan.forEach(nominal => {
+                if (nominal > totalBelanja) {
+                    let kelasWarna = nominal === 100000 ? 'money-100k' : (nominal === 50000 ? 'money-50k' : (nominal === 20000 ? 'money-20k' : 'money-10k'));
+                    html += `<button onclick="pilihUang(${nominal})" class="p-3 rounded-lg font-black text-center text-xs ${kelasWarna} shadow-sm active:scale-95 transition">Rp ${nominal.toLocaleString('id-ID')}</button>`;
                 }
             });
             document.getElementById('rekomendasi-uang').innerHTML = html;
+            pilihUang(totalBelanja); // Default diset ke uang pas dulu
+        }
+
+        function pilihUang(jumlah) {
+            uangDiterima = jumlah;
+            let kembalian = uangDiterima - totalBelanja;
+            document.getElementById('txt-kembalian').innerText = "Rp " + (kembalian >= 0 ? kembalian.toLocaleString('id-ID') : 0);
         }
 
         function setMethod(method) {
@@ -90,34 +181,71 @@
             if(method === 'TUNAI') {
                 document.getElementById('panel-tunai').classList.remove('hidden');
                 document.getElementById('panel-qris').classList.add('hidden');
-                document.getElementById('btn-tunai').className = "p-3 border-2 border-amber-400 bg-amber-100 text-amber-900 font-bold rounded-lg";
+                document.getElementById('btn-tunai').className = "p-3 border-2 border-amber-400 bg-amber-100 text-amber-900 font-bold rounded-lg shadow-sm";
                 document.getElementById('btn-qris').className = "p-3 border border-gray-200 text-gray-700 font-bold rounded-lg";
             } else {
                 document.getElementById('panel-tunai').classList.add('hidden');
                 document.getElementById('panel-qris').classList.remove('hidden');
-                document.getElementById('btn-qris').className = "p-3 border-2 border-amber-400 bg-amber-100 text-amber-900 font-bold rounded-lg";
+                document.getElementById('btn-qris').className = "p-3 border-2 border-amber-400 bg-amber-100 text-amber-900 font-bold rounded-lg shadow-sm";
                 document.getElementById('btn-tunai').className = "p-3 border border-gray-200 text-gray-700 font-bold rounded-lg";
             }
         }
 
-        function pilihUang(jumlah) {
-            uangDiterima = jumlah;
-            let kembalian = uangDiterima - totalBelanja;
-            document.getElementById('txt-kembalian').innerText = "Rp " + kembalian.toLocaleString('id-ID');
-        }
+        // --- 6. KIRIM DATA KE GOOGLE SPREADSHEET ---
+        async function prosesTransaksi() {
+            if (totalBelanja === 0) {
+                alert("Keranjang masih kosong! Silakan pilih menu terlebih dahulu.");
+                return;
+            }
 
-        function prosesTransaksi() {
+            // Susun item yang dibeli menjadi teks teks
+            let itemDibeli = [];
+            for (let nama in keranjang) {
+                if (keranjang[nama] > 0) {
+                    itemDibeli.push(`${nama} (${keranjang[nama]}x)`);
+                }
+            }
+
+            let dataTransaksi = {
+                id: "TRX-" + Date.now(),
+                item: itemDibeli.join(", "),
+                total: totalBelanja,
+                metode: metodePembayaran,
+                bayar: metodePembayaran === 'TUNAI' ? uangDiterima : totalBelanja,
+                kembalian: metodePembayaran === 'TUNAI' ? Math.max(0, uangDiterima - totalBelanja) : 0
+            };
+
+            // Berikan notifikasi loading awal
             let infoNotif = document.getElementById('notification');
-            infoNotif.innerText = "🎉 Sukses! Transaksi tercatat ke Spreadsheet.";
-            infoNotif.classList.remove('hidden');
-            
-            // Logika pengiriman data menggunakan fetch() ke URL_API_SPREADSHEET bisa ditambahkan disini
-            
-            setTimeout(() => { infoNotif.classList.add('hidden'); }, 4000);
+            infoNotif.innerText = "⏳ Menyimpan transaksi ke Google Sheets...";
+            infoNotif.className = "mt-2 p-2 bg-blue-500 text-white text-sm font-semibold rounded-lg shadow block";
+
+            try {
+                // Kirim data ke Google Apps Script via POST
+                await fetch(URL_API_SPREADSHEET, {
+                    method: 'POST',
+                    body: JSON.stringify(dataTransaksi)
+                });
+
+                // Notifikasi Sukses
+                infoNotif.innerText = "🎉 Sukses! Transaksi telah tercatat.";
+                infoNotif.className = "mt-2 p-2 bg-green-500 text-white text-sm font-semibold rounded-lg shadow block animate-bounce";
+                
+                // Reset kasir setelah sukses
+                keranjang = {};
+                tampilkanMenuKeLayar();
+                hitungTotal();
+
+                setTimeout(() => { infoNotif.className = "hidden"; }, 4000);
+            } catch (error) {
+                infoNotif.innerText = "❌ Gagal mengirim data transaksi.";
+                infoNotif.className = "mt-2 p-2 bg-red-500 text-white text-sm font-semibold rounded-lg shadow block";
+                console.error(error);
+            }
         }
 
-        // Jalankan saat load awal
-        initTunai();
+        // Jalankan memuat menu otomatis ketika web dibuka
+        muatMenuDariSpreadsheet();
     </script>
 </body>
 </html>
