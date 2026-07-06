@@ -49,17 +49,17 @@
 
         <!-- Area Pembayaran Tunai -->
         <div id="area-tunai" class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 space-y-4">
-            <h2 class="text-sm font-bold text-slate-500 uppercase tracking-wider">💵 (Pilih Nominal Uang Yang Digunakan)</h2>
+            <h2 class="text-sm font-bold text-slate-500 uppercase tracking-wider">💵 (Pilih Nominal atau Ketik Manual)</h2>
             <div id="rupiah-grid" class="grid grid-cols-2 gap-2.5"></div>
             
-            <!-- FITUR BARU: Input Nominal Mandiri -->
+            <!-- PERBAIKAN UTAMA: Kolom Input Mandiri yang Lebih Responsif & Stabil -->
             <div class="border-t pt-3 space-y-1.5">
-                <label for="input-cash-manual" class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Atau Input Manual Uang Diterima</label>
+                <label for="input-cash-manual" class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Atau Ketik Manual Uang Diterima</label>
                 <div class="relative rounded-xl shadow-sm">
                     <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                         <span class="text-slate-400 font-bold text-sm">Rp</span>
                     </div>
-                    <input type="number" name="input-cash-manual" id="input-cash-manual" oninput="inputUangManual(this.value)" class="block w-full rounded-xl border-slate-200 pl-9 pr-3 py-3 text-slate-800 font-bold bg-slate-50 focus:border-amber-500 focus:ring-amber-500 focus:bg-white text-sm border" placeholder="Contoh: 17500">
+                    <input type="text" inputmode="numeric" id="input-cash-manual" onkeyup="tangkapUangManual(this)" class="block w-full rounded-xl border-slate-200 pl-10 pr-3 py-3 text-slate-800 font-black bg-slate-50 focus:border-amber-500 focus:ring-amber-500 focus:bg-white text-base border" placeholder="0">
                 </div>
             </div>
             
@@ -160,11 +160,11 @@
             let container = document.getElementById("rupiah-grid");
             if(grandTotal === 0) {
                 container.innerHTML = "<p class='col-span-2 text-center text-xs text-slate-400 py-2'>Pilih menu terlebih dahulu</p>";
-                setUangFisik(0);
+                updateTampilanKembalian(0);
                 return;
             }
 
-            let html = `<button onclick="setUangFisikKnob(${grandTotal})" class="p-3 text-xs font-bold rounded-xl border-2 border-dashed border-slate-300 text-slate-600 active:scale-95 transition bg-slate-50">💵 UANG PAS</button>`;
+            let html = `<button onclick="setUangDariTombol(${grandTotal})" class="p-3 text-xs font-bold rounded-xl border-2 border-dashed border-slate-300 text-slate-600 active:scale-95 transition bg-slate-50">💵 UANG PAS</button>`;
             
             let lembaranStatis = [5000, 10000, 20000, 50000, 100000];
             let pilihanUang = [];
@@ -184,29 +184,46 @@
             pilihanUang.sort((a, b) => a.nominal - b.nominal);
 
             pilihanUang.slice(0, 5).forEach(item => {
-                html += `<button onclick="setUangFisikKnob(${item.nominal})" class="p-3 text-xs font-black rounded-xl shadow-sm active:scale-95 transition ${item.style}">Rp ${item.nominal.toLocaleString('id-ID')}</button>`;
+                html += `<button onclick="setUangDariTombol(${item.nominal})" class="p-3 text-xs font-black rounded-xl shadow-sm active:scale-95 transition ${item.style}">Rp ${item.nominal.toLocaleString('id-ID')}</button>`;
             });
             
             container.innerHTML = html;
-            setUangFisik(grandTotal);
+            
+            // Jaga nilai cashDiterima jika kasir sedang mengetik manual, jangan ditimpa paksa ke grandTotal
+            let inputManual = document.getElementById("input-cash-manual").value;
+            if(!inputManual) {
+                cashDiterima = grandTotal;
+            }
+            updateTampilanKembalian(cashDiterima);
         }
 
-        // Fungsi pembantu jika menekan tombol cepat (sekaligus mengosongkan kolom manual)
-        function setUangFisikKnob(jumlah) {
-            document.getElementById("input-cash-manual").value = "";
-            setUangFisik(jumlah);
-        }
-
-        // Fungsi pembantu saat mengetik mandiri di kolom input baru
-        function inputUangManual(val) {
-            let jumlah = val === "" ? 0 : Number(val);
-            setUangFisik(jumlah);
-        }
-
-        function setUangFisik(jumlah) {
+        // Dipanggil jika menekan tombol cepat pecahan di atas
+        function setUangDariTombol(jumlah) {
+            document.getElementById("input-cash-manual").value = ""; // Bersihkan kolom ketik manual
             cashDiterima = jumlah;
-            document.getElementById("txt-cash-in").innerText = "Rp " + cashDiterima.toLocaleString('id-ID');
-            let sisa = cashDiterima - grandTotal;
+            updateTampilanKembalian(cashDiterima);
+        }
+
+        // Dipanggil SECARA REAL-TIME saat kasir mengetik nominal sendiri
+        function tangkapUangManual(inputan) {
+            // Hilangkan semua karakter titik atau non-angka agar bisa diproses matematika
+            let angkaBersih = inputan.value.replace(/\./g, "").replace(/\D/g, "");
+            
+            if(angkaBersih === "" || isNaN(angkaBersih)) {
+                cashDiterima = 0;
+                inputan.value = "";
+            } else {
+                cashDiterima = parseInt(angkaBersih);
+                // Beri efek cantik auto-format titik ribuan saat diketik
+                inputan.value = cashDiterima.toLocaleString('id-ID');
+            }
+            updateTampilanKembalian(cashDiterima);
+        }
+
+        // Mengatur teks ringkasan nota pembayaran di layar terbawah
+        function updateTampilanKembalian(jumlah) {
+            document.getElementById("txt-cash-in").innerText = "Rp " + jumlah.toLocaleString('id-ID');
+            let sisa = jumlah - grandTotal;
             document.getElementById("txt-change").innerText = "Rp " + (sisa >= 0 ? sisa.toLocaleString('id-ID') : 0);
         }
 
@@ -270,6 +287,7 @@
                 document.getElementById("input-cash-manual").value = "";
                 orderan = {};
                 grandTotal = 0;
+                cashDiterima = 0;
                 kalkulasiNota();
                 renderMenu();
             } catch(e) {
