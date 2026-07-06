@@ -1,6 +1,306 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toko n-Dhonk</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .uang-100k { background-color: #fee2e2; color: #991b1b; border: 2px solid #fca5a5; }
+        .uang-50k { background-color: #e0f2fe; color: #075985; border: 2px solid #93c5fd; }
+        .uang-20k { background-color: #dcfce7; color: #166534; border: 2px solid #86efac; }
+        .uang-10k { background-color: #f3e8ff; color: #6b21a8; border: 2px solid #d8b4fe; }
+        .uang-5k { background-color: #fef3c7; color: #92400e; border: 2px solid #fcd34d; }
+        .uang-custom { background-color: #f1f5f9; color: #334155; border: 2px solid #cbd5e1; }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans pb-12 text-slate-800">
+
+    <div id="notif-box" class="hidden fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-50 p-4 rounded-xl shadow-xl text-white text-center font-bold transition-all duration-300"></div>
+
+    <div class="bg-amber-500 text-white p-4 shadow-md sticky top-0 z-40 flex justify-between items-center">
+        <h1 class="text-lg font-bold tracking-wide">🍛 Aplikasi Kasir By Awal</h1>
+        <button onclick="muatMenu()" class="text-xs bg-amber-700 px-3 py-1.5 rounded-lg font-medium active:scale-95 transition">🔄 Refresh Menu</button>
+    </div>
+
+    <div class="max-w-md mx-auto p-4 space-y-4">
+        
+        <!-- Pilihan Menu -->
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+            <h2 class="text-sm font-bold text-slate-500 uppercase mb-3 tracking-wider">🛒 Pilihan Menu & Lauk/Barang</h2>
+            <div id="loading-text" class="text-center py-6 text-slate-400 text-sm italic">Sedang menyinkronkan data, harap tunggu...</div>
+            <div id="menu-list" class="space-y-3 divide-y divide-slate-100"></div>
+        </div>
+
+        <!-- Total Layar -->
+        <div class="bg-amber-600 text-white p-4 rounded-xl shadow-inner flex justify-between items-center">
+            <span class="text-xs font-bold uppercase tracking-wider text-amber-200">Total Tagihan</span>
+            <span id="total-screen" class="text-2xl font-black">Rp 0</span>
+        </div>
+
+        <!-- Metode Pembayaran -->
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 space-y-3">
+            <h2 class="text-sm font-bold text-slate-500 uppercase tracking-wider">💳 Metode Pembayaran</h2>
+            <div class="grid grid-cols-2 gap-3">
+                <button id="tab-tunai" onclick="gantiMetode('TUNAI')" class="p-3 font-bold rounded-xl border-2 border-amber-500 bg-amber-50 text-amber-700 transition">💵 TUNAI</button>
+                <button id="tab-qris" onclick="gantiMetode('QRIS')" class="p-3 font-bold rounded-xl border border-slate-200 text-slate-600 transition">📱 QRIS</button>
+            </div>
+        </div>
+
+        <!-- Area Pembayaran Tunai -->
+        <div id="area-tunai" class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 space-y-4">
+            <h2 class="text-sm font-bold text-slate-500 uppercase tracking-wider">💵 (Pilih Nominal atau Ketik Manual)</h2>
+            <div id="rupiah-grid" class="grid grid-cols-2 gap-2.5"></div>
+            
+            <!-- PERBAIKAN UTAMA: Kolom Input Mandiri yang Lebih Responsif & Stabil -->
+            <div class="border-t pt-3 space-y-1.5">
+                <label for="input-cash-manual" class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Atau Ketik Manual Uang Diterima</label>
+                <div class="relative rounded-xl shadow-sm">
+                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                        <span class="text-slate-400 font-bold text-sm">Rp</span>
+                    </div>
+                    <input type="text" inputmode="numeric" id="input-cash-manual" onkeyup="tangkapUangManual(this)" class="block w-full rounded-xl border-slate-200 pl-10 pr-3 py-3 text-slate-800 font-black bg-slate-50 focus:border-amber-500 focus:ring-amber-500 focus:bg-white text-base border" placeholder="0">
+                </div>
+            </div>
+            
+            <div class="border-t pt-3 flex justify-between items-center">
+                <span class="text-sm text-slate-500">Uang Diterima:</span>
+                <span id="txt-cash-in" class="font-bold text-slate-700">Rp 0</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-sm text-slate-500">Uang Kembalian:</span>
+                <span id="txt-change" class="text-lg font-black text-green-600">Rp 0</span>
+            </div>
+        </div>
+
+        <!-- Area Pembayaran QRIS -->
+        <div id="area-qris" class="hidden bg-white p-4 rounded-xl shadow-sm border border-slate-100 text-center space-y-4">
+            <div class="flex flex-col items-center justify-center p-3 bg-slate-50 rounded-xl border border-slate-200">
+                <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Total Scan QRIS</p>
+                <p id="qris-amount-text" class="text-xl font-black text-amber-600 mb-3">Rp 0</p>
+                
+                <div class="bg-white p-3 rounded-xl shadow-md border border-slate-100 flex items-center justify-center">
+                    <img id="qris-image" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=Toko-n-Dhonk" alt="QRIS Toko n-Dhonk" class="w-48 h-48 object-contain" />
+                </div>
+                <p class="text-[11px] text-slate-400 mt-3 leading-relaxed">Silakan scan QRIS di atas, periksa nama akun <b>Toko n-Dhonk</b> dan pastikan statusnya berhasil.</p>
+            </div>
+        </div>
+
+        <button onclick="bayarSekarang()" class="w-full bg-emerald-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-emerald-700 active:scale-95 transition text-center text-lg">
+            Simpan Data
+        </button>
+    </div>
+
+    <script>
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwo4Be97S21PHDVAsijxPLKWW2PDQRzwy8DtMblKo7pPMgAhnmeNLypOwyMN3vf3zZZ2A/exec"; 
+
+        let itemMenu = [];
+        let orderan = {};
+        let grandTotal = 0;
+        let caraBayar = "TUNAI";
+        let cashDiterima = 0;
+
+        function triggerNotif(msg, type) {
+            let box = document.getElementById("notif-box");
+            box.innerText = msg;
+            box.className = type === "success" ? "fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-50 p-4 rounded-xl shadow-xl text-white text-center font-bold bg-emerald-600 block" : "fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-50 p-4 rounded-xl shadow-xl text-white text-center font-bold bg-rose-600 block";
+            setTimeout(() => { box.className = "hidden"; }, 3500);
+        }
+
+        async function muatMenu() {
+            document.getElementById("loading-text").classList.remove("hidden");
+            document.getElementById("menu-list").innerHTML = "";
+            try {
+                let res = await fetch(APPS_SCRIPT_URL);
+                itemMenu = await res.json();
+                document.getElementById("loading-text").classList.add("hidden");
+                renderMenu();
+            } catch (err) {
+                document.getElementById("loading-text").innerText = "❌ Hubungan gagal! Periksa kembali Web App URL Anda.";
+            }
+        }
+
+        function renderMenu() {
+            let html = "";
+            itemMenu.forEach(item => {
+                if(!orderan[item.nama]) orderan[item.nama] = 0;
+                html += `
+                <div class="flex justify-between items-center py-2.5">
+                    <div>
+                        <div class="font-bold text-slate-800 text-sm">${item.nama}</div>
+                        <div class="text-xs font-semibold text-amber-600">Rp ${item.harga.toLocaleString('id-ID')}</div>
+                    </div>
+                    <div class="flex items-center space-x-2.5">
+                        <button onclick="ubahQty('${item.nama}', -1)" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 font-bold active:scale-90 transition shadow-sm text-center">-</button>
+                        <span id="qty-${item.nama.replace(/\s+/g, '')}" class="w-6 text-center text-sm font-bold text-slate-700">${orderan[item.nama]}</span>
+                        <button onclick="ubahQty('${item.nama}', 1)" class="w-8 h-8 rounded-lg bg-amber-500 text-white font-bold active:scale-90 transition shadow-sm text-center">+</button>
+                    </div>
+                </div>`;
+            });
+            document.getElementById("menu-list").innerHTML = html;
+        }
+
+        function ubahQty(nama, delta) {
+            orderan[nama] = Math.max(0, orderan[nama] + delta);
+            document.getElementById(`qty-${nama.replace(/\s+/g, '')}`).innerText = orderan[nama];
+            kalkulasiNota();
+        }
+
+        function kalkulasiNota() {
+            grandTotal = 0;
+            itemMenu.forEach(item => {
+                grandTotal += orderan[item.nama] * item.harga;
+            });
+            document.getElementById("total-screen").innerText = "Rp " + grandTotal.toLocaleString('id-ID');
+            document.getElementById("qris-amount-text").innerText = "Rp " + grandTotal.toLocaleString('id-ID');
+            renderUangRupiah();
+        }
+
+        function renderUangRupiah() {
+            let container = document.getElementById("rupiah-grid");
+            if(grandTotal === 0) {
+                container.innerHTML = "<p class='col-span-2 text-center text-xs text-slate-400 py-2'>Pilih menu terlebih dahulu</p>";
+                updateTampilanKembalian(0);
+                return;
+            }
+
+            let html = `<button onclick="setUangDariTombol(${grandTotal})" class="p-3 text-xs font-bold rounded-xl border-2 border-dashed border-slate-300 text-slate-600 active:scale-95 transition bg-slate-50">💵 UANG PAS</button>`;
+            
+            let lembaranStatis = [5000, 10000, 20000, 50000, 100000];
+            let pilihanUang = [];
+
+            let kelipatan5k = Math.ceil(grandTotal / 5000) * 5000;
+            if (kelipatan5k !== grandTotal) {
+                pilihanUang.push({ nominal: kelipatan5k, style: 'uang-custom' });
+            }
+
+            lembaranStatis.forEach(nominal => {
+                if (nominal > grandTotal && nominal !== kelipatan5k) {
+                    let cssStyle = nominal === 100000 ? 'uang-100k' : (nominal === 50000 ? 'uang-50k' : (nominal === 20000 ? 'uang-20k' : (nominal === 10000 ? 'uang-10k' : 'uang-5k')));
+                    pilihanUang.push({ nominal: nominal, style: cssStyle });
+                }
+            });
+
+            pilihanUang.sort((a, b) => a.nominal - b.nominal);
+
+            pilihanUang.slice(0, 5).forEach(item => {
+                html += `<button onclick="setUangDariTombol(${item.nominal})" class="p-3 text-xs font-black rounded-xl shadow-sm active:scale-95 transition ${item.style}">Rp ${item.nominal.toLocaleString('id-ID')}</button>`;
+            });
+            
+            container.innerHTML = html;
+            
+            // Jaga nilai cashDiterima jika kasir sedang mengetik manual, jangan ditimpa paksa ke grandTotal
+            let inputManual = document.getElementById("input-cash-manual").value;
+            if(!inputManual) {
+                cashDiterima = grandTotal;
+            }
+            updateTampilanKembalian(cashDiterima);
+        }
+
+        // Dipanggil jika menekan tombol cepat pecahan di atas
+        function setUangDariTombol(jumlah) {
+            document.getElementById("input-cash-manual").value = ""; // Bersihkan kolom ketik manual
+            cashDiterima = jumlah;
+            updateTampilanKembalian(cashDiterima);
+        }
+
+        // Dipanggil SECARA REAL-TIME saat kasir mengetik nominal sendiri
+        function tangkapUangManual(inputan) {
+            // Hilangkan semua karakter titik atau non-angka agar bisa diproses matematika
+            let angkaBersih = inputan.value.replace(/\./g, "").replace(/\D/g, "");
+            
+            if(angkaBersih === "" || isNaN(angkaBersih)) {
+                cashDiterima = 0;
+                inputan.value = "";
+            } else {
+                cashDiterima = parseInt(angkaBersih);
+                // Beri efek cantik auto-format titik ribuan saat diketik
+                inputan.value = cashDiterima.toLocaleString('id-ID');
+            }
+            updateTampilanKembalian(cashDiterima);
+        }
+
+        // Mengatur teks ringkasan nota pembayaran di layar terbawah
+        function updateTampilanKembalian(jumlah) {
+            document.getElementById("txt-cash-in").innerText = "Rp " + jumlah.toLocaleString('id-ID');
+            let sisa = jumlah - grandTotal;
+            document.getElementById("txt-change").innerText = "Rp " + (sisa >= 0 ? sisa.toLocaleString('id-ID') : 0);
+        }
+
+        function gantiMetode(opsi) {
+            caraBayar = opsi;
+            if(opsi === "TUNAI") {
+                document.getElementById("area-tunai").classList.remove("hidden");
+                document.getElementById("area-qris").classList.add("hidden");
+                document.getElementById("tab-tunai").className = "p-3 font-bold rounded-xl border-2 border-amber-500 bg-amber-50 text-amber-700 transition shadow-sm";
+                document.getElementById("tab-qris").className = "p-3 font-bold rounded-xl border border-slate-200 text-slate-600 transition";
+            } else {
+                document.getElementById("area-tunai").classList.add("hidden");
+                document.getElementById("area-qris").classList.remove("hidden");
+                document.getElementById("tab-qris").className = "p-3 font-bold rounded-xl border-2 border-amber-500 bg-amber-50 text-amber-700 transition shadow-sm";
+                document.getElementById("tab-tunai").className = "p-3 font-bold rounded-xl border border-slate-200 text-slate-600 transition";
+                
+                let qrisImg = document.getElementById("qris-image");
+                if(grandTotal > 0){
+                    qrisImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=TokoNDhonk_Total_${grandTotal}`;
+                }
+            }
+        }
+
+        async function bayarSekarang() {
+            if(grandTotal === 0) {
+                triggerNotif("Keranjang masih kosong!", "error");
+                return;
+            }
+
+            if(caraBayar === "TUNAI" && cashDiterima < grandTotal) {
+                triggerNotif("Uang diterima kurang dari total tagihan!", "error");
+                return;
+            }
+
+            let rincian = [];
+            for(let key in orderan) {
+                if(orderan[key] > 0) rincian.push(`${key} (${orderan[key]}x)`);
+            }
+
+            let paketData = {
+                id: "TX-" + Math.floor(Math.random() * 90000 + 10000),
+                item: rincian.join(", "),
+                total: grandTotal,
+                metode: caraBayar,
+                bayar: caraBayar === "TUNAI" ? cashDiterima : grandTotal,
+                kembalian: caraBayar === "TUNAI" ? Math.max(0, cashDiterima - grandTotal) : 0
+            };
+
+            triggerNotif("⏳ Mengirim transaksi ke Google Sheets...", "success");
+
+            try {
+                await fetch(APPS_SCRIPT_URL, {
+                    method: "POST",
+                    mode: "no-cors", 
+                    headers: { "Content-Type": "text/plain" },
+                    body: JSON.stringify(paketData)
+                });
+
+                triggerNotif("🎉 Berhasil! Transaksi tercatat di Spreadsheet.", "success");
+                
+                document.getElementById("input-cash-manual").value = "";
+                orderan = {};
+                grandTotal = 0;
+                cashDiterima = 0;
+                kalkulasiNota();
+                renderMenu();
+            } catch(e) {
+                triggerNotif("❌ Jaringan Bermasalah. Gagal Simpan.", "error");
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", muatMenu);
+    </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="id">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Toko n-Dhonk</title>
