@@ -194,7 +194,7 @@
         </div>
     </div>
 
-    <script>
+   <script>
         const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwo4Be97S21PHDVAsijxPLKWW2PDQRzwy8DtMblKo7pPMgAhnmeNLypOwyMN3vf3zZZ2A/exec"; 
 
         let itemMenu = [];
@@ -204,13 +204,20 @@
         let caraBayar = "TUNAI";
         let cashDiterima = 0;
 
+        // Jalankan inisialisasi saat dokumen selesai dimuat
+        document.addEventListener("DOMContentLoaded", () => {
+            updateJamDigital();
+            setInterval(updateJamDigital, 1000);
+            setDefaultTanggal();
+            muatMenu(); // Memuat menu sekaligus memproses laporan awal jika data tersedia
+        });
+
         function updateJamDigital() {
             const sekarang = new Date();
             const opsiFormat = { timeZone: 'Asia/Makassar', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
             const stringWaktu = sekarang.toLocaleTimeString('id-ID', opsiFormat);
             document.getElementById("jam-digital").innerText = "Sekarang Jam " + stringWaktu.replace(/\./g, ':');
         }
-        setInterval(updateJamDigital, 1000);
 
         function triggerNotif(msg, type) {
             let box = document.getElementById("notif-box");
@@ -263,9 +270,9 @@
                 document.getElementById("menu-container").classList.remove("hidden");
                 renderMenu();
                 renderUangRupiah();
-                if(!document.getElementById('page-laporan').classList.contains('hidden')) {
-                    prosesLaporanHarian();
-                }
+                
+                // Menjalankan proses laporan harian secara otomatis setelah data berhasil disinkronkan
+                prosesLaporanHarian();
             } catch (err) {
                 document.getElementById("loading-text").innerText = "❌ Hubungan gagal! Periksa kembali Web App URL Anda.";
             }
@@ -273,14 +280,16 @@
 
         function createItemHtml(item) {
             if(!orderan[item.nama]) orderan[item.nama] = 0;
+            // Mengganti spasi beruntun (termasuk karakter whitespace) menjadi regex aman agar id elemen DOM valid
+            const idAman = item.nama.replace(/\s+/g, '_');
             return `
             <div class="pt-2 pb-2">
                 <div class="font-bold text-slate-800 text-[13px] leading-tight break-words">${item.nama}</div>
                 <div class="text-[11px] font-bold text-amber-600 mb-2">Rp ${(item.harga || 0).toLocaleString('id-ID')}</div>
                 <div class="flex items-center space-x-1">
-                    <button onclick="ubahQty('${item.nama}', -1)" class="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 font-bold active:scale-90 transition text-sm shadow-sm flex items-center justify-center">-</button>
-                    <span id="qty-${item.nama.replace(/\s+/g, '')}" class="w-5 text-center text-xs font-black text-slate-700">${orderan[item.nama]}</span>
-                    <button onclick="ubahQty('${item.nama}', 1)" class="w-7 h-7 rounded-lg bg-amber-500 text-white font-bold active:scale-90 transition text-sm shadow-sm flex items-center justify-center">+</button>
+                    <button onclick="ubahQty('${item.nama.replace(/'/g, "\\'")}', -1)" class="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 font-bold active:scale-90 transition text-sm shadow-sm flex items-center justify-center">-</button>
+                    <span id="qty-${idAman}" class="w-5 text-center text-xs font-black text-slate-700">${orderan[item.nama]}</span>
+                    <button onclick="ubahQty('${item.nama.replace(/'/g, "\\'")}', 1)" class="w-7 h-7 rounded-lg bg-amber-500 text-white font-bold active:scale-90 transition text-sm shadow-sm flex items-center justify-center">+</button>
                 </div>
             </div>`;
         }
@@ -298,7 +307,11 @@
 
         function ubahQty(nama, delta) {
             orderan[nama] = Math.max(0, (orderan[nama] || 0) + delta);
-            document.getElementById(`qty-${nama.replace(/\s+/g, '')}`).innerText = orderan[nama];
+            const idAman = nama.replace(/\s+/g, '_');
+            const elemenQty = document.getElementById(`qty-${idAman}`);
+            if(elemenQty) {
+                elemenQty.innerText = orderan[nama];
+            }
             kalkulasiNota();
         }
 
@@ -383,16 +396,13 @@
             }
         }
 
-        // ================= LOGIKA PROSES FILTER DUA TABEL LAPORAN (PAGI & MALAM) =================
         async function prosesLaporanHarian() {
             let tglTerpilih = document.getElementById("filter-tanggal").value;
             if(!tglTerpilih) return;
 
-            // Batas Shift Pagi (06:00 s/d 15:59:59)
             let pagiMulai = new Date(`${tglTerpilih}T06:00:00+08:00`);
             let pagiAkhir = new Date(`${tglTerpilih}T15:59:59+08:00`);
             
-            // Batas Shift Malam (16:00 s/d 05:59:59 esok harinya)
             let malamMulai = new Date(`${tglTerpilih}T16:00:00+08:00`);
             let besok = new Date(malamMulai);
             besok.setDate(besok.getDate() + 1);
@@ -402,7 +412,6 @@
             let rekapPagi = {};
             let rekapMalam = {};
 
-            // Inisialisasi awal list menu agar struktur data siap
             itemMenu.forEach(m => {
                 rekapPagi[m.nama] = { nama: m.nama, qty: 0, tunai: 0, qris: 0, harga: m.harga };
                 rekapMalam[m.nama] = { nama: m.nama, qty: 0, tunai: 0, qris: 0, harga: m.harga };
@@ -423,7 +432,6 @@
 
                 let targetRekap = null;
 
-                // Cek data masuk rentang waktu pagi atau malam
                 if(txDate >= pagiMulai && txDate <= pagiAkhir) {
                     targetRekap = rekapPagi;
                 } else if(txDate >= malamMulai && txDate <= malamAkhir) {
@@ -461,7 +469,6 @@
                 }
             });
 
-            // Pembuatan Baris & Total Tabel Pagi
             let htmlPagi = "";
             let qPagi = 0, tPagi = 0, qrPagi = 0;
             for(let key in rekapPagi) {
@@ -483,7 +490,6 @@
             document.getElementById("qris-pagi").innerText = "Rp " + qrPagi.toLocaleString('id-ID');
             document.getElementById("total-pagi").innerText = "Rp " + (tPagi + qrPagi).toLocaleString('id-ID');
 
-            // Pembuatan Baris & Total Tabel Malam
             let htmlMalam = "";
             let qMalam = 0, tMalam = 0, qrMalam = 0;
             for(let key in rekapMalam) {
@@ -553,15 +559,9 @@
                 kalkulasiNota();
                 renderMenu();
                 
-                if(!document.getElementById('page-laporan').classList.contains('hidden')) {
-                    prosesLaporanHarian();
-                }
-            } catch(e) { triggerNotif("❌ Jaringan Bermasalah. Gagal Simpan.", "error"); }
+                prosesLaporanHarian();
+            } catch(e) { triggerNotif("❌ Jaringan Bermasalah.", "error"); }
         }
-
-        setDefaultTanggal();
-        updateJamDigital();
-        document.addEventListener("DOMContentLoaded", muatMenu);
     </script>
 </body>
 </html>
