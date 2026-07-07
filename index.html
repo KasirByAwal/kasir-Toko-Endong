@@ -18,11 +18,10 @@
 
     <div id="notif-box" class="hidden fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-50 p-4 rounded-xl shadow-xl text-white text-center font-bold transition-all duration-300"></div>
 
-    <!-- Header dengan Tambahan Jam Digital -->
+    <!-- Header dengan Tampilan Jam Digital Realtime -->
     <div class="bg-amber-500 text-white p-4 shadow-md sticky top-0 z-40 flex justify-between items-center">
         <div>
             <h1 class="text-lg font-bold tracking-wide">🍛 Aplikasi Kasir By Awal</h1>
-            <!-- Tampilan Jam Digital Realtime -->
             <div id="jam-digital" class="text-xs font-mono font-bold bg-amber-600/50 px-2 py-0.5 rounded mt-0.5 inline-block text-amber-50">WITA --:--:--</div>
         </div>
         <button onclick="muatMenu()" class="text-xs bg-amber-700 px-3 py-1.5 rounded-lg font-medium active:scale-95 transition">🔄 Refresh</button>
@@ -30,24 +29,24 @@
 
     <div class="max-w-md mx-auto p-4 space-y-4">
         
-        <!-- Pilihan Menu Dua Kolom (Utama & Lauk) -->
+        <!-- Pilihan Menu Dua Kolom Kiri & Kanan Berdampingan -->
         <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
-            <h2 class="text-sm font-bold text-slate-500 uppercase mb-3 tracking-wider">🛒 Pilihan Menu & Lauk</h2>
+            <h2 class="text-sm font-bold text-slate-500 uppercase mb-3 tracking-wider">🛒 Pilihan Menu & Lauk/Barang</h2>
             
             <div id="loading-text" class="text-center py-6 text-slate-400 text-sm italic">Sedang menyinkronkan data, harap tunggu...</div>
             
-            <!-- Grid Pembagi Kolom Kategori -->
-            <div id="menu-container" class="hidden grid grid-cols-2 gap-4">
-                <!-- Kolom Kategori Utama (Kiri) -->
+            <!-- Grid Layout Murni Berdampingan Kiri & Kanan -->
+            <div id="menu-container" class="hidden grid grid-cols-2 gap-3">
+                <!-- Kolom Utama (Kiri) -->
                 <div class="border-r border-slate-100 pr-2">
                     <h3 class="text-xs font-extrabold text-amber-600 uppercase border-b pb-1 mb-2 tracking-wide">🍛 Utama</h3>
-                    <div id="kolom-utama" class="space-y-3 divide-y divide-slate-50"></div>
+                    <div id="kolom-utama" class="space-y-4 divide-y divide-slate-100"></div>
                 </div>
                 
-                <!-- Kolom Kategori Lauk / Tambahan (Kanan) -->
+                <!-- Kolom Lauk (Kanan) -->
                 <div class="pl-1">
-                    <h3 class="text-xs font-extrabold text-emerald-600 uppercase border-b pb-1 mb-2 tracking-wide">🍗 Lauk / Ekstra</h3>
-                    <div id="kolom-lauk" class="space-y-3 divide-y divide-slate-50"></div>
+                    <h3 class="text-xs font-extrabold text-emerald-600 uppercase border-b pb-1 mb-2 tracking-wide">🍗 Lauk</h3>
+                    <div id="kolom-lauk" class="space-y-4 divide-y divide-slate-100"></div>
                 </div>
             </div>
         </div>
@@ -119,10 +118,8 @@
         let caraBayar = "TUNAI";
         let cashDiterima = 0;
 
-        // Fungsi Jam Digital Realtime Zona WITA (GMT+8)
         function updateJamDigital() {
             const sekarang = new Date();
-            // Memaksa format ke zona waktu Makassar (WITA / GMT+8)
             const opsiFormat = { timeZone: 'Asia/Makassar', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
             const stringWaktu = sekarang.toLocaleTimeString('id-ID', opsiFormat);
             document.getElementById("jam-digital").innerText = "WITA " + stringWaktu.replace(/\./g, ':');
@@ -146,6 +143,7 @@
                 itemMenu = rawData.map(item => ({
                     nama: item.nama ? item.nama.toString() : "Tanpa Nama",
                     harga: isNaN(Number(item.harga)) ? 0 : Number(item.harga),
+                    // Pembacaan murni dari kolom Kategori di Google Sheets Anda
                     kategori: item.kategori ? item.kategori.toString().trim().toLowerCase() : "utama",
                     status: item.status ? item.status.toString() : ""
                 }));
@@ -162,13 +160,13 @@
         function createItemHtml(item) {
             if(!orderan[item.nama]) orderan[item.nama] = 0;
             return `
-            <div class="pt-2 pb-1.5">
-                <div class="font-bold text-slate-800 text-xs truncate" title="${item.nama}">${item.nama}</div>
-                <div class="text-[11px] font-semibold text-slate-500 mb-1.5">Rp ${(item.harga || 0).toLocaleString('id-ID')}</div>
-                <div class="flex items-center space-x-1.5">
-                    <button onclick="ubahQty('${item.nama}', -1)" class="w-6 h-6 rounded bg-slate-100 text-slate-600 font-bold active:scale-90 transition text-xs shadow-sm flex items-center justify-center">-</button>
-                    <span id="qty-${item.nama.replace(/\s+/g, '')}" class="w-5 text-center text-xs font-bold text-slate-700">${orderan[item.nama]}</span>
-                    <button onclick="ubahQty('${item.nama}', 1)" class="w-6 h-6 rounded bg-amber-500 text-white font-bold active:scale-90 transition text-xs shadow-sm flex items-center justify-center">+</button>
+            <div class="pt-2 pb-2">
+                <div class="font-bold text-slate-800 text-[13px] leading-tight break-words">${item.nama}</div>
+                <div class="text-[11px] font-bold text-amber-600 mb-2">Rp ${(item.harga || 0).toLocaleString('id-ID')}</div>
+                <div class="flex items-center space-x-1">
+                    <button onclick="ubahQty('${item.nama}', -1)" class="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 font-bold active:scale-90 transition text-sm shadow-sm flex items-center justify-center">-</button>
+                    <span id="qty-${item.nama.replace(/\s+/g, '')}" class="w-5 text-center text-xs font-black text-slate-700">${orderan[item.nama]}</span>
+                    <button onclick="ubahQty('${item.nama}', 1)" class="w-7 h-7 rounded-lg bg-amber-500 text-white font-bold active:scale-90 transition text-sm shadow-sm flex items-center justify-center">+</button>
                 </div>
             </div>`;
         }
@@ -178,15 +176,14 @@
             let htmlLauk = "";
 
             itemMenu.forEach(item => {
-                // Memilah menu berdasarkan data kolom kategori
-                if(item.kategori === "lauk" || item.kategori === "tambahan") {
+                // Dipilah murni berdasarkan isi kolom C spreadsheet Anda ('utama' atau 'lauk')
+                if(item.kategori === "lauk") {
                     htmlLauk += createItemHtml(item);
                 } else {
                     htmlUtama += createItemHtml(item);
                 }
             });
 
-            // Antisipasi jika data salah satu kolom kosong
             document.getElementById("kolom-utama").innerHTML = htmlUtama || "<p class='text-[11px] text-slate-400 italic'>Kosong</p>";
             document.getElementById("kolom-lauk").innerHTML = htmlLauk || "<p class='text-[11px] text-slate-400 italic'>Kosong</p>";
         }
@@ -335,7 +332,6 @@
             }
         }
 
-        // Jalankan inisialisasi jam langsung saat dibuka
         updateJamDigital();
         document.addEventListener("DOMContentLoaded", muatMenu);
     </script>
