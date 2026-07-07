@@ -173,46 +173,49 @@
         }
 
         function renderUangRupiah() {
-            let container = document.getElementById("rupiah-grid");
-            if(grandTotal === 0) {
-                container.innerHTML = "<p class='col-span-2 text-center text-xs text-slate-400 py-2'>Pilih menu terlebih dahulu</p>";
-                setUangFisik(0);
-                return;
-            }
+    let container = document.getElementById("rupiah-grid");
+    if(grandTotal === 0) {
+        container.innerHTML = "<p class='col-span-2 text-center text-xs text-slate-400 py-2'>Pilih menu terlebih dahulu</p>";
+        setUangFisik(0);
+        return;
+    }
 
-            let html = `<button onclick="setUangFisik(${grandTotal})" class="p-3 text-xs font-bold rounded-xl border-2 border-dashed border-slate-300 text-slate-600 active:scale-95 transition bg-slate-50">💵 UANG PAS</button>`;
-            
-            let lembaranStatis = [5000, 10000, 20000, 50000, 100000];
-            let pilihanUang = [];
+    let html = `<button onclick="setUangFisik(${grandTotal})" class="p-3 text-xs font-bold rounded-xl border-2 border-dashed border-slate-300 text-slate-600 active:scale-95 transition bg-slate-50">💵 UANG PAS</button>`;
+    
+    let lembaranStatis = [5000, 10000, 20000, 50000, 100000];
+    let pilihanUang = [];
 
-            let kelipatan5k = Math.ceil(grandTotal / 5000) * 5000;
-            if (kelipatan5k !== grandTotal) {
-                pilihanUang.push({ nominal: kelipatan5k, style: 'uang-custom' });
-            }
+    let kelipatan5k = Math.ceil(grandTotal / 5000) * 5000;
+    if (kelipatan5k !== grandTotal) {
+        pilihanUang.push({ nominal: kelipatan5k, style: 'uang-custom' });
+    }
 
-            lembaranStatis.forEach(nominal => {
-                if (nominal > grandTotal && nominal !== kelipatan5k) {
-                    let cssStyle = nominal === 100000 ? 'uang-100k' : (nominal === 50000 ? 'uang-50k' : (nominal === 20000 ? 'uang-20k' : (nominal === 10000 ? 'uang-10k' : 'uang-5k')));
-                    pilihanUang.push({ nominal: nominal, style: cssStyle });
-                }
-            });
-
-            pilihanUang.sort((a, b) => a.nominal - b.nominal);
-
-            pilihanUang.slice(0, 5).forEach(item => {
-                html += `<button onclick="setUangFisik(${item.nominal})" class="p-3 text-xs font-black rounded-xl shadow-sm active:scale-95 transition ${item.style}">Rp ${item.nominal.toLocaleString('id-ID')}</button>`;
-            });
-            
-            container.innerHTML = html;
-            
-            // Sinkronisasi nilai default pembayaran saat keranjang berubah
-            let manualVal = document.getElementById("input-manual-bayar").value;
-            if(!manualVal) {
-                setUangFisik(grandTotal);
-            } else {
-                handleInputManual(manualVal);
-            }
+    lembaranStatis.forEach(nominal => {
+        if (nominal > grandTotal && nominal !== kelipatan5k) {
+            let cssStyle = nominal === 100000 ? 'uang-100k' : (nominal === 50000 ? 'uang-50k' : (nominal === 20000 ? 'uang-20k' : (nominal === 10000 ? 'uang-10k' : 'uang-5k')));
+            pilihanUang.push({ nominal: nominal, style: cssStyle });
         }
+    });
+
+    pilihanUang.sort((a, b) => a.nominal - b.nominal);
+
+    pilihanUang.slice(0, 5).forEach(item => {
+        html += `<button onclick="setUangFisik(${item.nominal})" class="p-3 text-xs font-black rounded-xl shadow-sm active:scale-95 transition ${item.style}">Rp ${item.nominal.toLocaleString('id-ID')}</button>`;
+    });
+    
+    container.innerHTML = html;
+    
+    // PERBAIKAN: Cek apakah user sedang mengetik secara manual atau kolom kosong
+    let manualInput = document.getElementById("input-manual-bayar");
+    if (manualInput && manualInput.value !== "") {
+        handleInputManual(manualInput.value);
+    } else {
+        // Jika kolom manual kosong, kembalikan kalkulasi ke nilai default cashDiterima yang ada
+        let sisa = cashDiterima - grandTotal;
+        document.getElementById("txt-cash-in").innerText = "Rp " + cashDiterima.toLocaleString('id-ID');
+        document.getElementById("txt-change").innerText = "Rp " + (sisa >= 0 ? sisa.toLocaleString('id-ID') : 0);
+    }
+}
 
         // Fungsi khusus untuk membaca input manual dari user
         function handleInputManual(val) {
