@@ -3,268 +3,281 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Aplikasi Kasir & Laporan Harian</title>
+    <title>Sistem Kasir Pintar</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
-        /* Gaya Khusus untuk Tombol Pecahan Uang Dinamis */
-        .uang-custom { bg-color: #f8fafc; border-color: #cbd5e1; color: #475569; }
-        .uang-5k { background-color: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
-        .uang-10k { background-color: #fdf2f8; border: 1px solid #fbcfe8; color: #9d174d; }
-        .uang-20k { background-color: #f0fdfa; border: 1px solid #99f6e4; color: #115e59; }
-        .uang-50k { background-color: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; }
-        .uang-100k { background-color: #fff1f2; border: 1px solid #fecdd3; color: #9f1239; }
+        /* Gaya Kustom untuk Pilihan Uang Fisik Cepat */
+        .uang-100k { bg-color: #fee2e2; border: 2px solid #ef4444; color: #b91c1c; } /* Merah */
+        .uang-50k { bg-color: #e0f2fe; border: 2px solid #0284c7; color: #0369a1; }  /* Biru */
+        .uang-20k { bg-color: #f0fdf4; border: 2px solid #16a34a; color: #15803d; }  /* Hijau */
+        .uang-10k { bg-color: #fae8ff; border: 2px solid #c084fc; color: #a21caf; }  /* Ungu */
+        .uang-5k { bg-color: #fef3c7; border: 2px solid #d97706; color: #b45309; }   /* Cokelat/Kuning */
+        .uang-custom { bg-color: #f1f5f9; border: 2px solid #64748b; color: #334155; } /* Abu-abu */
+        
+        /* Tambahan Utility Fallback untuk Class Custom di atas */
+        .uang-100k { background-color: #fee2e2; border: 2px solid #ef4444; color: #b91c1c; }
+        .uang-50k  { background-color: #e0f2fe; border: 2px solid #0284c7; color: #0369a1; }
+        .uang-20k  { background-color: #f0fdf4; border: 2px solid #16a34a; color: #15803d; }
+        .uang-10k  { background-color: #fae8ff; border: 2px solid #c084fc; color: #a21caf; }
+        .uang-5k   { background-color: #fef3c7; border: 2px solid #d97706; color: #b45309; }
+        .uang-custom { background-color: #f1f5f9; border: 2px solid #64748b; color: #334155; }
     </style>
 </head>
-<body class="bg-slate-100 font-sans text-slate-800 antialiased select-none pb-24">
+<body class="bg-slate-50 font-sans select-none antialiased text-slate-800 pb-20">
 
-    <!-- Box Notifikasi Global -->
+    <!-- NOTIFIKASI BOX POPUP -->
     <div id="notif-box" class="hidden"></div>
 
     <!-- HEADER UTAMA -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-40 px-4 py-3 shadow-sm flex justify-between items-center">
+    <header class="bg-white border-b border-slate-100 sticky top-0 z-40 px-4 py-3 shadow-xs flex items-center justify-between">
         <div>
-            <h1 class="font-black text-lg text-slate-800 tracking-tight">DASHBOARD KASIR</h1>
-            <p id="jam-digital" class="text-xs font-bold text-amber-600 mt-0.5">Memuat jam...</p>
+            <h1 class="text-base font-black tracking-tight text-slate-900">SISTEM KASIR</h1>
+            <p id="jam-digital" class="text-[11px] font-bold text-slate-400 mt-0.5">Memuat waktu...</p>
         </div>
-        <div id="loading-text" class="text-xs font-bold text-amber-500 bg-amber-50 px-2.5 py-1 rounded-lg animate-pulse">
-            ⏳ Sinkronisasi Data...
+        <!-- Filter Tanggal Operasional -->
+        <div class="flex items-center space-x-1.5 bg-slate-100 rounded-xl px-2.5 py-1.5 border border-slate-200">
+            <span class="text-[10px] font-black text-slate-500 uppercase tracking-wider">Operasional:</span>
+            <input type="date" id="filter-tanggal" onchange="prosesLaporanHarian()" class="bg-transparent text-xs font-bold text-slate-700 focus:outline-hidden cursor-pointer">
         </div>
     </header>
 
+    <!-- CONTAINER UTAMA -->
     <main class="max-w-7xl mx-auto p-4">
         
-        <!-- ==================== HALAMAN 1: KASIR ==================== -->
-        <section id="page-kasir" class="space-y-4">
-            <!-- Grid Utama: Membagi area Menu (Kiri) dan Pembayaran (Kanan) -->
-            <div id="menu-container" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-4">
-                
-                <!-- Area Menu Kiri: Berdampingan Antara Menu Utama & Lauk (Menggunakan grid-cols-2 sejak resolusi terkecil) -->
-                <div class="lg:col-span-2 grid grid-cols-2 gap-2 sm:gap-4 alignment-stretch">
-                    <!-- Kolom Menu Utama -->
-                    <div class="bg-white p-3 sm:p-4 rounded-2xl shadow-sm border border-slate-200/60 flex flex-col h-full">
-                        <h2 class="font-black text-xs sm:text-sm text-slate-700 uppercase tracking-wider border-b pb-2 mb-3 flex items-center">
-                            <span class="w-1.5 h-3.5 sm:w-2 sm:h-4 bg-amber-500 rounded mr-1.5 sm:mr-2"></span> Menu Utama
-                        </h2>
-                        <div id="kolom-utama" class="divide-y divide-slate-100 flex-1 overflow-y-auto max-h-[60vh] pr-1"></div>
-                    </div>
-
-                    <!-- Kolom Lauk Tambahan -->
-                    <div class="bg-white p-3 sm:p-4 rounded-2xl shadow-sm border border-slate-200/60 flex flex-col h-full">
-                        <h2 class="font-black text-xs sm:text-sm text-slate-700 uppercase tracking-wider border-b pb-2 mb-3 flex items-center">
-                            <span class="w-1.5 h-3.5 sm:w-2 sm:h-4 bg-orange-500 rounded mr-1.5 sm:mr-2"></span> Lauk / Tambahan
-                        </h2>
-                        <div id="kolom-lauk" class="divide-y divide-slate-100 flex-1 overflow-y-auto max-h-[60vh] pr-1"></div>
-                    </div>
+        <!-- ==================== PAGE 1: KASIR ==================== -->
+        <section id="page-kasir" class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+            
+            <!-- KOLOM KIRI: MENU KATALOG (8 Kolom) -->
+            <div class="lg:col-span-7 xl:col-span-8 space-y-4">
+                <!-- Status Loading -->
+                <div id="loading-text" class="text-center py-12 bg-white rounded-2xl border border-slate-100 shadow-xs">
+                    <div class="animate-spin inline-block w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full mb-3"></div>
+                    <p class="text-xs font-bold text-slate-500">Menghubungkan ke database Google Sheets...</p>
                 </div>
 
-                <!-- Kolom Transaksi & Pembayaran (Kanan) -->
-                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/60 space-y-4 h-fit">
-                    <!-- Screen Total Harga -->
-                    <div class="bg-slate-900 text-right p-4 rounded-xl shadow-inner">
-                        <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Belanja</span>
-                        <span id="total-screen" class="text-2xl font-black text-amber-400 tracking-tight">Rp 0</span>
+                <!-- Container Utama Grid Menu -->
+                <div id="menu-container" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Kategori Utama -->
+                    <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-xs">
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-2.5 mb-3">
+                            <h2 class="text-xs font-black tracking-wider text-slate-400 uppercase flex items-center gap-1.5">
+                                🍱 Menu Utama
+                            </h2>
+                        </div>
+                        <div id="kolom-utama" class="divide-y divide-slate-100">
+                            <!-- Diisi dinamis via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Kategori Lauk / Tambahan -->
+                    <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-xs">
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-2.5 mb-3">
+                            <h2 class="text-xs font-black tracking-wider text-slate-400 uppercase flex items-center gap-1.5">
+                                🍳 Lauk Tambahan
+                            </h2>
+                        </div>
+                        <div id="kolom-lauk" class="divide-y divide-slate-100">
+                            <!-- Diisi dinamis via JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KOLOM KANAN: PEMBAYARAN & NOTA (5 Kolom) -->
+            <div class="lg:col-span-5 xl:col-span-4 space-y-4">
+                <div class="bg-white rounded-2xl border border-slate-100 shadow-md p-4 sticky top-20">
+                    
+                    <!-- Monitor Screen Ringkasan Total -->
+                    <div class="bg-slate-900 rounded-xl p-4 text-right mb-4 shadow-inner">
+                        <span class="text-[10px] font-black tracking-widest text-slate-500 uppercase block mb-0.5">Total Tagihan</span>
+                        <div id="total-screen" class="text-2xl font-black text-amber-400 tracking-tight">Rp 0</div>
                     </div>
 
                     <!-- Pilihan Metode Pembayaran -->
-                    <div class="grid grid-cols-2 gap-2 text-center text-xs">
-                        <button id="tab-tunai" onclick="gantiMetode('TUNAI')" class="p-3 font-bold rounded-xl border-2 border-amber-500 bg-amber-50 text-amber-700 transition shadow-sm">
+                    <div class="grid grid-cols-2 gap-2 mb-4">
+                        <button id="tab-tunai" onclick="gantiMetode('TUNAI')" class="p-3 font-bold rounded-xl border-2 border-amber-500 bg-amber-50 text-amber-700 transition shadow-sm flex items-center justify-center gap-2 text-xs">
                             💵 TUNAI
                         </button>
-                        <button id="tab-qris" onclick="gantiMetode('QRIS')" class="p-3 font-bold rounded-xl border border-slate-200 text-slate-600 transition">
+                        <button id="tab-qris" onclick="gantiMetode('QRIS')" class="p-3 font-bold rounded-xl border border-slate-200 text-slate-600 transition flex items-center justify-center gap-2 text-xs">
                             📱 QRIS
                         </button>
                     </div>
 
-                    <!-- Area Pembayaran: TUNAI -->
-                    <div id="area-tunai" class="space-y-3">
-                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Pecahan Uang / Uang Pas</label>
-                        <div id="rupiah-grid" class="grid grid-cols-2 gap-2"></div>
-                        
-                        <div class="pt-2">
-                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Input Manual Pembayaran</label>
-                            <input type="number" id="input-manual-bayar" oninput="handleInputManual(this.value)" placeholder="Masukkan nominal..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold focus:outline-none focus:border-amber-500 transition">
+                    <!-- BLOK METODE: TUNAI -->
+                    <div id="area-tunai" class="space-y-4">
+                        <!-- Input Manual -->
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase block mb-1.5 tracking-wider">Input Uang Manual (Rp)</label>
+                            <input type="number" id="input-manual-bayar" oninput="handleInputManual(this.value)" placeholder="Masukkan nominal pembayaran..." class="w-full bg-slate-50 font-black text-slate-800 text-sm p-3 rounded-xl border border-slate-200 focus:outline-hidden focus:border-amber-500 transition shadow-xs">
                         </div>
 
-                        <!-- Info Kembalian -->
-                        <div class="bg-slate-50 p-3 rounded-xl text-xs space-y-1.5 border border-slate-100">
-                            <div class="flex justify-between text-slate-500 font-medium">
-                                <span>Uang Diterima:</span>
-                                <span id="txt-cash-in" class="font-bold text-slate-700">Rp 0</span>
+                        <!-- Grid Pintas Kembalian Uang Fisik -->
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase block mb-1.5 tracking-wider">Uang Fisik Cepat</label>
+                            <div id="rupiah-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                <!-- Diisi dinamis via JS -->
                             </div>
-                            <div class="flex justify-between items-center border-t border-slate-200/60 pt-1.5 font-bold">
-                                <span class="text-slate-600">Kembalian:</span>
-                                <span id="txt-change" class="text-sm text-amber-600 font-black">Rp 0</span>
+                        </div>
+
+                        <!-- Kalkulator Kembalian -->
+                        <div class="bg-slate-50 rounded-xl p-3 border border-slate-100 grid grid-cols-2 gap-2 text-xs font-bold">
+                            <div class="text-slate-500">Diterima:</div>
+                            <div id="txt-cash-in" class="text-right text-slate-800 font-black">Rp 0</div>
+                            <div class="text-slate-500 border-t border-slate-200 pt-1.5 mt-1">Kembalian:</div>
+                            <div id="txt-change" class="text-right text-emerald-600 font-black text-sm border-t border-slate-200 pt-1.5 mt-1">Rp 0</div>
+                        </div>
+                    </div>
+
+                    <!-- BLOK METODE: QRIS -->
+                    <div id="area-qris" class="hidden space-y-3">
+                        <div class="border border-slate-200 rounded-2xl p-4 text-center bg-slate-50 flex flex-col items-center justify-center min-h-[180px]">
+                            <div class="font-black text-slate-800 text-sm mb-1">Pindai QRIS Dinamis</div>
+                            <div id="qris-amount-text" class="text-xs font-bold text-amber-600 mb-3">Rp 0</div>
+                            <!-- Placeholder QR Code Minimalis Menggunakan SVG -->
+                            <div class="bg-white p-2 rounded-xl shadow-xs border border-slate-100">
+                                <svg width="110" height="110" viewBox="0 0 100 100" class="text-slate-900">
+                                    <path d="M5,5 h30 v30 h-30 z M15,15 h10 v10 h-10 z M65,5 h30 v30 h-30 z M75,15 h10 v10 h-10 z M5,65 h30 v30 h-30 z M15,75 h10 v10 h-10 z" fill="currentColor"/>
+                                    <path d="M45,5 h10 v10 h-10 z M45,25 h10 v15 h-10 z M55,15 h10 v15 h-10 z M35,45 h15 v10 h-15 z M5,45 h10 v15 h-10 z M25,45 h10 v10 h-10 z M65,45 h15 v10 h-15 z M85,45 h10 v25 h-10 z M45,65 h10 v15 h-10 z M55,85 h15 v10 h-15 z M75,65 h10 v10 h-10 z M85,85 h10 v10 h-10 z M45,85 h5 v5 h-5 z" fill="currentColor"/>
+                                </svg>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Area Pembayaran: QRIS -->
-                    <div id="area-qris" class="hidden text-center p-4 bg-slate-50 border border-dashed border-slate-200 rounded-xl space-y-2">
-                        <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Pembayaran Elektronik</div>
-                        <div id="qris-amount-text" class="text-lg font-black text-sky-600">Rp 0</div>
-                        <p class="text-[10px] text-slate-400 leading-normal px-2">Pastikan dana QRIS sudah sukses diverifikasi masuk ke rekening sebelum menyelesaikan transaksi.</p>
-                    </div>
-
-                    <!-- Tombol Eksekusi Akhir -->
-                    <button onclick="bayarSekarang()" class="w-full bg-amber-500 hover:bg-amber-600 active:scale-[0.98] text-white font-black rounded-xl py-3.5 shadow-md shadow-amber-500/20 text-sm tracking-wide transition">
-                        ✅ SELESAIKAN TRANSAKSI
+                    <!-- Tombol Aksi Eksekusi -->
+                    <button onclick="bayarSekarang()" class="w-full mt-4 bg-slate-900 text-white p-4 rounded-xl font-black text-sm active:scale-[0.98] transition shadow-lg shadow-slate-900/20 hover:bg-slate-800 cursor-pointer flex items-center justify-center gap-2">
+                        🚀 PROSES & SIMPAN TRANSAKSI
                     </button>
                 </div>
             </div>
+
         </section>
 
-        <!-- ==================== HALAMAN 2: LAPORAN ==================== -->
-        <section id="page-laporan" class="hidden space-y-4">
+        <!-- ==================== PAGE 2: LAPORAN SHIFT ==================== -->
+        <section id="page-laporan" class="hidden space-y-6">
             
-            <!-- Kontrol Filter Berdasarkan Tanggal -->
-            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                    <h2 class="font-black text-sm text-slate-700 uppercase tracking-wider">Histori & Laporan Penjualan</h2>
-                    <p class="text-xs text-slate-400 mt-0.5">Ganti tanggal untuk melihat penjualan sebelumnya</p>
-                </div>
-                <input type="date" id="filter-tanggal" onchange="prosesLaporanHarian()" class="bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs font-bold text-slate-700 focus:outline-none focus:border-amber-500 transition">
-            </div>
-
-            <!-- LAPORAN SHIFT: PAGI -->
-            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/60 space-y-3">
-                <div class="flex justify-between items-center border-b border-slate-100 pb-2.5">
-                    <div class="flex items-center space-x-2">
-                        <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span>
-                        <h3 class="font-black text-sm text-slate-700 uppercase tracking-wider">Penjualan Pagi</h3>
+            <!-- BLOK SHIFT PAGI (06:00 - 15:59) -->
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-xs overflow-hidden">
+                <div class="bg-linear-to-r from-amber-500 to-amber-600 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-white">
+                    <div>
+                        <h3 class="text-sm font-black flex items-center gap-1.5">☀️ Shift Pagi <span class="text-[10px] font-normal bg-white/20 px-2 py-0.5 rounded-full">06:00 - 15:59 WITA</span></h3>
+                        <p class="text-[11px] text-amber-100 mt-0.5">Ringkasan penjualan real-time terhitung berdasarkan tanggal filter di atas.</p>
                     </div>
-                    <!-- Navigasi Toggle Rekap/Rincian Pagi -->
-                    <button id="btn-toggle-pagi" onclick="gantiTampilanLaporan('pagi')" class="text-[11px] font-bold text-amber-600 bg-amber-50 px-3 py-1.5 rounded-lg active:scale-95 transition shadow-sm border border-amber-200">
+                    <button id="btn-toggle-pagi" onclick="gantiTampilanLaporan('pagi')" class="text-[11px] font-bold text-amber-600 bg-white px-3 py-1.5 rounded-lg active:scale-95 transition shadow-sm border border-amber-200 self-start sm:self-auto cursor-pointer">
                         📋 Lihat Rincian
                     </button>
                 </div>
-
-                <!-- Tampilan Rekap Menu Pagi -->
-                <div id="area-rekap-pagi" class="overflow-x-auto">
-                    <table class="w-full text-[12px] text-left border-collapse">
+                
+                <!-- Konten Rekap Pagi (Default Terbuka) -->
+                <div id="area-rekap-pagi" class="p-4 overflow-x-auto">
+                    <table class="w-full text-xs text-left">
                         <thead>
-                            <tr class="text-slate-400 font-bold border-b border-slate-100">
-                                <th class="p-2.5 pl-0">Nama Menu</th>
-                                <th class="p-2.5 text-center">Qty</th>
-                                <th class="p-2.5 text-right text-emerald-600/80">Tunai</th>
-                                <th class="p-2.5 text-right text-sky-600/80">QRIS</th>
+                            <tr class="text-slate-400 font-black border-b border-slate-100 uppercase tracking-wider">
+                                <th class="p-3">Nama Menu</th>
+                                <th class="p-3 text-center">Qty</th>
+                                <th class="p-3 text-right text-emerald-600">Tunai</th>
+                                <th class="p-3 text-right text-sky-600">QRIS</th>
                             </tr>
                         </thead>
-                        <tbody id="body-tabel-pagi" class="divide-y divide-slate-50"></tbody>
+                        <tbody id="body-tabel-pagi" class="divide-y divide-slate-100">
+                            <!-- Diisi dinamis via JS -->
+                        </tbody>
                     </table>
                 </div>
 
-                <!-- Tampilan Rincian Transaksi Pagi -->
-                <div id="area-rincian-pagi" class="hidden overflow-x-auto w-full">
-                    <table class="w-full text-[12px] text-left border-collapse">
+                <!-- Konten Rincian Transaksi Pagi (Hidden) -->
+                <div id="area-rincian-pagi" class="p-4 overflow-x-auto hidden">
+                    <table class="w-full text-xs text-left">
                         <thead>
-                            <tr class="bg-slate-50 text-slate-500 font-bold border-b border-slate-200">
+                            <tr class="text-slate-400 font-black border-b border-slate-100 uppercase tracking-wider">
                                 <th class="p-2.5">Jam</th>
                                 <th class="p-2.5">Item Terjual</th>
                                 <th class="p-2.5 text-center">Metode</th>
                                 <th class="p-2.5 text-right">Total</th>
                             </tr>
                         </thead>
-                        <tbody id="body-rincian-pagi"></tbody>
+                        <tbody id="body-rincian-pagi" class="divide-y divide-slate-50">
+                            <!-- Diisi dinamis via JS -->
+                        </tbody>
                     </table>
                 </div>
 
-                <!-- Ringkasan Finansial Pagi -->
-                <div class="bg-slate-50 p-3 rounded-xl text-xs grid grid-cols-2 sm:grid-cols-4 gap-3 border border-slate-100 font-bold">
-                    <div class="p-2 rounded-lg bg-white border border-slate-100">
-                        <span class="block text-[10px] font-medium text-slate-400 uppercase">Item Terjual</span>
-                        <span id="qty-pagi" class="text-sm text-slate-700 font-black">0</span>
-                    </div>
-                    <div class="p-2 rounded-lg bg-white border border-slate-100">
-                        <span class="block text-[10px] font-medium text-emerald-500 uppercase">Total Tunai</span>
-                        <span id="tunai-pagi" class="text-sm text-emerald-600 font-black">Rp 0</span>
-                    </div>
-                    <div class="p-2 rounded-lg bg-white border border-slate-100">
-                        <span class="block text-[10px] font-medium text-sky-500 uppercase">Total QRIS</span>
-                        <span id="qris-pagi" class="text-sm text-sky-600 font-black">Rp 0</span>
-                    </div>
-                    <div class="p-2 rounded-lg bg-amber-500 border border-amber-600 text-white shadow-sm">
-                        <span class="block text-[10px] font-medium text-amber-100 uppercase">Omset Pagi</span>
-                        <span id="total-pagi" class="text-sm font-black">Rp 0</span>
-                    </div>
+                <!-- Footer Total Pendapatan Shift Pagi -->
+                <div class="bg-slate-50 border-t border-slate-100 p-4 grid grid-cols-2 sm:grid-cols-4 gap-3 text-center text-xs font-black">
+                    <div class="p-2 bg-white rounded-xl border border-slate-100"><span class="text-[10px] text-slate-400 block font-bold mb-0.5">Total Qty</span><span id="qty-pagi" class="text-slate-700">0</span></div>
+                    <div class="p-2 bg-white rounded-xl border border-slate-100"><span class="text-[10px] text-emerald-500 block font-bold mb-0.5">Total Tunai</span><span id="tunai-pagi" class="text-emerald-600">Rp 0</span></div>
+                    <div class="p-2 bg-white rounded-xl border border-slate-100"><span class="text-[10px] text-sky-500 block font-bold mb-0.5">Total QRIS</span><span id="qris-pagi" class="text-sky-600">Rp 0</span></div>
+                    <div class="p-2 bg-amber-50 rounded-xl border border-amber-100 sm:col-span-1 col-span-2"><span class="text-[10px] text-amber-700 block font-bold mb-0.5">Grand Total Shift</span><span id="total-pagi" class="text-amber-700 text-sm">Rp 0</span></div>
                 </div>
             </div>
 
-            <!-- LAPORAN SHIFT: MALAM -->
-            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/60 space-y-3">
-                <div class="flex justify-between items-center border-b border-slate-100 pb-2.5">
-                    <div class="flex items-center space-x-2">
-                        <span class="w-2.5 h-2.5 bg-indigo-500 rounded-full animate-pulse"></span>
-                        <h3 class="font-black text-sm text-slate-700 uppercase tracking-wider">Penjualan malam</h3>
+            <!-- BLOK SHIFT MALAM (16:00 - 05:59 Besok) -->
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-xs overflow-hidden">
+                <div class="bg-linear-to-r from-slate-700 to-slate-800 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-white">
+                    <div>
+                        <h3 class="text-sm font-black flex items-center gap-1.5">🌙 Shift Malam <span class="text-[10px] font-normal bg-white/20 px-2 py-0.5 rounded-full">16:00 - 05:59 WITA</span></h3>
+                        <p class="text-[11px] text-slate-300 mt-0.5">Log penjualan malam hari, mencakup penyesuaian waktu kalender hingga esok subuh.</p>
                     </div>
-                    <!-- Navigasi Toggle Rekap/Rincian Malam -->
-                    <button id="btn-toggle-malam" onclick="gantiTampilanLaporan('malam')" class="text-[11px] font-bold text-amber-600 bg-amber-50 px-3 py-1.5 rounded-lg active:scale-95 transition shadow-sm border border-amber-200">
+                    <button id="btn-toggle-malam" onclick="gantiTampilanLaporan('malam')" class="text-[11px] font-bold text-amber-600 bg-white px-3 py-1.5 rounded-lg active:scale-95 transition shadow-sm border border-amber-200 self-start sm:self-auto cursor-pointer">
                         📋 Lihat Rincian
                     </button>
                 </div>
-
-                <!-- Tampilan Rekap Menu Malam -->
-                <div id="area-rekap-malam" class="overflow-x-auto">
-                    <table class="w-full text-[12px] text-left border-collapse">
+                
+                <!-- Konten Rekap Malam (Default Terbuka) -->
+                <div id="area-rekap-malam" class="p-4 overflow-x-auto">
+                    <table class="w-full text-xs text-left">
                         <thead>
-                            <tr class="text-slate-400 font-bold border-b border-slate-100">
-                                <th class="p-2.5 pl-0">Nama Menu</th>
-                                <th class="p-2.5 text-center">Qty</th>
-                                <th class="p-2.5 text-right text-emerald-600/80">Tunai</th>
-                                <th class="p-2.5 text-right text-sky-600/80">QRIS</th>
+                            <tr class="text-slate-400 font-black border-b border-slate-100 uppercase tracking-wider">
+                                <th class="p-3">Nama Menu</th>
+                                <th class="p-3 text-center">Qty</th>
+                                <th class="p-3 text-right text-emerald-600">Tunai</th>
+                                <th class="p-3 text-right text-sky-600">QRIS</th>
                             </tr>
                         </thead>
-                        <tbody id="body-tabel-malam" class="divide-y divide-slate-50"></tbody>
+                        <tbody id="body-tabel-malam" class="divide-y divide-slate-100">
+                            <!-- Diisi dinamis via JS -->
+                        </tbody>
                     </table>
                 </div>
 
-                <!-- Tampilan Rincian Transaksi Malam -->
-                <div id="area-rincian-malam" class="hidden overflow-x-auto w-full">
-                    <table class="w-full text-[12px] text-left border-collapse">
+                <!-- Konten Rincian Transaksi Malam (Hidden) -->
+                <div id="area-rincian-malam" class="p-4 overflow-x-auto hidden">
+                    <table class="w-full text-xs text-left">
                         <thead>
-                            <tr class="bg-slate-50 text-slate-500 font-bold border-b border-slate-200">
+                            <tr class="text-slate-400 font-black border-b border-slate-100 uppercase tracking-wider">
                                 <th class="p-2.5">Jam</th>
                                 <th class="p-2.5">Item Terjual</th>
                                 <th class="p-2.5 text-center">Metode</th>
                                 <th class="p-2.5 text-right">Total</th>
                             </tr>
                         </thead>
-                        <tbody id="body-rincian-malam"></tbody>
+                        <tbody id="body-rincian-malam" class="divide-y divide-slate-50">
+                            <!-- Diisi dinamis via JS -->
+                        </tbody>
                     </table>
                 </div>
 
-                <!-- Ringkasan Finansial Malam -->
-                <div class="bg-slate-50 p-3 rounded-xl text-xs grid grid-cols-2 sm:grid-cols-4 gap-3 border border-slate-100 font-bold">
-                    <div class="p-2 rounded-lg bg-white border border-slate-100">
-                        <span class="block text-[10px] font-medium text-slate-400 uppercase">Item Terjual</span>
-                        <span id="qty-malam" class="text-sm text-slate-700 font-black">0</span>
-                    </div>
-                    <div class="p-2 rounded-lg bg-white border border-slate-100">
-                        <span class="block text-[10px] font-medium text-emerald-500 uppercase">Total Tunai</span>
-                        <span id="tunai-malam" class="text-sm text-emerald-600 font-black">Rp 0</span>
-                    </div>
-                    <div class="p-2 rounded-lg bg-white border border-slate-100">
-                        <span class="block text-[10px] font-medium text-sky-500 uppercase">Total QRIS</span>
-                        <span id="qris-malam" class="text-sm text-sky-600 font-black">Rp 0</span>
-                    </div>
-                    <div class="p-2 rounded-lg bg-amber-500 border border-amber-600 text-white shadow-sm">
-                        <span class="block text-[10px] font-medium text-amber-100 uppercase">Omset Malam</span>
-                        <span id="total-malam" class="text-sm font-black">Rp 0</span>
-                    </div>
+                <!-- Footer Total Pendapatan Shift Malam -->
+                <div class="bg-slate-50 border-t border-slate-100 p-4 grid grid-cols-2 sm:grid-cols-4 gap-3 text-center text-xs font-black">
+                    <div class="p-2 bg-white rounded-xl border border-slate-100"><span class="text-[10px] text-slate-400 block font-bold mb-0.5">Total Qty</span><span id="qty-malam" class="text-slate-700">0</span></div>
+                    <div class="p-2 bg-white rounded-xl border border-slate-100"><span class="text-[10px] text-emerald-500 block font-bold mb-0.5">Total Tunai</span><span id="tunai-malam" class="text-emerald-600">Rp 0</span></div>
+                    <div class="p-2 bg-white rounded-xl border border-slate-100"><span class="text-[10px] text-sky-500 block font-bold mb-0.5">Total QRIS</span><span id="qris-malam" class="text-sky-600">Rp 0</span></div>
+                    <div class="p-2 bg-slate-700 rounded-xl border border-slate-600 sm:col-span-1 col-span-2"><span class="text-[10px] text-slate-300 block font-bold mb-0.5">Grand Total Shift</span><span id="total-malam" class="text-amber-400 text-sm">Rp 0</span></div>
                 </div>
             </div>
+
         </section>
     </main>
 
-    <!-- NAVIGATION TABS (STICKY BOTTOM NAVBAR) -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-xl px-6 py-2.5 z-40 flex justify-around items-center max-w-md mx-auto rounded-t-2xl">
-        <button id="nav-kasir" onclick="navigasiKe('kasir')" class="flex flex-col items-center justify-center text-amber-600 font-bold transition">
-            <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"></path></svg>
-            <span class="text-[10px] tracking-wide">Mesin Kasir</span>
+    <!-- BAR NAVIGASI BAWAH (STICKY FOOTER MOBILE ORIENTED) -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-xl z-40 grid grid-cols-2 py-2.5">
+        <button id="nav-kasir" onclick="navigasiKe('kasir')" class="flex flex-col items-center justify-center text-amber-600 font-bold transition cursor-pointer">
+            <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"/></svg>
+            <span class="text-[10px]">Mesin Kasir</span>
         </button>
-        <button id="nav-laporan" onclick="navigasiKe('laporan')" class="flex flex-col items-center justify-center text-slate-400 font-bold transition">
-            <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"></path></svg>
-            <span class="text-[10px] tracking-wide">Laporan Shift</span>
+        <button id="nav-laporan" onclick="navigasiKe('laporan')" class="flex flex-col items-center justify-center text-slate-400 font-bold transition cursor-pointer">
+            <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z"/><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z"/></svg>
+            <span class="text-[10px]">Laporan Shift</span>
         </button>
     </nav>
 
@@ -296,37 +309,34 @@
         function triggerNotif(msg, type) {
             let box = document.getElementById("notif-box");
             box.innerText = msg;
-            box.className = type === "success" ? "fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-50 p-4 rounded-xl shadow-xl text-white text-center font-bold bg-emerald-600 block" : "fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-50 p-4 rounded-xl shadow-xl text-white text-center font-bold bg-rose-600 block";
+            box.className = type === "success" 
+                ? "fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-50 p-4 rounded-xl shadow-xl text-white text-center font-bold bg-emerald-600 block" 
+                : "fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-50 p-4 rounded-xl shadow-xl text-white text-center font-bold bg-rose-600 block";
             setTimeout(() => { box.className = "hidden"; }, 3500);
         }
 
-       function setDefaultTanggal() {
-            // Mengambil waktu saat ini di zona Asia/Makassar
+        function setDefaultTanggal() {
             const witaNow = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Makassar"}));
-            
-            // Logika inti: Mundurkan 6 jam. 
-            // Jika sekarang jam 3 subuh esok hari, mundur 6 jam akan mengembalikan tanggal ke hari sebelumnya.
-            // Tanggal baru akan terpilih otomatis HANYA jika jam sudah melewati 06:00 pagi.
             witaNow.setHours(witaNow.getHours() - 6);
 
             const yyyy = witaNow.getFullYear();
             const mm = String(witaNow.getMonth() + 1).padStart(2, '0');
             const dd = String(witaNow.getDate()).padStart(2, '0');
             
-            // Mengisi nilai default kotak input tanggal yang bisa dipilih manual
             document.getElementById('filter-tanggal').value = `${yyyy}-${mm}-${dd}`;
         }
+
         function navigasiKe(halaman) {
             if(halaman === 'kasir') {
                 document.getElementById('page-kasir').classList.remove('hidden');
                 document.getElementById('page-laporan').classList.add('hidden');
-                document.getElementById('nav-kasir').className = "flex flex-col items-center justify-center text-amber-600 font-bold transition";
-                document.getElementById('nav-laporan').className = "flex flex-col items-center justify-center text-slate-400 font-bold transition";
+                document.getElementById('nav-kasir').className = "flex flex-col items-center justify-center text-amber-600 font-bold transition cursor-pointer";
+                document.getElementById('nav-laporan').className = "flex flex-col items-center justify-center text-slate-400 font-bold transition cursor-pointer";
             } else {
                 document.getElementById('page-kasir').classList.add('hidden');
                 document.getElementById('page-laporan').classList.remove('hidden');
-                document.getElementById('nav-kasir').className = "flex flex-col items-center justify-center text-slate-400 font-bold transition";
-                document.getElementById('nav-laporan').className = "flex flex-col items-center justify-center text-amber-600 font-bold transition";
+                document.getElementById('nav-kasir').className = "flex flex-col items-center justify-center text-slate-400 font-bold transition cursor-pointer";
+                document.getElementById('nav-laporan').className = "flex flex-col items-center justify-center text-amber-600 font-bold transition cursor-pointer";
                 prosesLaporanHarian();
             }
         }
@@ -366,9 +376,9 @@
                 <div class="font-bold text-slate-800 text-[13px] leading-tight break-words">${item.nama}</div>
                 <div class="text-[11px] font-bold text-amber-600 mb-2">Rp ${(item.harga || 0).toLocaleString('id-ID')}</div>
                 <div class="flex items-center space-x-1">
-                    <button onclick="ubahQty('${item.nama.replace(/'/g, "\\'")}', -1)" class="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 font-bold active:scale-90 transition text-sm shadow-sm flex items-center justify-center">-</button>
+                    <button onclick="ubahQty('${item.nama.replace(/'/g, "\\'")}', -1)" class="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 font-bold active:scale-90 transition text-sm shadow-sm flex items-center justify-center cursor-pointer">-</button>
                     <span id="qty-${idAman}" class="w-5 text-center text-xs font-black text-slate-700">${orderan[item.nama]}</span>
-                    <button onclick="ubahQty('${item.nama.replace(/'/g, "\\'")}', 1)" class="w-7 h-7 rounded-lg bg-amber-500 text-white font-bold active:scale-90 transition text-sm shadow-sm flex items-center justify-center">+</button>
+                    <button onclick="ubahQty('${item.nama.replace(/'/g, "\\'")}', 1)" class="w-7 h-7 rounded-lg bg-amber-500 text-white font-bold active:scale-90 transition text-sm shadow-sm flex items-center justify-center cursor-pointer">+</button>
                 </div>
             </div>`;
         }
@@ -411,7 +421,7 @@
                 return;
             }
 
-            let html = `<button onclick="setUangFisik(${grandTotal})" class="p-3 text-xs font-bold rounded-xl border-2 border-dashed border-slate-300 text-slate-600 active:scale-95 transition bg-slate-50">💵 UANG PAS</button>`;
+            let html = `<button onclick="setUangFisik(${grandTotal})" class="p-3 text-xs font-bold rounded-xl border-2 border-dashed border-slate-300 text-slate-600 active:scale-95 transition bg-slate-50 cursor-pointer">💵 UANG PAS</button>`;
             let gridStatis = [5000, 10000, 20000, 50000, 100000];
             let pilihanUang = [];
 
@@ -427,7 +437,7 @@
 
             pilihanUang.sort((a, b) => a.nominal - b.nominal);
             pilihanUang.slice(0, 5).forEach(item => {
-                html += `<button onclick="setUangFisik(${item.nominal})" class="p-3 text-xs font-black rounded-xl shadow-sm active:scale-95 transition ${item.style}">Rp ${item.nominal.toLocaleString('id-ID')}</button>`;
+                html += `<button onclick="setUangFisik(${item.nominal})" class="p-3 text-xs font-black rounded-xl shadow-sm active:scale-95 transition ${item.style} cursor-pointer">Rp ${item.nominal.toLocaleString('id-ID')}</button>`;
             });
             container.innerHTML = html;
             
@@ -463,13 +473,13 @@
             if(opsi === "TUNAI") {
                 document.getElementById("area-tunai").classList.remove("hidden");
                 document.getElementById("area-qris").classList.add("hidden");
-                document.getElementById("tab-tunai").className = "p-3 font-bold rounded-xl border-2 border-amber-500 bg-amber-50 text-amber-700 transition shadow-sm";
-                document.getElementById("tab-qris").className = "p-3 font-bold rounded-xl border border-slate-200 text-slate-600 transition";
+                document.getElementById("tab-tunai").className = "p-3 font-bold rounded-xl border-2 border-amber-500 bg-amber-50 text-amber-700 transition shadow-sm flex items-center justify-center gap-2 text-xs cursor-pointer";
+                document.getElementById("tab-qris").className = "p-3 font-bold rounded-xl border border-slate-200 text-slate-600 transition flex items-center justify-center gap-2 text-xs cursor-pointer";
             } else {
                 document.getElementById("area-tunai").classList.add("hidden");
                 document.getElementById("area-qris").classList.remove("hidden");
-                document.getElementById("tab-qris").className = "p-3 font-bold rounded-xl border-2 border-amber-500 bg-amber-50 text-amber-700 transition shadow-sm";
-                document.getElementById("tab-tunai").className = "p-3 font-bold rounded-xl border border-slate-200 text-slate-600 transition";
+                document.getElementById("tab-qris").className = "p-3 font-bold rounded-xl border-2 border-amber-500 bg-amber-50 text-amber-700 transition shadow-sm flex items-center justify-center gap-2 text-xs cursor-pointer";
+                document.getElementById("tab-tunai").className = "p-3 font-bold rounded-xl border border-slate-200 text-slate-600 transition flex items-center justify-center gap-2 text-xs cursor-pointer";
             }
         }
 
@@ -482,12 +492,12 @@
                 areaRekap.classList.remove('hidden');
                 areaRincian.classList.add('hidden');
                 btn.innerText = "📋 Lihat Rincian";
-                btn.className = "text-[11px] font-bold text-amber-600 bg-amber-50 px-3 py-1.5 rounded-lg active:scale-95 transition shadow-sm border border-amber-200";
+                btn.className = "text-[11px] font-bold text-amber-600 bg-amber-50 px-3 py-1.5 rounded-lg active:scale-95 transition shadow-sm border border-amber-200 self-start sm:self-auto cursor-pointer";
             } else {
                 areaRekap.classList.add('hidden');
                 areaRincian.classList.remove('hidden');
                 btn.innerText = "📊 Lihat Rekap";
-                btn.className = "text-[11px] font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg active:scale-95 transition shadow-sm border border-slate-200";
+                btn.className = "text-[11px] font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg active:scale-95 transition shadow-sm border border-slate-200 self-start sm:self-auto cursor-pointer";
             }
         }
 
@@ -572,12 +582,13 @@
                             qtyMenu = parseInt(cocokQty[2], 10);
                         }
 
-                        let hargaBawaan = targetRekap[namaMenu] ? targetRekap[namaMenu].harga : 0;
-                        let subTotalItem = qtyMenu * hargaBawaan;
-
                         if(!targetRekap[namaMenu]) {
-                            targetRekap[namaMenu] = { nama: namaMenu, qty: 0, tunai: 0, qris: 0, harga: hargaBawaan };
+                            let cariMenuMaster = itemMenu.find(m => m.nama === namaMenu);
+                            let hargaMaster = cariMenuMaster ? cariMenuMaster.harga : 0;
+                            targetRekap[namaMenu] = { nama: namaMenu, qty: 0, tunai: 0, qris: 0, harga: hargaMaster };
                         }
+
+                        let subTotalItem = qtyMenu * targetRekap[namaMenu].harga;
 
                         targetRekap[namaMenu].qty += qtyMenu;
                         if(metodeStr === "QRIS") { targetRekap[namaMenu].qris += subTotalItem; } 
@@ -593,8 +604,8 @@
                 if(r.qty > 0) {
                     qPagi += r.qty; tPagi += r.tunai; qrPagi += r.qris;
                     htmlPagi += `
-                    <tr class="hover:bg-slate-50 transition">
-                        <td class="p-3 font-bold text-slate-800">${r.nama}</td>
+                    <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+                        <td class="p-3 font-bold text-slate-800 leading-normal break-words max-w-[150px]">${r.nama}</td>
                         <td class="p-3 text-center text-slate-600 font-bold">${r.qty}</td>
                         <td class="p-3 text-right text-emerald-600">Rp ${r.tunai.toLocaleString('id-ID')}</td>
                         <td class="p-3 text-right text-sky-600">Rp ${r.qris.toLocaleString('id-ID')}</td>
@@ -618,8 +629,8 @@
                 if(r.qty > 0) {
                     qMalam += r.qty; tMalam += r.tunai; qrMalam += r.qris;
                     htmlMalam += `
-                    <tr class="hover:bg-slate-50 transition">
-                        <td class="p-3 font-bold text-slate-800">${r.nama}</td>
+                    <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+                        <td class="p-3 font-bold text-slate-800 leading-normal break-words max-w-[150px]">${r.nama}</td>
                         <td class="p-3 text-center text-slate-600 font-bold">${r.qty}</td>
                         <td class="p-3 text-right text-emerald-600">Rp ${r.tunai.toLocaleString('id-ID')}</td>
                         <td class="p-3 text-right text-sky-600">Rp ${r.qris.toLocaleString('id-ID')}</td>
@@ -680,6 +691,7 @@
 
                 orderan = {};
                 grandTotal = 0;
+                cashDiterima = 0; 
                 document.getElementById("input-manual-bayar").value = "";
                 kalkulasiNota();
                 renderMenu();
