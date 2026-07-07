@@ -49,9 +49,20 @@
 
         <!-- Area Pembayaran Tunai -->
         <div id="area-tunai" class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 space-y-4">
-            <h2 class="text-sm font-bold text-slate-500 uppercase tracking-wider">💵 (Pilih Nominal Uang Yang Digunakan)</h2>
+            <h2 class="text-sm font-bold text-slate-500 uppercase tracking-wider">💵 (Pilih Nominal / Input Manual)</h2>
             <div id="rupiah-grid" class="grid grid-cols-2 gap-2.5"></div>
             
+            <!-- Input Manual Nominal Pembayaran -->
+            <div class="pt-2">
+                <label for="input-manual-bayar" class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Input Manual Jumlah Uang:</label>
+                <div class="relative rounded-xl shadow-sm">
+                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                        <span class="text-slate-400 text-sm font-bold">Rp</span>
+                    </div>
+                    <input type="number" id="input-manual-bayar" oninput="handleInputManual(this.value)" min="0" placeholder="0" class="block w-full rounded-xl border border-slate-200 py-3 pl-9 pr-3 text-sm font-bold text-slate-700 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 focus:outline-none">
+                </div>
+            </div>
+
             <div class="border-t pt-3 flex justify-between items-center">
                 <span class="text-sm text-slate-500">Uang Diterima:</span>
                 <span id="txt-cash-in" class="font-bold text-slate-700">Rp 0</span>
@@ -101,7 +112,16 @@
             document.getElementById("menu-list").innerHTML = "";
             try {
                 let res = await fetch(APPS_SCRIPT_URL);
-                itemMenu = await res.json();
+                let rawData = await res.json();
+                
+                // Perbaikan NaN: Validasi tipe data angka pada saat parsing awal dari API
+                itemMenu = rawData.map(item => ({
+                    nama: item.nama ? item.nama.toString() : "Tanpa Nama",
+                    harga: isNaN(Number(item.harga)) ? 0 : Number(item.harga),
+                    kategori: item.kategori ? item.kategori.toString() : "",
+                    status: item.status ? item.status.toString() : ""
+                }));
+
                 document.getElementById("loading-text").classList.add("hidden");
                 renderMenu();
                 renderUangRupiah();
@@ -118,7 +138,7 @@
                 <div class="flex justify-between items-center py-2.5">
                     <div>
                         <div class="font-bold text-slate-800 text-sm">${item.nama}</div>
-                        <div class="text-xs font-semibold text-amber-600">Rp ${item.harga.toLocaleString('id-ID')}</div>
+                        <div class="text-xs font-semibold text-amber-600">Rp ${(item.harga || 0).toLocaleString('id-ID')}</div>
                     </div>
                     <div class="flex items-center space-x-2.5">
                         <button onclick="ubahQty('${item.nama}', -1)" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 font-bold active:scale-90 transition shadow-sm text-center">-</button>
@@ -131,7 +151,7 @@
         }
 
         function ubahQty(nama, delta) {
-            orderan[nama] = Math.max(0, orderan[nama] + delta);
+            orderan[nama] = Math.max(0, (orderan[nama] || 0) + delta);
             document.getElementById(`qty-${nama.replace(/\s+/g, '')}`).innerText = orderan[nama];
             kalkulasiNota();
         }
@@ -139,8 +159,14 @@
         function kalkulasiNota() {
             grandTotal = 0;
             itemMenu.forEach(item => {
-                grandTotal += orderan[item.nama] * item.harga;
+                let qty = orderan[item.nama] || 0;
+                let price = item.harga || 0;
+                grandTotal += qty * price;
             });
+            
+            // Proteksi tambahan dari nilai tak terduga
+            if(isNaN(grandTotal)) grandTotal = 0;
+
             document.getElementById("total-screen").innerText = "Rp " + grandTotal.toLocaleString('id-ID');
             document.getElementById("qris-amount-text").innerText = "Rp " + grandTotal.toLocaleString('id-ID');
             renderUangRupiah();
@@ -178,11 +204,34 @@
             });
             
             container.innerHTML = html;
-            setUangFisik(grandTotal);
+            
+            // Sinkronisasi nilai default pembayaran saat keranjang berubah
+            let manualVal = document.getElementById("input-manual-bayar").value;
+            if(!manualVal) {
+                setUangFisik(grandTotal);
+            } else {
+                handleInputManual(manualVal);
+            }
+        }
+
+        // Fungsi khusus untuk membaca input manual dari user
+        function handleInputManual(val) {
+            let parsed = parseInt(val, 10);
+            if (isNaN(parsed) || parsed < 0) parsed = 0;
+            
+            cashDiterima = parsed;
+            document.getElementById("txt-cash-in").innerText = "Rp " + cashDiterima.toLocaleString('id-ID');
+            let sisa = cashDiterima - grandTotal;
+            document.getElementById("txt-change").innerText = "Rp " + (sisa >= 0 ? sisa.toLocaleString('id-ID') : 0);
         }
 
         function setUangFisik(jumlah) {
-            cashDiterima = jumlah;
+            let amanJumlah = isNaN(Number(jumlah)) ? 0 : Number(jumlah);
+            cashDiterima = amanJumlah;
+            
+            // Reset isi kolom input jika menekan tombol lembaran cepat
+            document.getElementById("input-manual-bayar").value = amanJumlah === grandTotal ? "" : amanJumlah;
+            
             document.getElementById("txt-cash-in").innerText = "Rp " + cashDiterima.toLocaleString('id-ID');
             let sisa = cashDiterima - grandTotal;
             document.getElementById("txt-change").innerText = "Rp " + (sisa >= 0 ? sisa.toLocaleString('id-ID') : 0);
@@ -216,7 +265,7 @@
 
             let rincian = [];
             for(let key in orderan) {
-                if(orderan[key] > 0) rincian.push(`${key} (${orderan[key]}x)`);
+                if((orderan[key] || 0) > 0) rincian.push(`${key} (${orderan[key]}x)`);
             }
 
             let paketData = {
@@ -242,6 +291,7 @@
                 
                 orderan = {};
                 grandTotal = 0;
+                document.getElementById("input-manual-bayar").value = "";
                 kalkulasiNota();
                 renderMenu();
             } catch(e) {
