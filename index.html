@@ -240,26 +240,24 @@
             document.getElementById("txt-change").innerText = "Rp " + (sisa >= 0 ? sisa.toLocaleString('id-ID') : 0);
         }
 
-        function gantiMetode(opsi) {
-            caraBayar = opsi;
-            if(opsi === "TUNAI") {
-                document.getElementById("area-tunai").classList.remove("hidden");
-                document.getElementById("area-qris").classList.add("hidden");
-                document.getElementById("tab-tunai").className = "p-3 font-bold rounded-xl border-2 border-amber-500 bg-amber-50 text-amber-700 transition shadow-sm";
-                document.getElementById("tab-qris").className = "p-3 font-bold rounded-xl border border-slate-200 text-slate-600 transition";
-            } else {
-                document.getElementById("area-tunai").classList.add("hidden");
-                document.getElementById("area-qris").classList.remove("hidden");
-                document.getElementById("tab-qris").className = "p-3 font-bold rounded-xl border-2 border-amber-500 bg-amber-50 text-amber-700 transition shadow-sm";
-                document.getElementById("tab-tunai").className = "p-3 font-bold rounded-xl border border-slate-200 text-slate-600 transition";
-                
-                let qrisImg = document.getElementById("qris-image");
-                if(grandTotal > 0){
-                    qrisImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=TokoNDhonk_Total_${grandTotal}`;
-                }
-            }
-        }
-
+       function gantiMetode(opsi) {
+    caraBayar = opsi;
+    if(opsi === "TUNAI") {
+        document.getElementById("area-tunai").classList.remove("hidden");
+        document.getElementById("area-qris").classList.add("hidden");
+        document.getElementById("tab-tunai").className = "p-3 font-bold rounded-xl border-2 border-amber-500 bg-amber-50 text-amber-700 transition shadow-sm";
+        document.getElementById("tab-qris").className = "p-3 font-bold rounded-xl border border-slate-200 text-slate-600 transition";
+    } else {
+        document.getElementById("area-tunai").classList.add("hidden");
+        document.getElementById("area-qris").classList.remove("hidden");
+        document.getElementById("tab-qris").className = "p-3 font-bold rounded-xl border-2 border-amber-500 bg-amber-50 text-amber-700 transition shadow-sm";
+        document.getElementById("tab-tunai").className = "p-3 font-bold rounded-xl border border-slate-200 text-slate-600 transition";
+        
+        // Memakai Direct Link Google Drive agar gambar QRIS Anda langsung muncul
+        let qrisImg = document.getElementById("qris-image");
+        qrisImg.src = "https://lh3.googleusercontent.com/d/1ZyqwfktzhZHNvQiZrBhvHqB5G34X1SKA";
+    }
+}
         async function bayarSekarang() {
             if(grandTotal === 0) {
                 triggerNotif("Keranjang masih kosong!", "error");
