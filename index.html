@@ -300,19 +300,22 @@
             setTimeout(() => { box.className = "hidden"; }, 3500);
         }
 
-        function setDefaultTanggal() {
-            // Ambil waktu saat ini berdasarkan zona Asia/Makassar
+       function setDefaultTanggal() {
+            // Mengambil waktu saat ini di zona Asia/Makassar
             const witaNow = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Makassar"}));
             
-            // Kurangi 6 jam agar transaksi sebelum jam 06:00 WITA tetap masuk ke tanggal sebelumnya
+            // Logika inti: Mundurkan 6 jam. 
+            // Jika sekarang jam 3 subuh esok hari, mundur 6 jam akan mengembalikan tanggal ke hari sebelumnya.
+            // Tanggal baru akan terpilih otomatis HANYA jika jam sudah melewati 06:00 pagi.
             witaNow.setHours(witaNow.getHours() - 6);
 
             const yyyy = witaNow.getFullYear();
             const mm = String(witaNow.getMonth() + 1).padStart(2, '0');
             const dd = String(witaNow.getDate()).padStart(2, '0');
+            
+            // Mengisi nilai default kotak input tanggal yang bisa dipilih manual
             document.getElementById('filter-tanggal').value = `${yyyy}-${mm}-${dd}`;
         }
-
         function navigasiKe(halaman) {
             if(halaman === 'kasir') {
                 document.getElementById('page-kasir').classList.remove('hidden');
