@@ -39,20 +39,20 @@
             <!-- Grid Utama: Membagi area Menu (Kiri) dan Pembayaran (Kanan) -->
             <div id="menu-container" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-4">
                 
-                <!-- Area Menu Kiri: Berdampingan Antara Menu Utama & Lauk -->
-                <div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 alignment-stretch">
+                <!-- Area Menu Kiri: Berdampingan Antara Menu Utama & Lauk (Menggunakan grid-cols-2 sejak resolusi terkecil) -->
+                <div class="lg:col-span-2 grid grid-cols-2 gap-2 sm:gap-4 alignment-stretch">
                     <!-- Kolom Menu Utama -->
-                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/60 flex flex-col h-full">
-                        <h2 class="font-black text-sm text-slate-700 uppercase tracking-wider border-b pb-2 mb-3 flex items-center">
-                            <span class="w-2 h-4 bg-amber-500 rounded mr-2"></span> Menu Utama
+                    <div class="bg-white p-3 sm:p-4 rounded-2xl shadow-sm border border-slate-200/60 flex flex-col h-full">
+                        <h2 class="font-black text-xs sm:text-sm text-slate-700 uppercase tracking-wider border-b pb-2 mb-3 flex items-center">
+                            <span class="w-1.5 h-3.5 sm:w-2 sm:h-4 bg-amber-500 rounded mr-1.5 sm:mr-2"></span> Menu Utama
                         </h2>
                         <div id="kolom-utama" class="divide-y divide-slate-100 flex-1 overflow-y-auto max-h-[60vh] pr-1"></div>
                     </div>
 
                     <!-- Kolom Lauk Tambahan -->
-                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/60 flex flex-col h-full">
-                        <h2 class="font-black text-sm text-slate-700 uppercase tracking-wider border-b pb-2 mb-3 flex items-center">
-                            <span class="w-2 h-4 bg-orange-500 rounded mr-2"></span> Lauk / Tambahan
+                    <div class="bg-white p-3 sm:p-4 rounded-2xl shadow-sm border border-slate-200/60 flex flex-col h-full">
+                        <h2 class="font-black text-xs sm:text-sm text-slate-700 uppercase tracking-wider border-b pb-2 mb-3 flex items-center">
+                            <span class="w-1.5 h-3.5 sm:w-2 sm:h-4 bg-orange-500 rounded mr-1.5 sm:mr-2"></span> Lauk / Tambahan
                         </h2>
                         <div id="kolom-lauk" class="divide-y divide-slate-100 flex-1 overflow-y-auto max-h-[60vh] pr-1"></div>
                     </div>
