@@ -565,17 +565,32 @@ function setDefaultTanggal() {
             }
         }
 
-        function prosesLaporanHarian() {
-            const filterTglInput = document.getElementById("filter-tanggal");
-            if(!filterTglInput) return;
-            let tglTerpilih = filterTglInput.value;
-            if(!tglTerpilih) return;
+       function prosesLaporanHarian() {
+    const filterTglInput = document.getElementById("filter-tanggal");
+    if(!filterTglInput) return;
+    
+    let tglTerpilih = "";
 
-            let pagiMulai = new Date(`${tglTerpilih}T06:00:00+08:00`);
-            let pagiAkhir = new Date(`${tglTerpilih}T15:59:59+08:00`);
-            let malamMulai = new Date(`${tglTerpilih}T16:00:00+08:00`);
-            let besok = new Date(malamMulai); besok.setDate(besok.getDate() + 1);
-            let malamAkhir = new Date(besok); malamAkhir.setHours(5, 59, 59, 999);
+    // Ambil tanggal asli dari objek Flatpickr agar formatnya YYYY-MM-DD
+    if (filterTglInput._flatpickr && filterTglInput._flatpickr.selectedDates.length > 0) {
+        const d = filterTglInput._flatpickr.selectedDates[0];
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        tglTerpilih = `${yyyy}-${mm}-${dd}`; 
+    } else {
+        // Fallback jika flatpickr belum siap, gunakan value teks input langsung
+        tglTerpilih = filterTglInput.value;
+    }
+
+    if(!tglTerpilih) return;
+
+    // Pastikan variabel waktu di bawah ini menggunakan tglTerpilih yang baru
+    let pagiMulai = new Date(`${tglTerpilih}T06:00:00+08:00`);
+    let pagiAkhir = new Date(`${tglTerpilih}T15:59:59+08:00`);
+    let malamMulai = new Date(`${tglTerpilih}T16:00:00+08:00`);
+    let besok = new Date(malamMulai); besok.setDate(besok.getDate() + 1);
+    let malamAkhir = new Date(besok); malamAkhir.setHours(5, 59, 59, 999);
 
             let rekapPagi = {}; let rekapMalam = {};
             let rincianPagiBaris = []; let rincianMalamBaris = [];
