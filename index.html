@@ -72,7 +72,7 @@
     <header class="bg-gradient-to-r from-slate-900 to-slate-800 text-white p-4 sticky top-0 z-30 shadow-md">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
             <div class="text-center sm:text-left">
-                <h1 class="text-sm font-black tracking-wide text-amber-400">WARUNG DIGITAL KASIR</h1>
+                <h1 class="text-sm font-black tracking-wide text-amber-400">TOKO ENDONG</h1>
                 <p id="jam-digital" class="text-[10px] text-slate-300 font-medium mt-0.5">Memuat jam...</p>
             </div>
             <!-- TOMBOL SINKRON DATA DI MENU KASIR -->
@@ -167,7 +167,7 @@
             <div class="bg-slate-900 rounded-2xl p-4 text-white border border-slate-800 shadow-md">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div>
-                        <h4 class="text-[10px] font-black text-amber-400 uppercase tracking-wider">TOTAL PENJUALAN GABUNGAN (OMSET GLOBAL)</h4>
+                        <h4 class="text-[10px] font-black text-amber-400 uppercase tracking-wider">TOTAL PENJUALAN Harian</h4>
                         <p class="text-[9px] text-slate-400 font-bold mt-0.5">Akumulasi Penjualan Harian</p>
                     </div>
                     <div class="grid grid-cols-2 gap-4 text-left sm:text-right border-t sm:border-t-0 border-slate-800 pt-2 sm:pt-0">
@@ -309,7 +309,7 @@
             const opsiFormat = { timeZone: 'Asia/Makassar', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
             const stringWaktu = sekarang.toLocaleTimeString('id-ID', opsiFormat);
             const elemenJam = document.getElementById("jam-digital");
-            if (elemenJam) { elemenJam.innerText = "Jam WITA " + stringWaktu.replace(/\./g, ':'); }
+            if (elemenJam) { elemenJam.innerText = "Sekarang Jam " + stringWaktu.replace(/\./g, ':'); }
         }
 
         function triggerNotif(msg, type) {
