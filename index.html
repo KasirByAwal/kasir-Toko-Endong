@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Kasir Pintar - WITA</title>
+    <title>Toko Endong/title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -83,7 +83,7 @@
     <header class="bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-md sticky top-0 z-40 px-4 py-3 flex items-center justify-between">
         <div>
             <h1 class="text-lg font-black tracking-tight flex items-center gap-1.5">
-                🏪 POS KASIR WITA
+                🏪 POS KASIR By Awal
             </h1>
             <p id="jam-digital" class="text-xs font-medium text-amber-100 mt-0.5">Memuat waktu...</p>
         </div>
@@ -97,7 +97,7 @@
     <!-- LOADING STATE (Cadangan Jika Sync Manual Terjadi) -->
     <div id="loading-text" class="hidden flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
         <div class="animate-spin rounded-full h-10 w-10 border-4 border-amber-500 border-t-transparent mb-3"></div>
-        <p class="font-bold text-slate-600 text-sm">Menghubungkan ke sistem Cloud Spreadsheet...</p>
+        <p class="font-bold text-slate-600 text-sm">Menghubungkan ke sistem Cloud...</p>
     </div>
 
     <!-- KONTEN APLIKASI UTAMA -->
@@ -780,7 +780,7 @@
 
             // JIKA QRIS: Tidak tampilkan dialog modal, langsung kirim seperti pesan yang sekarang
             if(caraBayar === "QRIS") {
-                kirimKeCloudSpreadsheet(paketData, skrgWita);
+                kirimKeCloudsheet(paketData, skrgWita);
             } 
             // JIKA TUNAI: Munculkan Dialog Konfirmasi Keren yang berisi item, harga, uang, kembalian besar
             else {
@@ -802,7 +802,7 @@
         }
 
         async function kirimKeCloudSpreadsheet(paketData, skrgWita) {
-            triggerNotif("⏳ Mengirim transaksi ke Google Sheets...", "success");
+            triggerNotif("⏳ Mengirim transaksi, harap tunggu...", "success");
 
             try {
                 await fetch(APPS_SCRIPT_URL, {
@@ -812,7 +812,7 @@
                     body: JSON.stringify(paketData)
                 });
 
-                triggerNotif("🎉 Berhasil! Transaksi tercatat di Spreadsheet.", "success");
+                triggerNotif("🎉 Berhasil! Transaksi tercatat.", "success");
                 
                 const offsetWita = 8 * 60; 
                 const waktuLokalMilidetik = skrgWita.getTime() + (offsetWita * 60 * 1000);
