@@ -267,18 +267,6 @@
         </section>
     </main>
 
-    <!-- NAVIGATION TABS (STICKY BOTTOM NAVBAR) -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-xl px-6 py-2.5 z-40 flex justify-around items-center max-w-md mx-auto rounded-t-2xl">
-        <button id="nav-kasir" onclick="navigasiKe('kasir')" class="flex flex-col items-center justify-center text-amber-600 font-bold transition">
-            <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"></path></svg>
-            <span class="text-[10px] tracking-wide">Mesin Kasir</span>
-        </button>
-        <button id="nav-laporan" onclick="navigasiKe('laporan')" class="flex flex-col items-center justify-center text-slate-400 font-bold transition">
-            <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"></path></svg>
-            <span class="text-[10px] tracking-wide">Laporan Shift</span>
-        </button>
-    </nav>
-
    <!-- LOGIKA JAVASCRIPT UTAMA -->
 <script>
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwo4Be97S21PHDVAsijxPLKWW2PDQRzwy8DtMblKo7pPMgAhnmeNLypOwyMN3vf3zZZ2A/exec"; 
@@ -301,51 +289,61 @@
         const sekarang = new Date();
         const opsiFormat = { timeZone: 'Asia/Makassar', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
         const stringWaktu = sekarang.toLocaleTimeString('id-ID', opsiFormat);
-        document.getElementById("jam-digital").innerText = "Sekarang Jam " + stringWaktu.replace(/\./g, ':');
+        const elemenJam = document.getElementById("jam-digital");
+        if (elemenJam) {
+            elemenJam.innerText = "Sekarang Jam " + stringWaktu.replace(/\./g, ':');
+        }
     }
 
     function triggerNotif(msg, type) {
         let box = document.getElementById("notif-box");
+        if (!box) return;
         box.innerText = msg;
         box.className = type === "success" ? "fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-50 p-4 rounded-xl shadow-xl text-white text-center font-bold bg-emerald-600 block" : "fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-50 p-4 rounded-xl shadow-xl text-white text-center font-bold bg-rose-600 block";
         setTimeout(() => { box.className = "hidden"; }, 3500);
     }
 
-   function setDefaultTanggal() {
-        // Mengambil waktu saat ini di zona Asia/Makassar
+    function setDefaultTanggal() {
         const witaNow = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Makassar"}));
-        
-        // Logika inti: Mundurkan 6 jam. 
-        // Jika sekarang jam 3 subuh esok hari, mundur 6 jam akan mengembalikan tanggal ke hari sebelumnya.
-        // Tanggal baru akan terpilih otomatis HANYA jika jam sudah melewati 06:00 pagi.
         witaNow.setHours(witaNow.getHours() - 6);
 
         const yyyy = witaNow.getFullYear();
         const mm = String(witaNow.getMonth() + 1).padStart(2, '0');
         const dd = String(witaNow.getDate()).padStart(2, '0');
         
-        // Mengisi nilai default kotak input tanggal yang bisa dipilih manual
-        document.getElementById('filter-tanggal').value = `${yyyy}-${mm}-${dd}`;
+        const elemenTgl = document.getElementById('filter-tanggal');
+        if (elemenTgl) {
+            elemenTgl.value = `${yyyy}-${mm}-${dd}`;
+        }
     }
     
     function navigasiKe(halaman) {
+        const pKasir = document.getElementById('page-kasir');
+        const pLaporan = document.getElementById('page-laporan');
+        const nKasir = document.getElementById('nav-kasir');
+        const nLaporan = document.getElementById('nav-laporan');
+
         if(halaman === 'kasir') {
-            document.getElementById('page-kasir').classList.remove('hidden');
-            document.getElementById('page-laporan').classList.add('hidden');
-            document.getElementById('nav-kasir').className = "flex flex-col items-center justify-center text-amber-600 font-bold transition";
-            document.getElementById('nav-laporan').className = "flex flex-col items-center justify-center text-slate-400 font-bold transition";
+            if(pKasir) pKasir.classList.remove('hidden');
+            if(pLaporan) pLaporan.classList.add('hidden');
+            if(nKasir) nKasir.className = "flex flex-col items-center justify-center text-amber-600 font-bold transition";
+            if(nLaporan) nLaporan.className = "flex flex-col items-center justify-center text-slate-400 font-bold transition";
         } else {
-            document.getElementById('page-kasir').classList.add('hidden');
-            document.getElementById('page-laporan').classList.remove('hidden');
-            document.getElementById('nav-kasir').className = "flex flex-col items-center justify-center text-slate-400 font-bold transition";
-            document.getElementById('nav-laporan').className = "flex flex-col items-center justify-center text-amber-600 font-bold transition";
+            if(pKasir) pKasir.classList.add('hidden');
+            if(pLaporan) pLaporan.classList.remove('hidden');
+            if(nKasir) nKasir.className = "flex flex-col items-center justify-center text-slate-400 font-bold transition";
+            if(nLaporan) nLaporan.className = "flex flex-col items-center justify-center text-amber-600 font-bold transition";
             prosesLaporanHarian();
         }
     }
 
     async function muatMenu() {
-        document.getElementById("loading-text").classList.remove("hidden");
-        document.getElementById("menu-container").classList.add("hidden");
+        const loadingText = document.getElementById("loading-text");
+        const menuContainer = document.getElementById("menu-container");
+
+        if(loadingText) loadingText.classList.remove("hidden");
+        if(menuContainer) menuContainer.classList.add("hidden");
+        
         try {
             let res = await fetch(APPS_SCRIPT_URL);
             let rawData = await res.json();
@@ -360,13 +358,17 @@
                 status: item.status ? item.status.toString() : ""
             }));
 
-            document.getElementById("loading-text").classList.add("hidden");
-            document.getElementById("menu-container").classList.remove("hidden");
+            if(loadingText) loadingText.classList.add("hidden");
+            if(menuContainer) menuContainer.classList.remove("hidden");
+            
             renderMenu();
             renderUangRupiah();
             prosesLaporanHarian();
         } catch (err) {
-            document.getElementById("loading-text").innerText = "❌ Hubungan gagal! Periksa kembali Web App URL Anda.";
+            if(loadingText) {
+                loadingText.innerText = "❌ Hubungan gagal! Periksa kembali Web App URL Anda.";
+            }
+            console.error("Gagal memuat data menu:", err);
         }
     }
 
@@ -390,11 +392,14 @@
         let htmlLauk = "";
         itemMenu.forEach(item => {
             if(item.kategori === "lauk") { htmlLauk += createItemHtml(item); } 
-            // Memastikan item yang tidak aktif / kosong tidak merusak layout
             else { htmlUtama += createItemHtml(item); }
         });
-        document.getElementById("kolom-utama").innerHTML = htmlUtama || "<p class='text-[11px] text-slate-400 italic'>Kosong</p>";
-        document.getElementById("kolom-lauk").innerHTML = htmlLauk || "<p class='text-[11px] text-slate-400 italic'>Kosong</p>";
+        
+        const kolUtama = document.getElementById("kolom-utama");
+        const kolLauk = document.getElementById("kolom-lauk");
+        
+        if(kolUtama) kolUtama.innerHTML = htmlUtama || "<p class='text-[11px] text-slate-400 italic'>Kosong</p>";
+        if(kolLauk) kolLauk.innerHTML = htmlLauk || "<p class='text-[11px] text-slate-400 italic'>Kosong</p>";
     }
 
     function ubahQty(nama, delta) {
@@ -405,35 +410,45 @@
         kalkulasiNota();
     }
 
+    function safeSetText(id, text) {
+        const el = document.getElementById(id);
+        if (el) el.innerText = text;
+    }
+
     function kalkulasiNota() {
         grandTotal = 0;
         itemMenu.forEach(item => {
             let qty = orderan[item.nama] || 0;
             grandTotal += qty * (item.harga || 0);
         });
-        document.getElementById("total-screen").innerText = "Rp " + grandTotal.toLocaleString('id-ID');
-        document.getElementById("qris-amount-text").innerText = "Rp " + grandTotal.toLocaleString('id-ID');
+        
+        safeSetText("total-screen", "Rp " + grandTotal.toLocaleString('id-ID'));
+        safeSetText("qris-amount-text", "Rp " + grandTotal.toLocaleString('id-ID'));
         renderUangRupiah();
     }
 
     function renderUangRupiah() {
         let container = document.getElementById("rupiah-grid");
+        if (!container) return;
+
         if(grandTotal === 0) {
             container.innerHTML = "<p class='col-span-2 text-center text-xs text-slate-400 py-2'>Pilih menu terlebih dahulu</p>";
             setUangFisik(0);
             return;
         }
 
+        // Mengganti background warna tombol statis dengan warna netral bawaan Tailwind 
+        // agar tidak crash jika CSS kustom 'uang-100k' Anda terhapus
         let html = `<button onclick="setUangFisik(${grandTotal})" class="p-3 text-xs font-bold rounded-xl border-2 border-dashed border-slate-300 text-slate-600 active:scale-95 transition bg-slate-50">💵 UANG PAS</button>`;
         let gridStatis = [5000, 10000, 20000, 50000, 100000];
         let pilihanUang = [];
 
         let kelipatan5k = Math.ceil(grandTotal / 5000) * 5000;
-        if (kelipatan5k !== grandTotal) { pilihanUang.push({ nominal: kelipatan5k, style: 'uang-custom' }); }
+        if (kelipatan5k !== grandTotal) { pilihanUang.push({ nominal: kelipatan5k, style: 'bg-amber-100 text-amber-800' }); }
 
         gridStatis.forEach(nominal => {
             if (nominal > grandTotal && nominal !== kelipatan5k) {
-                let cssStyle = nominal === 100000 ? 'uang-100k' : (nominal === 50000 ? 'uang-50k' : (nominal === 20000 ? 'uang-20k' : (nominal === 10000 ? 'uang-10k' : 'uang-5k')));
+                let cssStyle = nominal === 100000 ? 'bg-rose-100 text-rose-700' : (nominal === 50000 ? 'bg-blue-100 text-blue-700' : (nominal === 20000 ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-700'));
                 pilihanUang.push({ nominal: nominal, style: cssStyle });
             }
         });
@@ -448,8 +463,8 @@
         if (manualInput && manualInput.value !== "") { handleInputManual(manualInput.value); } 
         else {
             let sisa = cashDiterima - grandTotal;
-            document.getElementById("txt-cash-in").innerText = "Rp " + cashDiterima.toLocaleString('id-ID');
-            document.getElementById("txt-change").innerText = "Rp " + (sisa >= 0 ? sisa.toLocaleString('id-ID') : 0);
+            safeSetText("txt-cash-in", "Rp " + cashDiterima.toLocaleString('id-ID'));
+            safeSetText("txt-change", "Rp " + (sisa >= 0 ? sisa.toLocaleString('id-ID') : 0));
         }
     }
 
@@ -457,32 +472,40 @@
         let parsed = parseInt(val, 10);
         if (isNaN(parsed) || parsed < 0) parsed = 0;
         cashDiterima = parsed;
-        document.getElementById("txt-cash-in").innerText = "Rp " + cashDiterima.toLocaleString('id-ID');
+        safeSetText("txt-cash-in", "Rp " + cashDiterima.toLocaleString('id-ID'));
         let sisa = cashDiterima - grandTotal;
-        document.getElementById("txt-change").innerText = "Rp " + (sisa >= 0 ? sisa.toLocaleString('id-ID') : 0);
+        safeSetText("txt-change", "Rp " + (sisa >= 0 ? sisa.toLocaleString('id-ID') : 0));
     }
 
     function setUangFisik(jumlah) {
         let amanJumlah = isNaN(Number(jumlah)) ? 0 : Number(jumlah);
         cashDiterima = amanJumlah;
-        document.getElementById("input-manual-bayar").value = amanJumlah === grandTotal ? "" : amanJumlah;
-        document.getElementById("txt-cash-in").innerText = "Rp " + cashDiterima.toLocaleString('id-ID');
+        
+        let mInput = document.getElementById("input-manual-bayar");
+        if(mInput) mInput.value = amanJumlah === grandTotal ? "" : amanJumlah;
+        
+        safeSetText("txt-cash-in", "Rp " + cashDiterima.toLocaleString('id-ID'));
         let sisa = cashDiterima - grandTotal;
-        document.getElementById("txt-change").innerText = "Rp " + (sisa >= 0 ? sisa.toLocaleString('id-ID') : 0);
+        safeSetText("txt-change", "Rp " + (sisa >= 0 ? sisa.toLocaleString('id-ID') : 0));
     }
 
     function gantiMetode(opsi) {
         caraBayar = opsi;
+        const areaTunai = document.getElementById("area-tunai");
+        const areaQris = document.getElementById("area-qris");
+        const tabTunai = document.getElementById("tab-tunai");
+        const tabQris = document.getElementById("tab-qris");
+
         if(opsi === "TUNAI") {
-            document.getElementById("area-tunai").classList.remove("hidden");
-            document.getElementById("area-qris").classList.add("hidden");
-            document.getElementById("tab-tunai").className = "p-3 font-bold rounded-xl border-2 border-amber-500 bg-amber-50 text-amber-700 transition shadow-sm";
-            document.getElementById("tab-qris").className = "p-3 font-bold rounded-xl border border-slate-200 text-slate-600 transition";
+            if(areaTunai) areaTunai.classList.remove("hidden");
+            if(areaQris) areaQris.classList.add("hidden");
+            if(tabTunai) tabTunai.className = "p-3 font-bold rounded-xl border-2 border-amber-500 bg-amber-50 text-amber-700 transition shadow-sm";
+            if(tabQris) tabQris.className = "p-3 font-bold rounded-xl border border-slate-200 text-slate-600 transition";
         } else {
-            document.getElementById("area-tunai").classList.add("hidden");
-            document.getElementById("area-qris").classList.remove("hidden");
-            document.getElementById("tab-qris").className = "p-3 font-bold rounded-xl border-2 border-amber-500 bg-amber-50 text-amber-700 transition shadow-sm";
-            document.getElementById("tab-tunai").className = "p-3 font-bold rounded-xl border border-slate-200 text-slate-600 transition";
+            if(areaTunai) areaTunai.classList.add("hidden");
+            if(areaQris) areaQris.classList.remove("hidden");
+            if(tabQris) tabQris.className = "p-3 font-bold rounded-xl border-2 border-amber-500 bg-amber-50 text-amber-700 transition shadow-sm";
+            if(tabTunai) tabTunai.className = "p-3 font-bold rounded-xl border border-slate-200 text-slate-600 transition";
         }
     }
 
@@ -491,6 +514,8 @@
         const areaRekap = document.getElementById(`area-rekap-${shift}`);
         const areaRincian = document.getElementById(`area-rincian-${shift}`);
         
+        if(!areaRekap || !areaRincian || !btn) return;
+
         if (areaRekap.classList.contains('hidden')) {
             areaRekap.classList.remove('hidden');
             areaRincian.classList.add('hidden');
@@ -505,12 +530,14 @@
     }
 
     async function prosesLaporanHarian() {
-        let tglTerpilih = document.getElementById("filter-tanggal").value;
+        const filterTglInput = document.getElementById("filter-tanggal");
+        if(!filterTglInput) return;
+        
+        let tglTerpilih = filterTglInput.value;
         if(!tglTerpilih) return;
 
         let pagiMulai = new Date(`${tglTerpilih}T06:00:00+08:00`);
         let pagiAkhir = new Date(`${tglTerpilih}T15:59:59+08:00`);
-        
         let malamMulai = new Date(`${tglTerpilih}T16:00:00+08:00`);
         let besok = new Date(malamMulai);
         besok.setDate(besok.getDate() + 1);
@@ -526,14 +553,6 @@
             rekapPagi[m.nama] = { nama: m.nama, qty: 0, tunai: 0, qris: 0, harga: m.harga };
             rekapMalam[m.nama] = { nama: m.nama, qty: 0, tunai: 0, qris: 0, harga: m.harga };
         });
-
-        if(dataTransaksiSemua.length === 0) {
-            try {
-                let res = await fetch(APPS_SCRIPT_URL);
-                let rawData = await res.json();
-                dataTransaksiSemua = rawData.transaksi || [];
-            } catch(e) { console.log("Gagal memuat histori transaksi"); }
-        }
 
         dataTransaksiSemua.forEach(tx => {
             if(!tx.tanggal) return;
@@ -599,30 +618,27 @@
             }
         });
 
+        // Pengisian data tabel dengan pengaman ID
         let htmlPagi = "";
         let qPagi = 0, tPagi = 0, qrPagi = 0;
         for(let key in rekapPagi) {
             let r = rekapPagi[key];
             if(r.qty > 0) {
                 qPagi += r.qty; tPagi += r.tunai; qrPagi += r.qris;
-                htmlPagi += `
-                <tr class="hover:bg-slate-50 transition">
-                    <td class="p-3 font-bold text-slate-800">${r.nama}</td>
-                    <td class="p-3 text-center text-slate-600 font-bold">${r.qty}</td>
-                    <td class="p-3 text-right text-emerald-600">Rp ${r.tunai.toLocaleString('id-ID')}</td>
-                    <td class="p-3 text-right text-sky-600">Rp ${r.qris.toLocaleString('id-ID')}</td>
-                </tr>`;
+                htmlPagi += `<tr class="hover:bg-slate-50 transition"><td class="p-3 font-bold text-slate-800">${r.nama}</td><td class="p-3 text-center text-slate-600 font-bold">${r.qty}</td><td class="p-3 text-right text-emerald-600">Rp ${r.tunai.toLocaleString('id-ID')}</td><td class="p-3 text-right text-sky-600">Rp ${r.qris.toLocaleString('id-ID')}</td></tr>`;
             }
         }
-        document.getElementById("body-tabel-pagi").innerHTML = htmlPagi || `<tr><td colspan="4" class="p-6 text-center text-slate-400 italic">Tidak ada transaksi pagi.</td></tr>`;
-        document.getElementById("qty-pagi").innerText = qPagi;
-        document.getElementById("tunai-pagi").innerText = "Rp " + tPagi.toLocaleString('id-ID');
-        document.getElementById("qris-pagi").innerText = "Rp " + qrPagi.toLocaleString('id-ID');
-        document.getElementById("total-pagi").innerText = "Rp " + (tPagi + qrPagi).toLocaleString('id-ID');
+        
+        const bTabelPagi = document.getElementById("body-tabel-pagi");
+        if(bTabelPagi) bTabelPagi.innerHTML = htmlPagi || `<tr><td colspan="4" class="p-6 text-center text-slate-400 italic">Tidak ada transaksi pagi.</td></tr>`;
+        
+        safeSetText("qty-pagi", qPagi);
+        safeSetText("tunai-pagi", "Rp " + tPagi.toLocaleString('id-ID'));
+        safeSetText("qris-pagi", "Rp " + qrPagi.toLocaleString('id-ID'));
+        safeSetText("total-pagi", "Rp " + (tPagi + qrPagi).toLocaleString('id-ID'));
 
-        document.getElementById("body-rincian-pagi").innerHTML = rincianPagiBaris.length > 0 
-            ? rincianPagiBaris.join('') 
-            : `<tr><td colspan="4" class="p-6 text-center text-slate-400 italic">Belum ada rincian data transaksi pagi.</td></tr>`;
+        const bRincianPagi = document.getElementById("body-rincian-pagi");
+        if(bRincianPagi) bRincianPagi.innerHTML = rincianPagiBaris.length > 0 ? rincianPagiBaris.join('') : `<tr><td colspan="4" class="p-6 text-center text-slate-400 italic">Belum ada rincian data transaksi pagi.</td></tr>`;
 
         let htmlMalam = "";
         let qMalam = 0, tMalam = 0, qrMalam = 0;
@@ -630,24 +646,20 @@
             let r = rekapMalam[key];
             if(r.qty > 0) {
                 qMalam += r.qty; tMalam += r.tunai; qrMalam += r.qris;
-                htmlMalam += `
-                <tr class="hover:bg-slate-50 transition">
-                    <td class="p-3 font-bold text-slate-800">${r.nama}</td>
-                    <td class="p-3 text-center text-slate-600 font-bold">${r.qty}</td>
-                    <td class="p-3 text-right text-emerald-600">Rp ${r.tunai.toLocaleString('id-ID')}</td>
-                    <td class="p-3 text-right text-sky-600">Rp ${r.qris.toLocaleString('id-ID')}</td>
-                </tr>`;
+                htmlMalam += `<tr class="hover:bg-slate-50 transition"><td class="p-3 font-bold text-slate-800">${r.nama}</td><td class="p-3 text-center text-slate-600 font-bold">${r.qty}</td><td class="p-3 text-right text-emerald-600">Rp ${r.tunai.toLocaleString('id-ID')}</td><td class="p-3 text-right text-sky-600">Rp ${r.qris.toLocaleString('id-ID')}</td></tr>`;
             }
         }
-        document.getElementById("body-tabel-malam").innerHTML = htmlMalam || `<tr><td colspan="4" class="p-6 text-center text-slate-400 italic">Tidak ada transaksi malam.</td></tr>`;
-        document.getElementById("qty-malam").innerText = qMalam;
-        document.getElementById("tunai-malam").innerText = "Rp " + tMalam.toLocaleString('id-ID');
-        document.getElementById("qris-malam").innerText = "Rp " + qrMalam.toLocaleString('id-ID');
-        document.getElementById("total-malam").innerText = "Rp " + (tMalam + qrMalam).toLocaleString('id-ID');
+        
+        const bTabelMalam = document.getElementById("body-tabel-malam");
+        if(bTabelMalam) bTabelMalam.innerHTML = htmlMalam || `<tr><td colspan="4" class="p-6 text-center text-slate-400 italic">Tidak ada transaksi malam.</td></tr>`;
+        
+        safeSetText("qty-malam", qMalam);
+        safeSetText("tunai-malam", "Rp " + tMalam.toLocaleString('id-ID'));
+        safeSetText("qris-malam", "Rp " + qrMalam.toLocaleString('id-ID'));
+        safeSetText("total-malam", "Rp " + (tMalam + qrMalam).toLocaleString('id-ID'));
 
-        document.getElementById("body-rincian-malam").innerHTML = rincianMalamBaris.length > 0 
-            ? rincianMalamBaris.join('') 
-            : `<tr><td colspan="4" class="p-6 text-center text-slate-400 italic">Belum ada rincian data transaksi malam.</td></tr>`;
+        const bRincianMalam = document.getElementById("body-rincian-malam");
+        if(bRincianMalam) bRincianMalam.innerHTML = rincianMalamBaris.length > 0 ? rincianMalamBaris.join('') : `<tr><td colspan="4" class="p-6 text-center text-slate-400 italic">Belum ada rincian data transaksi malam.</td></tr>`;
     }
 
     async function bayarSekarang() {
@@ -656,7 +668,6 @@
             return;
         }
 
-        // Pengaman: Jika Tunai tapi uang yang dimasukkan kurang dari total belanja
         if(caraBayar === "TUNAI" && cashDiterima < grandTotal) {
             triggerNotif("Uang Tunai yang diterima kurang!", "error");
             return;
@@ -667,7 +678,6 @@
             if((orderan[key] || 0) > 0) rincian.push(`${key} (${orderan[key]}x)`);
         }
 
-        // PERBAIKAN UTAMA: Ambil waktu murni system lokal tanpa konversi string perantara, agar .toISOString() akurat
         let skrgWita = new Date();
 
         let paketData = {
@@ -691,7 +701,6 @@
 
             triggerNotif("🎉 Berhasil! Transaksi tercatat di Spreadsheet.", "success");
             
-            // Masukkan data baru ke array lokal dengan format ISO String murni
             dataTransaksiSemua.push({
                 tanggal: skrgWita.toISOString(),
                 item: paketData.item,
@@ -699,14 +708,21 @@
                 total: paketData.total
             });
 
-            // Reset Form Kasir
             orderan = {};
             grandTotal = 0;
             cashDiterima = 0;
-            document.getElementById("input-manual-bayar").value = "";
+            
+            let mInput = document.getElementById("input-manual-bayar");
+            if(mInput) mInput.value = "";
+            
             kalkulasiNota();
             renderMenu();
             prosesLaporanHarian();
-        } catch(e) { triggerNotif("❌ Jaringan Bermasalah.", "error"); }
+        } catch(e) { 
+            triggerNotif("❌ Jaringan Bermasalah.", "error"); 
+            console.error(e);
+        }
     }
 </script>
+</body>
+</html>
