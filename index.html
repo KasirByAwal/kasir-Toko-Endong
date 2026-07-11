@@ -365,6 +365,7 @@ function setDefaultTanggal() {
         locale: "id",                // Bahasa Indonesia (Januari, Februari, dll)
         dateFormat: "d-F-Y",         // Format tampilan: Hari - Bulan Penuh - Tahun
         defaultDate: witaNow,        // Set tanggal hari ini otomatis
+        disableMobile: true
         onChange: function(selectedDates, dateStr, instance) {
             prosesLaporanHarian();   // Jalankan hitung laporan saat tanggal diubah
         }
