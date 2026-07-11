@@ -364,8 +364,7 @@ function setDefaultTanggal() {
     flatpickr("#filter-tanggal", {
         locale: "id",                // Bahasa Indonesia (Januari, Februari, dll)
         dateFormat: "d-F-Y",         // Format tampilan: Hari - Bulan Penuh - Tahun
-        defaultDate: witaNow,        // Set tanggal hari ini otomatis
-        disableMobile: true
+        defaultDate: witaNow,        // Set tanggal hari ini otomatid
         onChange: function(selectedDates, dateStr, instance) {
             prosesLaporanHarian();   // Jalankan hitung laporan saat tanggal diubah
         }
