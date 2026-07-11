@@ -12,6 +12,10 @@
             user-select: none;
         }
     </style>
+    <!-- Masukkan ini di dalam <head> setelah Tailwind CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
 </head>
 <body class="bg-slate-100 font-sans text-slate-800 min-h-screen flex flex-col pb-24">
 
@@ -160,8 +164,7 @@
             <!-- TEMPAT PILIHAN TANGGAL -->
             <div class="bg-white rounded-2xl p-3 shadow-sm border border-slate-200/60 flex items-center justify-between">
                 <span class="text-xs font-black text-slate-700">📅 Lihat Laporan Tanggal:</span>
-                <input type="date" id="filter-tanggal" onchange="prosesLaporanHarian()" class="bg-slate-100 text-slate-800 font-black text-xs p-2 px-3 rounded-xl border border-slate-200 focus:outline-none cursor-pointer">
-            </div>
+                <input type="text" id="filter-tanggal" class="bg-slate-100 text-slate-800 font-black text-xs p-2 px-3 rounded-xl border border-slate-200 focus:outline-none cursor-pointer text-center" placeholder="Pilih Tanggal">
 
             <!-- RINGKASAN GRAND TOTAL GLOBAL -->
             <div class="bg-slate-900 rounded-2xl p-4 text-white border border-slate-800 shadow-md">
@@ -348,15 +351,21 @@
             if(modal) modal.classList.add("hidden");
         }
 
-        function setDefaultTanggal() {
-            const witaNow = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Makassar"}));
-            witaNow.setHours(witaNow.getHours() - 6);
-            const yyyy = witaNow.getFullYear();
-            const mm = String(witaNow.getMonth() + 1).padStart(2, '0');
-            const dd = String(witaNow.getDate()).padStart(2, '0');
-            const elemenTgl = document.getElementById('filter-tanggal');
-            if (elemenTgl) { elemenTgl.value = `${yyyy}-${mm}-${dd}`; }
+        // GANTI SELURUH FUNGSI INI
+function setDefaultTanggal() {
+    const witaNow = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Makassar"}));
+    witaNow.setHours(witaNow.getHours() - 6);
+
+    // Inisialisasi Flatpickr kustom dengan format DD-MMMM-YYYY
+    flatpickr("#filter-tanggal", {
+        locale: "id",                // Bahasa Indonesia (Januari, Februari, dll)
+        dateFormat: "d-F-Y",         // Format tampilan: Hari - Bulan Penuh - Tahun
+        defaultDate: witaNow,        // Set tanggal hari ini otomatis
+        onChange: function(selectedDates, dateStr, instance) {
+            prosesLaporanHarian();   // Jalankan hitung laporan saat tanggal diubah
         }
+    });
+}
         
         function navigasiKe(halaman) {
             const pKasir = document.getElementById('page-kasir');
