@@ -22,6 +22,63 @@
     <!-- Notifikasi Box Global -->
     <div id="notif-box" class="hidden"></div>
 
+    <!-- DIALOG SINKRONISASI AWAL (STARTUP LOADER) -->
+    <div id="dialog-sync" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 max-w-sm w-full text-center shadow-2xl border border-slate-100 transform scale-100 transition-all duration-300">
+            <div class="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
+                <span class="text-2xl">🔄</span>
+            </div>
+            <h3 class="text-base font-black text-slate-800 tracking-tight">Menyinkronkan Data</h3>
+            <p class="text-xs text-slate-500 mt-1 font-medium leading-relaxed">Sedang mengambil data menu dan riwayat transaksi terbaru dari Cloud Spreadsheet...</p>
+            <div class="mt-4 flex items-center justify-center gap-2 text-xs font-bold text-amber-600 bg-amber-50 py-2 px-4 rounded-xl max-w-max mx-auto">
+                <div class="animate-spin rounded-full h-3.5 w-3.5 border-2 border-amber-600 border-t-transparent"></div>
+                Harap Tunggu Sebentar
+            </div>
+        </div>
+    </div>
+
+    <!-- DIALOG KONFIRMASI PEMBAYARAN TUNAI (KEREN MODAL) -->
+    <div id="dialog-pembayaran" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl border border-slate-100 w-full max-w-md overflow-hidden transform transition-all">
+            <!-- Header Dialog -->
+            <div class="bg-gradient-to-r from-amber-500 to-amber-600 px-5 py-4 text-white">
+                <h3 class="font-black text-base tracking-tight flex items-center gap-2">💵 Konfirmasi Pembayaran Tunai</h3>
+                <p class="text-[11px] text-amber-100 font-medium mt-0.5">Harap periksa kecocokan uang fisik pelanggan</p>
+            </div>
+            <!-- Konten Utama -->
+            <div class="p-5 space-y-4 max-h-[70vh] overflow-y-auto">
+                <div>
+                    <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Item Yang Dipilih:</span>
+                    <div id="dialog-list-item" class="text-xs font-bold text-slate-700 mt-1 space-y-1 bg-slate-50 rounded-xl p-3 border border-slate-100 max-h-24 overflow-y-auto divide-y divide-slate-200/60"></div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                        <span class="text-[10px] uppercase font-bold text-slate-400 block">Total Tagihan</span>
+                        <span id="dialog-total-tagihan" class="text-sm font-black text-slate-800 block mt-0.5">Rp 0</span>
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                        <span class="text-[10px] uppercase font-bold text-slate-400 block">Uang Digunakan</span>
+                        <span id="dialog-uang-diterima" class="text-sm font-black text-slate-800 block mt-0.5">Rp 0</span>
+                    </div>
+                </div>
+                <!-- Kembalian Huruf Besar -->
+                <div class="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 text-center shadow-inner">
+                    <span class="text-[11px] uppercase font-black text-emerald-600 tracking-widest block">Nominal Kembalian</span>
+                    <span id="dialog-kembalian" class="text-3xl font-black text-emerald-600 tracking-tight block mt-1">Rp 0</span>
+                </div>
+            </div>
+            <!-- Aksi Pilihan -->
+            <div class="px-5 py-4 bg-slate-50 border-t border-slate-100 flex gap-3 text-xs">
+                <button onclick="tutupDialogPembayaran()" class="flex-1 py-3 bg-slate-200 hover:bg-slate-300 font-bold text-slate-700 rounded-xl active:scale-95 transition text-center">
+                    ❌ Batalkan
+                </button>
+                <button onclick="eksekusiTransaksiTunai()" class="flex-[2] py-3 bg-amber-500 hover:bg-amber-600 font-black text-white rounded-xl active:scale-[0.98] transition shadow-md shadow-amber-500/20 text-center">
+                    🚀 Konfirmasi & Simpan
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- HEADER UTAMA -->
     <header class="bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-md sticky top-0 z-40 px-4 py-3 flex items-center justify-between">
         <div>
@@ -37,8 +94,8 @@
         </div>
     </header>
 
-    <!-- LOADING STATE -->
-    <div id="loading-text" class="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
+    <!-- LOADING STATE (Cadangan Jika Sync Manual Terjadi) -->
+    <div id="loading-text" class="hidden flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
         <div class="animate-spin rounded-full h-10 w-10 border-4 border-amber-500 border-t-transparent mb-3"></div>
         <p class="font-bold text-slate-600 text-sm">Menghubungkan ke sistem Cloud Spreadsheet...</p>
     </div>
@@ -270,6 +327,19 @@
                 </div>
 
             </div>
+
+            <!-- GRAND TOTAL PENDAPATAN GABUNGAN SHIFT HARI INI -->
+            <div class="bg-gradient-to-r from-slate-800 to-slate-900 rounded-3xl p-5 text-white shadow-xl border border-slate-700/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h4 class="text-sm font-black tracking-wide text-amber-400 uppercase">📊 AKUMULASI GABUNGAN HARIAN</h4>
+                    <p class="text-[11px] text-slate-400 mt-0.5 font-medium">Kombinasi total penjualan Shift Pagi + Shift Malam pada tanggal terfilter</p>
+                </div>
+                <div class="text-right sm:text-right">
+                    <span class="text-[10px] text-slate-400 block font-bold uppercase tracking-widest">Total Penjualan Bersih</span>
+                    <span id="grand-total-gabungan" class="text-3xl font-black text-amber-400 tracking-tight block mt-0.5">Rp 0</span>
+                </div>
+            </div>
+
         </div>
     </main>
 
@@ -295,6 +365,7 @@
         let grandTotal = 0;
         let caraBayar = "TUNAI";
         let cashDiterima = 0;
+        let pendingPaketData = null; // Menyimpan data sementara saat dialog pembayaran aktif
 
         document.addEventListener("DOMContentLoaded", () => {
             updateJamDigital();
@@ -346,7 +417,8 @@
         }
 
         async function muatMenu() {
-            document.getElementById("loading-text").classList.remove("hidden");
+            // Tampilkan dialog sinkronisasi data di awal terbuka
+            document.getElementById("dialog-sync").classList.remove("hidden");
             document.getElementById("menu-container").classList.add("hidden");
             try {
                 let res = await fetch(APPS_SCRIPT_URL);
@@ -362,13 +434,16 @@
                     status: item.status ? item.status.toString() : ""
                 }));
 
-                document.getElementById("loading-text").classList.add("hidden");
+                // Hilangkan dialog sinkronisasi data karena proses muat data selesai
+                document.getElementById("dialog-sync").classList.add("hidden");
                 document.getElementById("menu-container").classList.remove("hidden");
                 renderMenu();
                 renderUangRupiah();
                 prosesLaporanHarian();
             } catch (err) {
-                document.getElementById("loading-text").innerText = "❌ Hubungan gagal! Periksa kembali Web App URL Anda.";
+                document.getElementById("dialog-sync").classList.add("hidden");
+                document.getElementById("loading-text").classList.remove("hidden");
+                document.getElementById("loading-text").innerHTML = "<p class='text-sm font-bold text-rose-600'>❌ Sinkronisasi gagal! Periksa koneksi internet atau Web App URL Anda.</p>";
             }
         }
 
@@ -651,6 +726,15 @@
             document.getElementById("body-rincian-malam").innerHTML = rincianMalamBaris.length > 0 
                 ? rincianMalamBaris.join('') 
                 : `<tr><td colspan="4" class="p-6 text-center text-slate-400 italic">Belum ada rincian data transaksi malam.</td></tr>`;
+
+            // MENGHITUNG DAN MENAMPILKAN GRAND TOTAL PENJUALAN GABUNGAN HARIAN (PAGI + MALAM)
+            let totalSemuaShift = (tPagi + qrPagi) + (tMalam + qrMalam);
+            document.getElementById("grand-total-gabungan").innerText = "Rp " + totalSemuaShift.toLocaleString('id-ID');
+        }
+
+        function tutupDialogPembayaran() {
+            document.getElementById("dialog-pembayaran").classList.add("hidden");
+            pendingPaketData = null;
         }
 
         async function bayarSekarang() {
@@ -660,8 +744,27 @@
             }
 
             let rincian = [];
+            let htmlListItems = "";
             for(let key in orderan) {
-                if((orderan[key] || 0) > 0) rincian.push(`${key} (${orderan[key]}x)`);
+                if((orderan[key] || 0) > 0) {
+                    let stringItem = `${key} (${orderan[key]}x)`;
+                    rincian.push(stringItem);
+                    
+                    let hargaItem = 0;
+                    let cocokMenu = itemMenu.find(m => m.nama === key);
+                    if(cocokMenu) hargaItem = cocokMenu.harga;
+
+                    htmlListItems += `
+                    <div class="py-1.5 flex justify-between items-center text-slate-700">
+                        <span class="font-medium">${key} <span class="text-amber-600 font-black">x${orderan[key]}</span></span>
+                        <span class="font-bold">Rp ${(hargaItem * orderan[key]).toLocaleString('id-ID')}</span>
+                    </div>`;
+                }
+            }
+
+            if(caraBayar === "TUNAI" && cashDiterima < grandTotal) {
+                triggerNotif("Uang fisik yang diterima kurang dari total tagihan!", "error");
+                return;
             }
 
             let skrgWita = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Makassar"}));
@@ -675,6 +778,30 @@
                 kembalian: caraBayar === "TUNAI" ? Math.max(0, cashDiterima - grandTotal) : 0
             };
 
+            // JIKA QRIS: Tidak tampilkan dialog modal, langsung kirim seperti pesan yang sekarang
+            if(caraBayar === "QRIS") {
+                kirimKeCloudSpreadsheet(paketData, skrgWita);
+            } 
+            // JIKA TUNAI: Munculkan Dialog Konfirmasi Keren yang berisi item, harga, uang, kembalian besar
+            else {
+                pendingPaketData = { paket: paketData, waktu: skrgWita };
+                
+                document.getElementById("dialog-list-item").innerHTML = htmlListItems;
+                document.getElementById("dialog-total-tagihan").innerText = "Rp " + grandTotal.toLocaleString('id-ID');
+                document.getElementById("dialog-uang-diterima").innerText = "Rp " + cashDiterima.toLocaleString('id-ID');
+                document.getElementById("dialog-kembalian").innerText = "Rp " + paketData.kembalian.toLocaleString('id-ID');
+                
+                document.getElementById("dialog-pembayaran").classList.remove("hidden");
+            }
+        }
+
+        function eksekusiTransaksiTunai() {
+            if(!pendingPaketData) return;
+            document.getElementById("dialog-pembayaran").classList.add("hidden");
+            kirimKeCloudSpreadsheet(pendingPaketData.paket, pendingPaketData.waktu);
+        }
+
+        async function kirimKeCloudSpreadsheet(paketData, skrgWita) {
             triggerNotif("⏳ Mengirim transaksi ke Google Sheets...", "success");
 
             try {
@@ -701,6 +828,7 @@
                 orderan = {};
                 grandTotal = 0;
                 document.getElementById("input-manual-bayar").value = "";
+                pendingPaketData = null;
                 kalkulasiNota();
                 renderMenu();
                 prosesLaporanHarian();
