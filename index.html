@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sistem Kasir Digital</title>
+    <title>Sistem Kasir Digital By Awal</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
@@ -29,7 +29,7 @@
     <div id="modal-konfirmasi" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden transform scale-95 transition-all">
             <div class="bg-amber-500 p-3.5 text-white text-center font-black text-xs tracking-wider flex items-center justify-center space-x-2">
-                <span>📝 KONFIRMASI BELANJAAN</span>
+                <span>📝 KONFIRMASI ITEM PEMBELIAN</span>
             </div>
             <div class="p-4 space-y-3.5 text-xs">
                 <div>
@@ -85,7 +85,7 @@
     <!-- LOADING SCREEN -->
     <div id="loading-text" class="flex-1 flex flex-col items-center justify-center p-8 text-center">
         <div class="w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mb-2.5"></div>
-        <p class="text-[11px] text-slate-500 font-bold">Sinkronisasi data Google Sheets...</p>
+        <p class="text-[11px] text-slate-500 font-bold">Sinkronisasi data, Harap Tunggu...</p>
     </div>
 
     <!-- MAIN APP CONTAINER -->
@@ -98,7 +98,7 @@
             <div class="lg:col-span-7 grid grid-cols-2 gap-3 items-start">
                 <!-- Kolom Kiri: Menu Utama -->
                 <div class="bg-white rounded-2xl p-3 shadow-sm border border-slate-200/60 min-h-[300px]">
-                    <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2.5 flex items-center"><span class="mr-1">🍛</span> Utama</h2>
+                    <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2.5 flex items-center"><span class="mr-1">🍛</span>Menu Utama</h2>
                     <div id="kolom-utama" class="space-y-3 divide-y divide-slate-100">
                         <!-- Render Otomatis -->
                     </div>
@@ -131,7 +131,7 @@
                             <div id="rupiah-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-1.5"></div>
                         </div>
                         <div>
-                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1">Ketik Manual</label>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1">Ketik Manual Nominal Uang</label>
                             <div class="relative">
                                 <span class="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-slate-400 text-xs">Rp</span>
                                 <input type="number" id="input-manual-bayar" oninput="handleInputManual(this.value)" placeholder="0" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 pl-9 text-xs font-black focus:outline-none focus:bg-white text-slate-700">
@@ -168,7 +168,7 @@
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div>
                         <h4 class="text-[10px] font-black text-amber-400 uppercase tracking-wider">TOTAL PENJUALAN GABUNGAN (OMSET GLOBAL)</h4>
-                        <p class="text-[9px] text-slate-400 font-bold mt-0.5">Akumulasi Shift Pagi + Shift Malam</p>
+                        <p class="text-[9px] text-slate-400 font-bold mt-0.5">Akumulasi Penjualan Harian</p>
                     </div>
                     <div class="grid grid-cols-2 gap-4 text-left sm:text-right border-t sm:border-t-0 border-slate-800 pt-2 sm:pt-0">
                         <div>
@@ -182,7 +182,7 @@
                     </div>
                 </div>
                 <div class="border-t border-slate-800 mt-3 pt-2.5 flex justify-between items-center">
-                    <span class="text-xs font-black text-slate-200">GRAND TOTAL AMAN:</span>
+                    <span class="text-xs font-black text-slate-200">GRAND TOTAL PENJUALAN:</span>
                     <span id="grand-total-hari-ini" class="text-xl font-black text-amber-400">Rp 0</span>
                 </div>
             </div>
@@ -191,8 +191,8 @@
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200/60 overflow-hidden">
                 <div class="bg-slate-50 p-3.5 border-b border-slate-100 flex justify-between items-center">
                     <div>
-                        <h3 class="font-black text-slate-800 text-xs flex items-center">🌅 SHIFT 1 (PAGI - SIANG)</h3>
-                        <p class="text-[9px] text-slate-400 font-bold">Jam 06:00 s/d 15:59 WITA</p>
+                        <h3 class="font-black text-slate-800 text-xs flex items-center">🌅 Penjualan Pagi</h3>
+                        <p class="text-[9px] text-slate-400 font-bold">Jam 06:00 s/d 15:59</p>
                     </div>
                     <button id="btn-toggle-pagi" onclick="gantiTampilanLaporan('pagi')" class="text-[10px] font-bold text-amber-600 bg-amber-50 px-2.5 py-1.5 rounded-lg border border-amber-200 shadow-sm">📋 Rincian</button>
                 </div>
@@ -234,8 +234,8 @@
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200/60 overflow-hidden">
                 <div class="bg-slate-50 p-3.5 border-b border-slate-100 flex justify-between items-center">
                     <div>
-                        <h3 class="font-black text-slate-800 text-xs flex items-center">🌃 NIGHT SHIFT (SORE - MALAM)</h3>
-                        <p class="text-[9px] text-slate-400 font-bold">Jam 16:00 s/d 05:59 Esok Hari WITA</p>
+                        <h3 class="font-black text-slate-800 text-xs flex items-center">🌃 Penjualan Malam</h3>
+                        <p class="text-[9px] text-slate-400 font-bold">Jam 16:00 s/d 05:59</p>
                     </div>
                     <button id="btn-toggle-malam" onclick="gantiTampilanLaporan('malam')" class="text-[10px] font-bold text-amber-600 bg-amber-50 px-2.5 py-1.5 rounded-lg border border-amber-200 shadow-sm">📋 Rincian</button>
                 </div>
@@ -699,7 +699,7 @@
             tutupModalKonfirmasi();
 
             let skrgWita = new Date();
-            triggerNotif("Sedang mengunggah data transaksi ke Google Spreadsheet...", "loading");
+            triggerNotif("Sedang mengunggah data transaksi, Harap tunggu...", "loading");
 
             try {
                 await fetch(APPS_SCRIPT_URL, {
@@ -710,7 +710,7 @@
                 });
 
                 tutupNotifModal(); 
-                triggerNotif("Transaksi telah sukses disimpan di Spreadsheet Cloud!", "success");
+                triggerNotif("Transaksi telah sukses disimpan.", "success");
                 
                 dataTransaksiSemua.push({
                     tanggal: skrgWita.toISOString(),
