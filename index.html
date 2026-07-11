@@ -558,7 +558,428 @@
         function triggerNotif(msg, type) {
             const container = document.getElementById("notif-box-container");
             const card = document.getElementById("notif-box-card");
-            const icon = document.getElementById("notif-box-icon");
+            const icon = document.getElementById("notif-box-icon");<!-- LOGIKA JAVASCRIPT UTAMA -->
+    <script>
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwo4Be97S21PHDVAsijxPLKWW2PDQRzwy8DtMblKo7pPMgAhnmeNLypOwyMN3vf3zZZ2A/exec"; 
+
+        let itemMenu = [];
+        let dataTransaksiSemua = []; 
+        let orderan = {};
+        let grandTotal = 0;
+        let caraBayar = "TUNAI";
+        let cashDiterima = 0;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            updateJamDigital();
+            setInterval(updateJamDigital, 1000);
+            setDefaultTanggal();
+            muatMenu(); 
+        });
+
+        function updateJamDigital() {
+            const sekarang = new Date();
+            const opsiFormat = { timeZone: 'Asia/Makassar', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+            const stringWaktu = sekarang.toLocaleTimeString('id-ID', opsiFormat);
+            document.getElementById("jam-digital").innerText = "Sekarang Jam " + stringWaktu.replace(/\./g, ':');
+        }
+
+        function triggerNotif(msg, type) {
+            let box = document.getElementById("notif-box");
+            box.innerText = msg;
+            box.className = type === "success" ? "fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-50 p-4 rounded-xl shadow-xl text-white text-center font-bold bg-emerald-600 block" : "fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm z-50 p-4 rounded-xl shadow-xl text-white text-center font-bold bg-rose-600 block";
+            setTimeout(() => { box.className = "hidden"; }, 3500);
+        }
+
+       function setDefaultTanggal() {
+            // Mengambil waktu saat ini di zona Asia/Makassar
+            const witaNow = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Makassar"}));
+            
+            // Logika inti: Mundurkan 6 jam. 
+            // Jika sekarang jam 3 subuh esok hari, mundur 6 jam akan mengembalikan tanggal ke hari sebelumnya.
+            // Tanggal baru akan terpilih otomatis HANYA jika jam sudah melewati 06:00 pagi.
+            witaNow.setHours(witaNow.getHours() - 6);
+
+            const yyyy = witaNow.getFullYear();
+            const mm = String(witaNow.getMonth() + 1).padStart(2, '0');
+            const dd = String(witaNow.getDate()).padStart(2, '0');
+            
+            // Mengisi nilai default kotak input tanggal yang bisa dipilih manual
+            document.getElementById('filter-tanggal').value = `${yyyy}-${mm}-${dd}`;
+        }
+
+        function navigasiKe(halaman) {
+            if(halaman === 'kasir') {
+                document.getElementById('page-kasir').classList.remove('hidden');
+                document.getElementById('page-laporan').classList.add('hidden');
+                document.getElementById('nav-kasir').className = "flex flex-col items-center justify-center text-amber-600 font-bold transition";
+                document.getElementById('nav-laporan').className = "flex flex-col items-center justify-center text-slate-400 font-bold transition";
+            } else {
+                document.getElementById('page-kasir').classList.add('hidden');
+                document.getElementById('page-laporan').classList.remove('hidden');
+                document.getElementById('nav-kasir').className = "flex flex-col items-center justify-center text-slate-400 font-bold transition";
+                document.getElementById('nav-laporan').className = "flex flex-col items-center justify-center text-amber-600 font-bold transition";
+                prosesLaporanHarian();
+            }
+        }
+
+        async function muatMenu() {
+            document.getElementById("loading-text").classList.remove("hidden");
+            document.getElementById("menu-container").classList.add("hidden");
+            try {
+                let res = await fetch(APPS_SCRIPT_URL);
+                let rawData = await res.json();
+                
+                let menuData = Array.isArray(rawData) ? rawData : (rawData.menu || []);
+                dataTransaksiSemua = rawData.transaksi || []; 
+                
+                itemMenu = menuData.map(item => ({
+                    nama: item.nama ? item.nama.toString() : "Tanpa Nama",
+                    harga: isNaN(Number(item.harga)) ? 0 : Number(item.harga),
+                    kategori: item.kategori ? item.kategori.toString().trim().toLowerCase() : "utama",
+                    status: item.status ? item.status.toString() : ""
+                }));
+
+                document.getElementById("loading-text").classList.add("hidden");
+                document.getElementById("menu-container").classList.remove("hidden");
+                renderMenu();
+                renderUangRupiah();
+                prosesLaporanHarian();
+            } catch (err) {
+                document.getElementById("loading-text").innerText = "❌ Hubungan gagal! Periksa kembali Web App URL Anda.";
+            }
+        }
+
+        function createItemHtml(item) {
+            if(!orderan[item.nama]) orderan[item.nama] = 0;
+            const idAman = item.nama.replace(/\s+/g, '_');
+            return `
+            <div class="pt-2 pb-2">
+                <div class="font-bold text-slate-800 text-[13px] leading-tight break-words">${item.nama}</div>
+                <div class="text-[11px] font-bold text-amber-600 mb-2">Rp ${(item.harga || 0).toLocaleString('id-ID')}</div>
+                <div class="flex items-center space-x-1">
+                    <button onclick="ubahQty('${item.nama.replace(/'/g, "\\'")}', -1)" class="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 font-bold active:scale-90 transition text-sm shadow-sm flex items-center justify-center">-</button>
+                    <span id="qty-${idAman}" class="w-5 text-center text-xs font-black text-slate-700">${orderan[item.nama]}</span>
+                    <button onclick="ubahQty('${item.nama.replace(/'/g, "\\'")}', 1)" class="w-7 h-7 rounded-lg bg-amber-500 text-white font-bold active:scale-90 transition text-sm shadow-sm flex items-center justify-center">+</button>
+                </div>
+            </div>`;
+        }
+
+        function renderMenu() {
+            let htmlUtama = "";
+            let htmlLauk = "";
+            itemMenu.forEach(item => {
+                if(item.kategori === "lauk") { htmlLauk += createItemHtml(item); } 
+                else { htmlUtama += createItemHtml(item); }
+            });
+            document.getElementById("kolom-utama").innerHTML = htmlUtama || "<p class='text-[11px] text-slate-400 italic'>Kosong</p>";
+            document.getElementById("kolom-lauk").innerHTML = htmlLauk || "<p class='text-[11px] text-slate-400 italic'>Kosong</p>";
+        }
+
+        function ubahQty(nama, delta) {
+            orderan[nama] = Math.max(0, (orderan[nama] || 0) + delta);
+            const idAman = nama.replace(/\s+/g, '_');
+            const elemenQty = document.getElementById(`qty-${idAman}`);
+            if(elemenQty) { elemenQty.innerText = orderan[nama]; }
+            kalkulasiNota();
+        }
+
+        function kalkulasiNota() {
+            grandTotal = 0;
+            itemMenu.forEach(item => {
+                let qty = orderan[item.nama] || 0;
+                grandTotal += qty * (item.harga || 0);
+            });
+            document.getElementById("total-screen").innerText = "Rp " + grandTotal.toLocaleString('id-ID');
+            document.getElementById("qris-amount-text").innerText = "Rp " + grandTotal.toLocaleString('id-ID');
+            renderUangRupiah();
+        }
+
+        function renderUangRupiah() {
+            let container = document.getElementById("rupiah-grid");
+            if(grandTotal === 0) {
+                container.innerHTML = "<p class='col-span-2 text-center text-xs text-slate-400 py-2'>Pilih menu terlebih dahulu</p>";
+                setUangFisik(0);
+                return;
+            }
+
+            let html = `<button onclick="setUangFisik(${grandTotal})" class="p-3 text-xs font-bold rounded-xl border-2 border-dashed border-slate-300 text-slate-600 active:scale-95 transition bg-slate-50">💵 UANG PAS</button>`;
+            let gridStatis = [5000, 10000, 20000, 50000, 100000];
+            let pilihanUang = [];
+
+            let kelipatan5k = Math.ceil(grandTotal / 5000) * 5000;
+            if (kelipatan5k !== grandTotal) { pilihanUang.push({ nominal: kelipatan5k, style: 'uang-custom' }); }
+
+            gridStatis.forEach(nominal => {
+                if (nominal > grandTotal && nominal !== kelipatan5k) {
+                    let cssStyle = nominal === 100000 ? 'uang-100k' : (nominal === 50000 ? 'uang-50k' : (nominal === 20000 ? 'uang-20k' : (nominal === 10000 ? 'uang-10k' : 'uang-5k')));
+                    pilihanUang.push({ nominal: nominal, style: cssStyle });
+                }
+            });
+
+            pilihanUang.sort((a, b) => a.nominal - b.nominal);
+            pilihanUang.slice(0, 5).forEach(item => {
+                html += `<button onclick="setUangFisik(${item.nominal})" class="p-3 text-xs font-black rounded-xl shadow-sm active:scale-95 transition ${item.style}">Rp ${item.nominal.toLocaleString('id-ID')}</button>`;
+            });
+            container.innerHTML = html;
+            
+            let manualInput = document.getElementById("input-manual-bayar");
+            if (manualInput && manualInput.value !== "") { handleInputManual(manualInput.value); } 
+            else {
+                let sisa = cashDiterima - grandTotal;
+                document.getElementById("txt-cash-in").innerText = "Rp " + cashDiterima.toLocaleString('id-ID');
+                document.getElementById("txt-change").innerText = "Rp " + (sisa >= 0 ? sisa.toLocaleString('id-ID') : 0);
+            }
+        }
+
+        function handleInputManual(val) {
+            let parsed = parseInt(val, 10);
+            if (isNaN(parsed) || parsed < 0) parsed = 0;
+            cashDiterima = parsed;
+            document.getElementById("txt-cash-in").innerText = "Rp " + cashDiterima.toLocaleString('id-ID');
+            let sisa = cashDiterima - grandTotal;
+            document.getElementById("txt-change").innerText = "Rp " + (sisa >= 0 ? sisa.toLocaleString('id-ID') : 0);
+        }
+
+        function setUangFisik(jumlah) {
+            let amanJumlah = isNaN(Number(jumlah)) ? 0 : Number(jumlah);
+            cashDiterima = amanJumlah;
+            document.getElementById("input-manual-bayar").value = amanJumlah === grandTotal ? "" : amanJumlah;
+            document.getElementById("txt-cash-in").innerText = "Rp " + cashDiterima.toLocaleString('id-ID');
+            let sisa = cashDiterima - grandTotal;
+            document.getElementById("txt-change").innerText = "Rp " + (sisa >= 0 ? sisa.toLocaleString('id-ID') : 0);
+        }
+
+        function gantiMetode(opsi) {
+            caraBayar = opsi;
+            if(opsi === "TUNAI") {
+                document.getElementById("area-tunai").classList.remove("hidden");
+                document.getElementById("area-qris").classList.add("hidden");
+                document.getElementById("tab-tunai").className = "p-3 font-bold rounded-xl border-2 border-amber-500 bg-amber-50 text-amber-700 transition shadow-sm";
+                document.getElementById("tab-qris").className = "p-3 font-bold rounded-xl border border-slate-200 text-slate-600 transition";
+            } else {
+                document.getElementById("area-tunai").classList.add("hidden");
+                document.getElementById("area-qris").classList.remove("hidden");
+                document.getElementById("tab-qris").className = "p-3 font-bold rounded-xl border-2 border-amber-500 bg-amber-50 text-amber-700 transition shadow-sm";
+                document.getElementById("tab-tunai").className = "p-3 font-bold rounded-xl border border-slate-200 text-slate-600 transition";
+            }
+        }
+
+        function gantiTampilanLaporan(shift) {
+            const btn = document.getElementById(`btn-toggle-${shift}`);
+            const areaRekap = document.getElementById(`area-rekap-${shift}`);
+            const areaRincian = document.getElementById(`area-rincian-${shift}`);
+            
+            if (areaRekap.classList.contains('hidden')) {
+                areaRekap.classList.remove('hidden');
+                areaRincian.classList.add('hidden');
+                btn.innerText = "📋 Lihat Rincian";
+                btn.className = "text-[11px] font-bold text-amber-600 bg-amber-50 px-3 py-1.5 rounded-lg active:scale-95 transition shadow-sm border border-amber-200";
+            } else {
+                areaRekap.classList.add('hidden');
+                areaRincian.classList.remove('hidden');
+                btn.innerText = "📊 Lihat Rekap";
+                btn.className = "text-[11px] font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg active:scale-95 transition shadow-sm border border-slate-200";
+            }
+        }
+
+        async function prosesLaporanHarian() {
+            let tglTerpilih = document.getElementById("filter-tanggal").value;
+            if(!tglTerpilih) return;
+
+            let pagiMulai = new Date(`${tglTerpilih}T06:00:00+08:00`);
+            let pagiAkhir = new Date(`${tglTerpilih}T15:59:59+08:00`);
+            
+            let malamMulai = new Date(`${tglTerpilih}T16:00:00+08:00`);
+            let besok = new Date(malamMulai);
+            besok.setDate(besok.getDate() + 1);
+            let malamAkhir = new Date(besok);
+            malamAkhir.setHours(5, 59, 59, 999);
+
+            let rekapPagi = {};
+            let rekapMalam = {};
+            let rincianPagiBaris = [];
+            let rincianMalamBaris = [];
+
+            itemMenu.forEach(m => {
+                rekapPagi[m.nama] = { nama: m.nama, qty: 0, tunai: 0, qris: 0, harga: m.harga };
+                rekapMalam[m.nama] = { nama: m.nama, qty: 0, tunai: 0, qris: 0, harga: m.harga };
+            });
+
+            if(dataTransaksiSemua.length === 0) {
+                try {
+                    let res = await fetch(APPS_SCRIPT_URL);
+                    let rawData = await res.json();
+                    dataTransaksiSemua = rawData.transaksi || [];
+                } catch(e) { console.log("Gagal memuat histori transaksi"); }
+            }
+
+            dataTransaksiSemua.forEach(tx => {
+                if(!tx.tanggal) return;
+                let txDate = new Date(tx.tanggal);
+                if(isNaN(txDate.getTime())) return;
+
+                let targetRekap = null;
+                let IsPagi = false;
+
+                if(txDate >= pagiMulai && txDate <= pagiAkhir) {
+                    targetRekap = rekapPagi;
+                    IsPagi = true;
+                } else if(txDate >= malamMulai && txDate <= malamAkhir) {
+                    targetRekap = rekapMalam;
+                    IsPagi = false;
+                }
+
+                if(targetRekap) {
+                    let metodeStr = tx.metode ? tx.metode.toString().toUpperCase() : "TUNAI";
+                    let itemRaw = tx.item ? tx.item.toString() : "";
+                    let bagianItem = itemRaw.split(",");
+                    
+                    let badgeMetode = metodeStr === "QRIS" 
+                        ? `<span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-sky-50 text-sky-600 border border-sky-200">QRIS</span>`
+                        : `<span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-emerald-50 text-emerald-600 border border-emerald-200">TUNAI</span>`;
+
+                    let jamMenit = txDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false }).replace(/\./g, ':');
+                    
+                    let htmlBarisDetail = `
+                    <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+                        <td class="p-2.5 text-slate-500 font-medium">${jamMenit}</td>
+                        <td class="p-2.5 text-slate-800 font-bold leading-normal break-words max-w-[180px]">${tx.item}</td>
+                        <td class="p-2.5 text-center">${badgeMetode}</td>
+                        <td class="p-2.5 text-right font-black text-slate-700">Rp ${Number(tx.total).toLocaleString('id-ID')}</td>
+                    </tr>`;
+
+                    if(IsPagi) { rincianPagiBaris.push(htmlBarisDetail); } 
+                    else { rincianMalamBaris.push(htmlBarisDetail); }
+
+                    bagianItem.forEach(bag => {
+                        let bersihkan = bag.trim();
+                        if(!bersihkan) return;
+
+                        let namaMenu = bersihkan;
+                        let qtyMenu = 1;
+                        let cocokQty = bersihkan.match(/(.+)\s\((\d+)x\)/);
+                        if(cocokQty) {
+                            namaMenu = cocokQty[1].trim();
+                            qtyMenu = parseInt(cocokQty[2], 10);
+                        }
+
+                        let hargaBawaan = targetRekap[namaMenu] ? targetRekap[namaMenu].harga : 0;
+                        let subTotalItem = qtyMenu * hargaBawaan;
+
+                        if(!targetRekap[namaMenu]) {
+                            targetRekap[namaMenu] = { nama: namaMenu, qty: 0, tunai: 0, qris: 0, harga: hargaBawaan };
+                        }
+
+                        targetRekap[namaMenu].qty += qtyMenu;
+                        if(metodeStr === "QRIS") { targetRekap[namaMenu].qris += subTotalItem; } 
+                        else { targetRekap[namaMenu].tunai += subTotalItem; }
+                    });
+                }
+            });
+
+            let htmlPagi = "";
+            let qPagi = 0, tPagi = 0, qrPagi = 0;
+            for(let key in rekapPagi) {
+                let r = rekapPagi[key];
+                if(r.qty > 0) {
+                    qPagi += r.qty; tPagi += r.tunai; qrPagi += r.qris;
+                    htmlPagi += `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="p-3 font-bold text-slate-800">${r.nama}</td>
+                        <td class="p-3 text-center text-slate-600 font-bold">${r.qty}</td>
+                        <td class="p-3 text-right text-emerald-600">Rp ${r.tunai.toLocaleString('id-ID')}</td>
+                        <td class="p-3 text-right text-sky-600">Rp ${r.qris.toLocaleString('id-ID')}</td>
+                    </tr>`;
+                }
+            }
+            document.getElementById("body-tabel-pagi").innerHTML = htmlPagi || `<tr><td colspan="4" class="p-6 text-center text-slate-400 italic">Tidak ada transaksi pagi.</td></tr>`;
+            document.getElementById("qty-pagi").innerText = qPagi;
+            document.getElementById("tunai-pagi").innerText = "Rp " + tPagi.toLocaleString('id-ID');
+            document.getElementById("qris-pagi").innerText = "Rp " + qrPagi.toLocaleString('id-ID');
+            document.getElementById("total-pagi").innerText = "Rp " + (tPagi + qrPagi).toLocaleString('id-ID');
+
+            document.getElementById("body-rincian-pagi").innerHTML = rincianPagiBaris.length > 0 
+                ? rincianPagiBaris.join('') 
+                : `<tr><td colspan="4" class="p-6 text-center text-slate-400 italic">Belum ada rincian data transaksi pagi.</td></tr>`;
+
+            let htmlMalam = "";
+            let qMalam = 0, tMalam = 0, qrMalam = 0;
+            for(let key in rekapMalam) {
+                let r = rekapMalam[key];
+                if(r.qty > 0) {
+                    qMalam += r.qty; tMalam += r.tunai; qrMalam += r.qris;
+                    htmlMalam += `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="p-3 font-bold text-slate-800">${r.nama}</td>
+                        <td class="p-3 text-center text-slate-600 font-bold">${r.qty}</td>
+                        <td class="p-3 text-right text-emerald-600">Rp ${r.tunai.toLocaleString('id-ID')}</td>
+                        <td class="p-3 text-right text-sky-600">Rp ${r.qris.toLocaleString('id-ID')}</td>
+                    </tr>`;
+                }
+            }
+            document.getElementById("body-tabel-malam").innerHTML = htmlMalam || `<tr><td colspan="4" class="p-6 text-center text-slate-400 italic">Tidak ada transaksi malam.</td></tr>`;
+            document.getElementById("qty-malam").innerText = qMalam;
+            document.getElementById("tunai-malam").innerText = "Rp " + tMalam.toLocaleString('id-ID');
+            document.getElementById("qris-malam").innerText = "Rp " + qrMalam.toLocaleString('id-ID');
+            document.getElementById("total-malam").innerText = "Rp " + (tMalam + qrMalam).toLocaleString('id-ID');
+
+            document.getElementById("body-rincian-malam").innerHTML = rincianMalamBaris.length > 0 
+                ? rincianMalamBaris.join('') 
+                : `<tr><td colspan="4" class="p-6 text-center text-slate-400 italic">Belum ada rincian data transaksi malam.</td></tr>`;
+        }
+
+        async function bayarSekarang() {
+            if(grandTotal === 0) {
+                triggerNotif("Keranjang masih kosong!", "error");
+                return;
+            }
+
+            let rincian = [];
+            for(let key in orderan) {
+                if((orderan[key] || 0) > 0) rincian.push(`${key} (${orderan[key]}x)`);
+            }
+
+            let skrgWita = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Makassar"}));
+
+            let paketData = {
+                id: "TX-" + Math.floor(Math.random() * 90000 + 10000),
+                item: rincian.join(", "),
+                total: grandTotal,
+                metode: caraBayar,
+                bayar: caraBayar === "TUNAI" ? cashDiterima : grandTotal,
+                kembalian: caraBayar === "TUNAI" ? Math.max(0, cashDiterima - grandTotal) : 0
+            };
+
+            triggerNotif("⏳ Mengirim transaksi ke Google Sheets...", "success");
+
+            try {
+                await fetch(APPS_SCRIPT_URL, {
+                    method: "POST",
+                    mode: "no-cors", 
+                    headers: { "Content-Type": "text/plain" },
+                    body: JSON.stringify(paketData)
+                });
+
+                triggerNotif("🎉 Berhasil! Transaksi tercatat di Spreadsheet.", "success");
+                
+                dataTransaksiSemua.push({
+                    tanggal: skrgWita.toISOString(),
+                    item: paketData.item,
+                    metode: paketData.metode,
+                    total: paketData.total
+                });
+
+                orderan = {};
+                grandTotal = 0;
+                document.getElementById("input-manual-bayar").value = "";
+                kalkulasiNota();
+                renderMenu();
+                prosesLaporanHarian();
+            } catch(e) { triggerNotif("❌ Jaringan Bermasalah.", "error"); }
+        }
+    </script>
+</body>
+</html>
             const text = document.getElementById("notif-box-text");
 
             text.innerText = msg;
