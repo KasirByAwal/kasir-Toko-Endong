@@ -230,7 +230,7 @@
                     </table>
                 </div>
                 <div class="bg-slate-50 p-3 border-t border-slate-100 grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] font-bold text-slate-600">
-                    <div class="bg-white p-2 rounded-lg border border-slate-100">Qty: <span id="qty-pagi" class="block font-black text-slate-800">0</span></div>
+                    <div class="bg-white p-2 rounded-lg border border-slate-100">Qty: <span>Utama: <span id="qty-pagi-utama" class="text-amber-500 font-bold">0</span> | Lauk: <span id="qty-pagi-lauk" class="text-amber-500 font-bold">0</span></span></div>
                     <div class="bg-white p-2 rounded-lg border border-slate-100">Tunai: <span id="tunai-pagi" class="block font-black text-emerald-600">Rp 0</span></div>
                     <div class="bg-white p-2 rounded-lg border border-slate-100">QRIS: <span id="qris-pagi" class="block font-black text-sky-600">Rp 0</span></div>
                     <div class="bg-amber-50 p-2 rounded-lg border border-amber-100">GRAND TOTAL: <span id="total-pagi" class="block font-black text-amber-700">Rp 0</span></div>
@@ -273,7 +273,7 @@
                     </table>
                 </div>
                 <div class="bg-slate-50 p-3 border-t border-slate-100 grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] font-bold text-slate-600">
-                    <div class="bg-white p-2 rounded-lg border border-slate-100">Qty: <span id="qty-malam" class="block font-black text-slate-800">0</span></div>
+                    <div class="bg-white p-2 rounded-lg border border-slate-100">Qty: <span>Utama: <span id="qty-malam-utama" class="text-amber-500 font-bold">0</span> | Lauk: <span id="qty-malam-lauk" class="text-amber-500 font-bold">0</span></span></div>
                     <div class="bg-white p-2 rounded-lg border border-slate-100">Tunai: <span id="tunai-malam" class="block font-black text-emerald-600">Rp 0</span></div>
                     <div class="bg-white p-2 rounded-lg border border-slate-100">QRIS: <span id="qris-malam" class="block font-black text-sky-600">Rp 0</span></div>
                     <div class="bg-amber-50 p-2 rounded-lg border border-amber-100">GRAND TOTAL: <span id="total-malam" class="block font-black text-amber-700">Rp 0</span></div>
@@ -645,65 +645,93 @@ function prosesLaporanHarian() {
         }
     });
 
-    let htmlPagi = ""; let qPagi = 0, tPagi = 0, qrPagi = 0;
+    // --- PROSES REKAP PAGI ---
+    let htmlPagi = ""; 
+    let tPagi = 0, qrPagi = 0;
+    let qtyPagiUtama = 0;
+    let qtyPagiLauk = 0;
+
     for(let key in rekapPagi) {
         let r = rekapPagi[key];
         if(r.qty > 0) {
-            qPagi += r.qty; tPagi += r.tunai; qrPagi += r.qris;
+            tPagi += r.tunai; qrPagi += r.qris;
+            
+            // Cek Kategori Pagi (Aman dari huruf besar/kecil)
+            let kat = (r.kategori || "").toString().toLowerCase().trim();
+            if(kat === "lauk") {
+                qtyPagiLauk += r.qty;
+            } else {
+                qtyPagiUtama += r.qty;
+            }
+
             htmlPagi += `<tr class="border-b border-slate-100"><td class="p-2 text-slate-800 font-bold">${r.nama}</td><td class="p-2 text-center">${r.qty}</td><td class="p-2 text-right text-emerald-600">Rp ${r.tunai.toLocaleString('id-ID')}</td><td class="p-2 text-right text-sky-600">Rp ${r.qris.toLocaleString('id-ID')}</td></tr>`;
         }
     }
     const bTabelPagi = document.getElementById("body-tabel-pagi");
     if(bTabelPagi) bTabelPagi.innerHTML = htmlPagi || `<tr><td colspan="4" class="p-4 text-center text-slate-400 italic text-[11px]">Kosong</td></tr>`;
-    safeSetText("qty-pagi", qPagi);
+    
+    // Tampilkan data terpisah ke elemen HTML Pagi yang baru
+    if(document.getElementById("qty-pagi-utama")) {
+        safeSetText("qty-pagi-utama", qtyPagiUtama);
+        safeSetText("qty-pagi-lauk", qtyPagiLauk);
+    } else {
+        // Fallback jika elemen HTML belum diganti, gabungkan teksnya
+        safeSetText("qty-pagi", `Utama: ${qtyPagiUtama} | Lauk: ${qtyPagiLauk}`);
+    }
+    
     safeSetText("tunai-pagi", "Rp " + tPagi.toLocaleString('id-ID'));
     safeSetText("qris-pagi", "Rp " + qrPagi.toLocaleString('id-ID'));
     safeSetText("total-pagi", "Rp " + (tPagi + qrPagi).toLocaleString('id-ID'));
     if(document.getElementById("body-rincian-pagi")) document.getElementById("body-rincian-pagi").innerHTML = rincianPagiBaris.join('') || `<tr><td colspan="4" class="p-4 text-center text-slate-400 italic">Kosong</td></tr>`;
 
-    let htmlMalam = ""; let qMalam = 0, tMalam = 0, qrMalam = 0;
+    // --- PROSES REKAP MALAM ---
+    let htmlMalam = ""; 
+    let tMalam = 0, qrMalam = 0;
+    let qtyMalamUtama = 0;
+    let qtyMalamLauk = 0;
+
     for(let key in rekapMalam) {
         let r = rekapMalam[key];
         if(r.qty > 0) {
-            qMalam += r.qty; tMalam += r.tunai; qrMalam += r.qris;
+            tMalam += r.tunai; qrMalam += r.qris;
+            
+            // Cek Kategori Malam (Aman dari huruf besar/kecil)
+            let kat = (r.kategori || "").toString().toLowerCase().trim();
+            if(kat === "lauk") {
+                qtyMalamLauk += r.qty;
+            } else {
+                qtyMalamUtama += r.qty;
+            }
+
             htmlMalam += `<tr class="border-b border-slate-100"><td class="p-2 text-slate-800 font-bold">${r.nama}</td><td class="p-2 text-center">${r.qty}</td><td class="p-2 text-right text-emerald-600">Rp ${r.tunai.toLocaleString('id-ID')}</td><td class="p-2 text-right text-sky-600">Rp ${r.qris.toLocaleString('id-ID')}</td></tr>`;
         }
     }
     const bTabelMalam = document.getElementById("body-tabel-malam");
     if(bTabelMalam) bTabelMalam.innerHTML = htmlMalam || `<tr><td colspan="4" class="p-4 text-center text-slate-400 italic text-[11px]">Kosong</td></tr>`;
-    safeSetText("qty-malam", qMalam);
+    
+    // Tampilkan data terpisah ke elemen HTML Malam yang baru
+    if(document.getElementById("qty-malam-utama")) {
+        safeSetText("qty-malam-utama", qtyMalamUtama);
+        safeSetText("qty-malam-lauk", qtyMalamLauk);
+    } else {
+        // Fallback jika elemen HTML belum diganti, gabungkan teksnya
+        safeSetText("qty-malam", `Utama: ${qtyMalamUtama} | Lauk: ${qtyMalamLauk}`);
+    }
+    
     safeSetText("tunai-malam", "Rp " + tMalam.toLocaleString('id-ID'));
     safeSetText("qris-malam", "Rp " + qrMalam.toLocaleString('id-ID'));
     safeSetText("total-malam", "Rp " + (tMalam + qrMalam).toLocaleString('id-ID'));
     if(document.getElementById("body-rincian-malam")) document.getElementById("body-rincian-malam").innerHTML = rincianMalamBaris.join('') || `<tr><td colspan="4" class="p-4 text-center text-slate-400 italic">Kosong</td></tr>`;
 
-    // --- HITUNG PEMISAHAN QTY UTAMA & LAUK GLOBAL ---
-    let totalQtyUtamaGlobal = 0;
-    let totalQtyLaukGlobal = 0;
-
-    // Hitung dari rekap Pagi
-    for(let key in rekapPagi) {
-        if(rekapPagi[key].kategori === "lauk") {
-            totalQtyLaukGlobal += rekapPagi[key].qty;
-        } else {
-            totalQtyUtamaGlobal += rekapPagi[key].qty;
-        }
-    }
-
-    // Hitung dari rekap Malam
-    for(let key in rekapMalam) {
-        if(rekapMalam[key].kategori === "lauk") {
-            totalQtyLaukGlobal += rekapMalam[key].qty;
-        } else {
-            totalQtyUtamaGlobal += rekapMalam[key].qty;
-        }
-    }
+    // --- PROSES GRAND TOTAL GLOBAL ---
+    let totalQtyUtamaGlobal = qtyPagiUtama + qtyMalamUtama;
+    let totalQtyLaukGlobal = qtyPagiLauk + qtyMalamLauk;
 
     let akumulasiTunaiGlobal = tPagi + tMalam;
     let akumulasiQrisGlobal = qrPagi + qrMalam;
     let omsetTotalHariIni = akumulasiTunaiGlobal + akumulasiQrisGlobal;
 
-    // Kirim data Qty yang terpisah ke elemen HTML baru Anda
+    // Kirim data Qty yang terpisah ke elemen HTML Grand Total
     safeSetText("grand-qty-utama", totalQtyUtamaGlobal);
     safeSetText("grand-qty-lauk", totalQtyLaukGlobal);
     safeSetText("grand-tunai-gabungan", "Rp " + akumulasiTunaiGlobal.toLocaleString('id-ID'));
