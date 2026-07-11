@@ -184,12 +184,16 @@
                         </div>
                     </div>
                 </div>
-                <div class="border-t border-slate-800 mt-3 pt-2.5 flex justify-between items-center">
+                <!-- BARIS PEMISAH QTY UTAMA DAN LAUK -->
+                <div class="border-t border-slate-800 mt-3 pt-2.5 flex justify-between items-center text-xs font-bold text-slate-300">
+                    <span>TOTAL QTY TERJUAL:</span>
+                    <span class="text-white font-black">Utama: <span id="grand-qty-utama" class="text-amber-400">0</span> | Lauk: <span id="grand-qty-lauk" class="text-amber-400">0</span></span>
+                </div>
+                <div class="border-t border-slate-800 mt-2 pt-2.5 flex justify-between items-center">
                     <span class="text-xs font-black text-slate-200">GRAND TOTAL PENJUALAN:</span>
                     <span id="grand-total-hari-ini" class="text-xl font-black text-amber-400">Rp 0</span>
                 </div>
             </div>
-
             <!-- SHIFT 1: PAGI -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200/60 overflow-hidden">
                 <div class="bg-slate-50 p-3.5 border-b border-slate-100 flex justify-between items-center">
@@ -564,8 +568,7 @@ function setDefaultTanggal() {
                 btn.innerText = "📊 Rekap";
             }
         }
-
-       function prosesLaporanHarian() {
+function prosesLaporanHarian() {
     const filterTglInput = document.getElementById("filter-tanggal");
     if(!filterTglInput) return;
     
@@ -592,92 +595,121 @@ function setDefaultTanggal() {
     let besok = new Date(malamMulai); besok.setDate(besok.getDate() + 1);
     let malamAkhir = new Date(besok); malamAkhir.setHours(5, 59, 59, 999);
 
-            let rekapPagi = {}; let rekapMalam = {};
-            let rincianPagiBaris = []; let rincianMalamBaris = [];
+    let rekapPagi = {}; let rekapMalam = {};
+    let rincianPagiBaris = []; let rincianMalamBaris = [];
 
-            itemMenu.forEach(m => {
-                rekapPagi[m.nama] = { nama: m.nama, qty: 0, tunai: 0, qris: 0, harga: m.harga };
-                rekapMalam[m.nama] = { nama: m.nama, qty: 0, tunai: 0, qris: 0, harga: m.harga };
+    itemMenu.forEach(m => {
+        // Menyertakan properti kategori bawaan dari itemMenu ke objek rekap
+        rekapPagi[m.nama] = { nama: m.nama, qty: 0, tunai: 0, qris: 0, harga: m.harga, kategori: m.kategori || "utama" };
+        rekapMalam[m.nama] = { nama: m.nama, qty: 0, tunai: 0, qris: 0, harga: m.harga, kategori: m.kategori || "utama" };
+    });
+
+    dataTransaksiSemua.forEach(tx => {
+        if(!tx.tanggal) return;
+        let txDate = new Date(tx.tanggal);
+        if(isNaN(txDate.getTime())) return;
+
+        let targetRekap = null; let IsPagi = false;
+        if(txDate >= pagiMulai && txDate <= pagiAkhir) { targetRekap = rekapPagi; IsPagi = true; } 
+        else if(txDate >= malamMulai && txDate <= malamAkhir) { targetRekap = rekapMalam; IsPagi = false; }
+
+        if(targetRekap) {
+            let metodeStr = tx.metode ? tx.metode.toString().toUpperCase() : "TUNAI";
+            let itemRaw = tx.item ? tx.item.toString() : "";
+            let bagianItem = itemRaw.split(",");
+            let badgeMetode = metodeStr === "QRIS" 
+                ? `<span class="px-1 text-[9px] font-bold bg-sky-50 text-sky-600 border border-sky-100">QRIS</span>`
+                : `<span class="px-1 text-[9px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-100">CASH</span>`;
+
+            let jamMenit = txDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false }).replace(/\./g, ':');
+            let htmlBarisDetail = `<tr class="border-b border-slate-100"><td class="p-2 text-slate-400 font-medium">${jamMenit}</td><td class="p-2 text-slate-800 leading-tight max-w-[150px] break-words">${tx.item}</td><td class="p-2 text-center">${badgeMetode}</td><td class="p-2 text-right text-slate-700">Rp ${Number(tx.total).toLocaleString('id-ID')}</td></tr>`;
+
+            if(IsPagi) { rincianPagiBaris.push(htmlBarisDetail); } else { rincianMalamBaris.push(htmlBarisDetail); }
+
+            bagianItem.forEach(bag => {
+                let bersihkan = bag.trim(); if(!bersihkan) return;
+                let namaMenu = bersihkan; let qtyMenu = 1;
+                let cocokQty = bersihkan.match(/(.+)\s\((\d+)x\)/);
+                if(cocokQty) { namaMenu = cocokQty[1].trim(); qtyMenu = parseInt(cocokQty[2], 10); }
+
+                // Ambil kategori dari data master itemMenu untuk fallback menu baru
+                let matchMenu = itemMenu.find(m => m.nama === namaMenu);
+                let kategoriMenu = matchMenu ? (matchMenu.kategori || "utama") : "utama";
+                let hargaBawaan = targetRekap[namaMenu] ? targetRekap[namaMenu].harga : 0;
+                let subTotalItem = qtyMenu * hargaBawaan;
+
+                if(!targetRekap[namaMenu]) { targetRekap[namaMenu] = { nama: namaMenu, qty: 0, tunai: 0, qris: 0, harga: hargaBawaan, kategori: kategoriMenu }; }
+                targetRekap[namaMenu].qty += qtyMenu;
+                if(metodeStr === "QRIS") { targetRekap[namaMenu].qris += subTotalItem; } else { targetRekap[namaMenu].tunai += subTotalItem; }
             });
-
-            dataTransaksiSemua.forEach(tx => {
-                if(!tx.tanggal) return;
-                let txDate = new Date(tx.tanggal);
-                if(isNaN(txDate.getTime())) return;
-
-                let targetRekap = null; let IsPagi = false;
-                if(txDate >= pagiMulai && txDate <= pagiAkhir) { targetRekap = rekapPagi; IsPagi = true; } 
-                else if(txDate >= malamMulai && txDate <= malamAkhir) { targetRekap = rekapMalam; IsPagi = false; }
-
-                if(targetRekap) {
-                    let metodeStr = tx.metode ? tx.metode.toString().toUpperCase() : "TUNAI";
-                    let itemRaw = tx.item ? tx.item.toString() : "";
-                    let bagianItem = itemRaw.split(",");
-                    let badgeMetode = metodeStr === "QRIS" 
-                        ? `<span class="px-1 text-[9px] font-bold bg-sky-50 text-sky-600 border border-sky-100">QRIS</span>`
-                        : `<span class="px-1 text-[9px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-100">CASH</span>`;
-
-                    let jamMenit = txDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false }).replace(/\./g, ':');
-                    let htmlBarisDetail = `<tr class="border-b border-slate-100"><td class="p-2 text-slate-400 font-medium">${jamMenit}</td><td class="p-2 text-slate-800 leading-tight max-w-[150px] break-words">${tx.item}</td><td class="p-2 text-center">${badgeMetode}</td><td class="p-2 text-right text-slate-700">Rp ${Number(tx.total).toLocaleString('id-ID')}</td></tr>`;
-
-                    if(IsPagi) { rincianPagiBaris.push(htmlBarisDetail); } else { rincianMalamBaris.push(htmlBarisDetail); }
-
-                    bagianItem.forEach(bag => {
-                        let bersihkan = bag.trim(); if(!bersihkan) return;
-                        let namaMenu = bersihkan; let qtyMenu = 1;
-                        let cocokQty = bersihkan.match(/(.+)\s\((\d+)x\)/);
-                        if(cocokQty) { namaMenu = cocokQty[1].trim(); qtyMenu = parseInt(cocokQty[2], 10); }
-
-                        let hargaBawaan = targetRekap[namaMenu] ? targetRekap[namaMenu].harga : 0;
-                        let subTotalItem = qtyMenu * hargaBawaan;
-
-                        if(!targetRekap[namaMenu]) { targetRekap[namaMenu] = { nama: namaMenu, qty: 0, tunai: 0, qris: 0, harga: hargaBawaan }; }
-                        targetRekap[namaMenu].qty += qtyMenu;
-                        if(metodeStr === "QRIS") { targetRekap[namaMenu].qris += subTotalItem; } else { targetRekap[namaMenu].tunai += subTotalItem; }
-                    });
-                }
-            });
-
-            let htmlPagi = ""; let qPagi = 0, tPagi = 0, qrPagi = 0;
-            for(let key in rekapPagi) {
-                let r = rekapPagi[key];
-                if(r.qty > 0) {
-                    qPagi += r.qty; tPagi += r.tunai; qrPagi += r.qris;
-                    htmlPagi += `<tr class="border-b border-slate-100"><td class="p-2 text-slate-800 font-bold">${r.nama}</td><td class="p-2 text-center">${r.qty}</td><td class="p-2 text-right text-emerald-600">Rp ${r.tunai.toLocaleString('id-ID')}</td><td class="p-2 text-right text-sky-600">Rp ${r.qris.toLocaleString('id-ID')}</td></tr>`;
-                }
-            }
-            const bTabelPagi = document.getElementById("body-tabel-pagi");
-            if(bTabelPagi) bTabelPagi.innerHTML = htmlPagi || `<tr><td colspan="4" class="p-4 text-center text-slate-400 italic text-[11px]">Kosong</td></tr>`;
-            safeSetText("qty-pagi", qPagi);
-            safeSetText("tunai-pagi", "Rp " + tPagi.toLocaleString('id-ID'));
-            safeSetText("qris-pagi", "Rp " + qrPagi.toLocaleString('id-ID'));
-            safeSetText("total-pagi", "Rp " + (tPagi + qrPagi).toLocaleString('id-ID'));
-            if(document.getElementById("body-rincian-pagi")) document.getElementById("body-rincian-pagi").innerHTML = rincianPagiBaris.join('') || `<tr><td colspan="4" class="p-4 text-center text-slate-400 italic">Kosong</td></tr>`;
-
-            let htmlMalam = ""; let qMalam = 0, tMalam = 0, qrMalam = 0;
-            for(let key in rekapMalam) {
-                let r = rekapMalam[key];
-                if(r.qty > 0) {
-                    qMalam += r.qty; tMalam += r.tunai; qrMalam += r.qris;
-                    htmlMalam += `<tr class="border-b border-slate-100"><td class="p-2 text-slate-800 font-bold">${r.nama}</td><td class="p-2 text-center">${r.qty}</td><td class="p-2 text-right text-emerald-600">Rp ${r.tunai.toLocaleString('id-ID')}</td><td class="p-2 text-right text-sky-600">Rp ${r.qris.toLocaleString('id-ID')}</td></tr>`;
-                }
-            }
-            const bTabelMalam = document.getElementById("body-tabel-malam");
-            if(bTabelMalam) bTabelMalam.innerHTML = htmlMalam || `<tr><td colspan="4" class="p-4 text-center text-slate-400 italic text-[11px]">Kosong</td></tr>`;
-            safeSetText("qty-malam", qMalam);
-            safeSetText("tunai-malam", "Rp " + tMalam.toLocaleString('id-ID'));
-            safeSetText("qris-malam", "Rp " + qrMalam.toLocaleString('id-ID'));
-            safeSetText("total-malam", "Rp " + (tMalam + qrMalam).toLocaleString('id-ID'));
-            if(document.getElementById("body-rincian-malam")) document.getElementById("body-rincian-malam").innerHTML = rincianMalamBaris.join('') || `<tr><td colspan="4" class="p-4 text-center text-slate-400 italic">Kosong</td></tr>`;
-
-            let akumulasiTunaiGlobal = tPagi + tMalam;
-            let akumulasiQrisGlobal = qrPagi + qrMalam;
-            let omsetTotalHariIni = akumulasiTunaiGlobal + akumulasiQrisGlobal;
-
-            safeSetText("grand-tunai-gabungan", "Rp " + akumulasiTunaiGlobal.toLocaleString('id-ID'));
-            safeSetText("grand-qris-gabungan", "Rp " + akumulasiQrisGlobal.toLocaleString('id-ID'));
-            safeSetText("grand-total-hari-ini", "Rp " + omsetTotalHariIni.toLocaleString('id-ID'));
         }
+    });
+
+    let htmlPagi = ""; let qPagi = 0, tPagi = 0, qrPagi = 0;
+    for(let key in rekapPagi) {
+        let r = rekapPagi[key];
+        if(r.qty > 0) {
+            qPagi += r.qty; tPagi += r.tunai; qrPagi += r.qris;
+            htmlPagi += `<tr class="border-b border-slate-100"><td class="p-2 text-slate-800 font-bold">${r.nama}</td><td class="p-2 text-center">${r.qty}</td><td class="p-2 text-right text-emerald-600">Rp ${r.tunai.toLocaleString('id-ID')}</td><td class="p-2 text-right text-sky-600">Rp ${r.qris.toLocaleString('id-ID')}</td></tr>`;
+        }
+    }
+    const bTabelPagi = document.getElementById("body-tabel-pagi");
+    if(bTabelPagi) bTabelPagi.innerHTML = htmlPagi || `<tr><td colspan="4" class="p-4 text-center text-slate-400 italic text-[11px]">Kosong</td></tr>`;
+    safeSetText("qty-pagi", qPagi);
+    safeSetText("tunai-pagi", "Rp " + tPagi.toLocaleString('id-ID'));
+    safeSetText("qris-pagi", "Rp " + qrPagi.toLocaleString('id-ID'));
+    safeSetText("total-pagi", "Rp " + (tPagi + qrPagi).toLocaleString('id-ID'));
+    if(document.getElementById("body-rincian-pagi")) document.getElementById("body-rincian-pagi").innerHTML = rincianPagiBaris.join('') || `<tr><td colspan="4" class="p-4 text-center text-slate-400 italic">Kosong</td></tr>`;
+
+    let htmlMalam = ""; let qMalam = 0, tMalam = 0, qrMalam = 0;
+    for(let key in rekapMalam) {
+        let r = rekapMalam[key];
+        if(r.qty > 0) {
+            qMalam += r.qty; tMalam += r.tunai; qrMalam += r.qris;
+            htmlMalam += `<tr class="border-b border-slate-100"><td class="p-2 text-slate-800 font-bold">${r.nama}</td><td class="p-2 text-center">${r.qty}</td><td class="p-2 text-right text-emerald-600">Rp ${r.tunai.toLocaleString('id-ID')}</td><td class="p-2 text-right text-sky-600">Rp ${r.qris.toLocaleString('id-ID')}</td></tr>`;
+        }
+    }
+    const bTabelMalam = document.getElementById("body-tabel-malam");
+    if(bTabelMalam) bTabelMalam.innerHTML = htmlMalam || `<tr><td colspan="4" class="p-4 text-center text-slate-400 italic text-[11px]">Kosong</td></tr>`;
+    safeSetText("qty-malam", qMalam);
+    safeSetText("tunai-malam", "Rp " + tMalam.toLocaleString('id-ID'));
+    safeSetText("qris-malam", "Rp " + qrMalam.toLocaleString('id-ID'));
+    safeSetText("total-malam", "Rp " + (tMalam + qrMalam).toLocaleString('id-ID'));
+    if(document.getElementById("body-rincian-malam")) document.getElementById("body-rincian-malam").innerHTML = rincianMalamBaris.join('') || `<tr><td colspan="4" class="p-4 text-center text-slate-400 italic">Kosong</td></tr>`;
+
+    // --- HITUNG PEMISAHAN QTY UTAMA & LAUK GLOBAL ---
+    let totalQtyUtamaGlobal = 0;
+    let totalQtyLaukGlobal = 0;
+
+    // Hitung dari rekap Pagi
+    for(let key in rekapPagi) {
+        if(rekapPagi[key].kategori === "lauk") {
+            totalQtyLaukGlobal += rekapPagi[key].qty;
+        } else {
+            totalQtyUtamaGlobal += rekapPagi[key].qty;
+        }
+    }
+
+    // Hitung dari rekap Malam
+    for(let key in rekapMalam) {
+        if(rekapMalam[key].kategori === "lauk") {
+            totalQtyLaukGlobal += rekapMalam[key].qty;
+        } else {
+            totalQtyUtamaGlobal += rekapMalam[key].qty;
+        }
+    }
+
+    let akumulasiTunaiGlobal = tPagi + tMalam;
+    let akumulasiQrisGlobal = qrPagi + qrMalam;
+    let omsetTotalHariIni = akumulasiTunaiGlobal + akumulasiQrisGlobal;
+
+    // Kirim data Qty yang terpisah ke elemen HTML baru Anda
+    safeSetText("grand-qty-utama", totalQtyUtamaGlobal);
+    safeSetText("grand-qty-lauk", totalQtyLaukGlobal);
+    safeSetText("grand-tunai-gabungan", "Rp " + akumulasiTunaiGlobal.toLocaleString('id-ID'));
+    safeSetText("grand-qris-gabungan", "Rp " + akumulasiQrisGlobal.toLocaleString('id-ID'));
+    safeSetText("grand-total-hari-ini", "Rp " + omsetTotalHariIni.toLocaleString('id-ID'));
+}
 
         function bayarSekarang() {
             if(grandTotal === 0) { triggerNotif("Isi dulu item belanjaan kasir!", "error"); return; }
