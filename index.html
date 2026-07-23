@@ -10,6 +10,7 @@
         body {
             -webkit-tap-highlight-color: transparent;
             user-select: none;
+            padding-bottom: 100px !important;
         }
         
         /* STYLE HABIS - KOTAK MELENGKUNG, KECIL, TENGAH */
@@ -358,8 +359,70 @@
             100% { background-position: -200% 0; }
         }
 
+        /* STICKY NOTA - PERBAIKAN */
+        .sticky-nota-wrapper {
+            position: sticky;
+            top: 80px;
+            z-index: 20;
+        }
+        .sticky-nota-wrapper .card-nota {
+            max-height: calc(100vh - 190px);
+            overflow-y: auto;
+        }
+
+        /* NAVIGASI FOOTER - TETAP DI BAWAH */
+        .nav-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            padding: 10px 24px;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+        }
+
         /* RESPONSIF */
+        @media (max-width: 1024px) {
+            body {
+                padding-bottom: 100px !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding-bottom: 95px !important;
+            }
+            .sticky-nota-wrapper {
+                top: 75px;
+            }
+            .sticky-nota-wrapper .card-nota {
+                max-height: calc(100vh - 170px);
+                padding: 12px !important;
+            }
+            .card-nota .p-4 {
+                padding: 12px !important;
+            }
+            /* Kurangi gap antar kartu di mobile */
+            .gap-4 {
+                gap: 10px !important;
+            }
+            .gap-3 {
+                gap: 8px !important;
+            }
+            .space-y-3 {
+                margin-top: 8px !important;
+            }
+            .space-y-3 > * + * {
+                margin-top: 8px !important;
+            }
+        }
+
         @media (max-width: 640px) {
+            body {
+                padding-bottom: 85px !important;
+            }
             .logo-3d { font-size: 20px !important; }
             .logo-3d::after { font-size: 16px !important; }
             .logo-wrapper { padding: 4px 12px 4px 8px; border-radius: 12px; }
@@ -386,8 +449,43 @@
                 width: 22px !important;
                 min-width: 22px !important;
             }
+            .sticky-nota-wrapper {
+                top: 70px;
+            }
+            .sticky-nota-wrapper .card-nota {
+                max-height: calc(100vh - 155px);
+                padding: 10px !important;
+            }
+            .card-nota .p-4 {
+                padding: 10px !important;
+            }
+            /* Kurangi gap antar elemen di mobile */
+            .gap-4 {
+                gap: 8px !important;
+            }
+            .gap-3 {
+                gap: 6px !important;
+            }
+            .space-y-3 {
+                margin-top: 6px !important;
+            }
+            .space-y-3 > * + * {
+                margin-top: 6px !important;
+            }
+            .p-3 {
+                padding: 8px !important;
+            }
+            /* Tombol bayar di mobile */
+            .btn-bayar-mobile {
+                padding: 12px !important;
+                font-size: 13px !important;
+            }
         }
+
         @media (max-width: 480px) {
+            body {
+                padding-bottom: 75px !important;
+            }
             .logo-3d { font-size: 17px !important; }
             .logo-3d::after { font-size: 13px !important; }
             .logo-wrapper { padding: 3px 8px 3px 6px; border-radius: 10px; border-width: 1.5px; }
@@ -417,6 +515,49 @@
             .card-3d:hover {
                 transform: perspective(600px) rotateX(0deg) rotateY(0deg) translateY(-2px);
             }
+            .sticky-nota-wrapper {
+                top: 65px;
+            }
+            .sticky-nota-wrapper .card-nota {
+                max-height: calc(100vh - 140px);
+                padding: 8px !important;
+            }
+            .card-nota .p-4 {
+                padding: 8px !important;
+            }
+            /* Kurangi gap lebih agresif di mobile kecil */
+            .gap-4 {
+                gap: 6px !important;
+            }
+            .gap-3 {
+                gap: 4px !important;
+            }
+            .gap-2 {
+                gap: 4px !important;
+            }
+            .space-y-3 {
+                margin-top: 4px !important;
+            }
+            .space-y-3 > * + * {
+                margin-top: 4px !important;
+            }
+            .p-3 {
+                padding: 6px !important;
+            }
+            .nav-footer {
+                padding: 6px 16px !important;
+            }
+            .nav-footer .text-xl {
+                font-size: 1.2rem !important;
+            }
+            .nav-footer .text-\\[11px\\] {
+                font-size: 9px !important;
+            }
+            /* Tombol bayar di mobile kecil */
+            .btn-bayar-mobile {
+                padding: 10px !important;
+                font-size: 12px !important;
+            }
         }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700;900&display=swap" rel="stylesheet">
@@ -424,7 +565,7 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
 </head>
-<body class="bg-slate-100 font-sans text-slate-800 min-h-screen flex flex-col pb-24">
+<body class="bg-slate-100 font-sans text-slate-800 min-h-screen flex flex-col">
 
     <!-- DIALOG NOTIFIKASI -->
     <div id="notif-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
@@ -516,72 +657,74 @@
     </div>
 
     <!-- MAIN APP CONTAINER -->
-    <main id="menu-container" class="max-w-7xl mx-auto p-3 w-full grid grid-cols-1 lg:grid-cols-12 gap-4 flex-1 hidden">
+    <main id="menu-container" class="max-w-7xl mx-auto p-3 w-full grid grid-cols-1 lg:grid-cols-12 gap-3 flex-1 hidden">
         
         <!-- ================= PAGE 1: KASIR UTAMA ================= -->
-        <section id="page-kasir" class="lg:col-span-12 grid grid-cols-1 lg:grid-cols-12 gap-4 w-full">
+        <section id="page-kasir" class="lg:col-span-12 grid grid-cols-1 lg:grid-cols-12 gap-3 w-full">
             
-            <div class="lg:col-span-7 grid grid-cols-2 gap-3 items-start">
+            <div class="lg:col-span-7 grid grid-cols-2 gap-2 items-start">
               
             <!-- KOLOM KIRI: Menu Utama & Lauk -->
-            <div class="space-y-3">
+            <div class="space-y-2">
               
-              <div class="card-utama card-3d rounded-2xl p-3 shadow-sm border min-h-[150px]">
-                <h2 class="kategori-title header-utama font-black uppercase tracking-wider mb-2 flex items-center"><span class="mr-1.5 text-base">🍛</span>Menu Utama</h2>
-                <div id="kolom-utama" class="grid grid-cols-2 gap-2"></div>
+              <div class="card-utama card-3d rounded-2xl p-2 shadow-sm border min-h-[140px]">
+                <h2 class="kategori-title header-utama font-black uppercase tracking-wider mb-1.5 flex items-center"><span class="mr-1 text-base">🍛</span>Menu Utama</h2>
+                <div id="kolom-utama" class="grid grid-cols-2 gap-1.5"></div>
               </div>
 
-              <div class="card-lauk card-3d rounded-2xl p-3 shadow-sm border min-h-[150px]">
-                <h2 class="kategori-title header-lauk font-black uppercase tracking-wider mb-2 flex items-center"><span class="mr-1.5 text-base">🍗</span> Lauk</h2>
-                <div id="kolom-lauk" class="grid grid-cols-2 gap-2"></div>
+              <div class="card-lauk card-3d rounded-2xl p-2 shadow-sm border min-h-[140px]">
+                <h2 class="kategori-title header-lauk font-black uppercase tracking-wider mb-1.5 flex items-center"><span class="mr-1 text-base">🍗</span> Lauk</h2>
+                <div id="kolom-lauk" class="grid grid-cols-2 gap-1.5"></div>
               </div>
 
             </div>
 
-            <div class="card-sembako card-3d rounded-2xl p-3 shadow-sm border min-h-[300px]">
-              <h2 class="kategori-title header-sembako font-black uppercase tracking-wider mb-2 flex items-center"><span class="mr-1.5 text-base">🌾</span>Sembako</h2>
-              <div id="kolom-sembako" class="grid grid-cols-2 gap-2"></div>
+            <div class="card-sembako card-3d rounded-2xl p-2 shadow-sm border min-h-[280px]">
+              <h2 class="kategori-title header-sembako font-black uppercase tracking-wider mb-1.5 flex items-center"><span class="mr-1 text-base">🌾</span>Sembako</h2>
+              <div id="kolom-sembako" class="grid grid-cols-2 gap-1.5"></div>
             </div>
             </div>
 
-            <!-- Bagian Nota -->
-            <div class="lg:col-span-5 space-y-3">
-                <div class="card-nota card-3d rounded-2xl p-4 shadow-sm border sticky top-20">
-                    <div class="bg-slate-900 text-right p-3 rounded-xl mb-3 border border-slate-800">
-                        <span class="text-[10px] text-amber-400 font-black tracking-wider block mb-0.5">TOTAL NOTA</span>
-                        <div id="total-screen" class="total-nota font-black text-white">Rp 0</div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-2 mb-3 text-sm text-center">
-                        <button id="tab-tunai" onclick="gantiMetode('TUNAI')" class="p-3 font-bold rounded-xl border-2 border-amber-500 bg-amber-50 text-amber-700 transition shadow-sm">💵 CASH</button>
-                        <button id="tab-qris" onclick="gantiMetode('QRIS')" class="p-3 font-bold rounded-xl border border-slate-200 text-slate-600 transition">📱 QRIS</button>
-                    </div>
-
-                    <div id="area-tunai" class="space-y-3">
-                        <div>
-                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1.5">Pilihan Uang Lembaran</label>
-                            <div id="rupiah-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-1.5"></div>
+            <!-- Bagian Nota - Sticky dengan wrapper -->
+            <div class="lg:col-span-5 space-y-2">
+                <div class="sticky-nota-wrapper">
+                    <div class="card-nota card-3d rounded-2xl p-3 shadow-sm border">
+                        <div class="bg-slate-900 text-right p-2.5 rounded-xl mb-2 border border-slate-800">
+                            <span class="text-[10px] text-amber-400 font-black tracking-wider block mb-0.5">TOTAL NOTA</span>
+                            <div id="total-screen" class="total-nota font-black text-white">Rp 0</div>
                         </div>
-                        <div>
-                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1">Ketik Manual Nominal Uang</label>
-                            <div class="relative">
-                                <span class="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-slate-400 text-sm">Rp</span>
-                                <input type="text" id="input-manual-bayar" oninput="handleInputManual(this.value)" placeholder="0" class="w-full bg-white border border-slate-200 rounded-xl p-3 pl-10 text-sm font-black focus:outline-none focus:ring-2 focus:ring-amber-400 text-slate-700">
+
+                        <div class="grid grid-cols-2 gap-1.5 mb-2 text-sm text-center">
+                            <button id="tab-tunai" onclick="gantiMetode('TUNAI')" class="p-2.5 font-bold rounded-xl border-2 border-amber-500 bg-amber-50 text-amber-700 transition shadow-sm text-xs">💵 CASH</button>
+                            <button id="tab-qris" onclick="gantiMetode('QRIS')" class="p-2.5 font-bold rounded-xl border border-slate-200 text-slate-600 transition text-xs">📱 QRIS</button>
+                        </div>
+
+                        <div id="area-tunai" class="space-y-2">
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1">Pilihan Uang</label>
+                                <div id="rupiah-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-1"></div>
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1">Manual</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-slate-400 text-xs">Rp</span>
+                                    <input type="text" id="input-manual-bayar" oninput="handleInputManual(this.value)" placeholder="0" class="w-full bg-white border border-slate-200 rounded-xl p-2.5 pl-8 text-sm font-black focus:outline-none focus:ring-2 focus:ring-amber-400 text-slate-700">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-1.5 bg-white/70 p-2 rounded-xl border border-slate-100 text-xs font-bold text-slate-600">
+                                <div>Diterima: <span id="txt-cash-in" class="block font-black text-slate-800 text-xs mt-0.5">Rp 0</span></div>
+                                <div class="text-right">Kembalian: <span id="txt-change" class="block font-black text-emerald-600 text-xs mt-0.5">Rp 0</span></div>
                             </div>
                         </div>
-                        <div class="grid grid-cols-2 gap-2 bg-white/70 p-3 rounded-xl border border-slate-100 text-sm font-bold text-slate-600">
-                            <div>Diterima: <span id="txt-cash-in" class="block font-black text-slate-800 text-sm mt-0.5">Rp 0</span></div>
-                            <div class="text-right">Kembalian: <span id="txt-change" class="block font-black text-emerald-600 text-sm mt-0.5">Rp 0</span></div>
+
+                        <div id="area-qris" class="hidden p-2 bg-white/70 rounded-xl border border-slate-200 text-center">
+                            <p class="text-xs text-slate-500 font-bold leading-relaxed">Bayar <span id="qris-amount-text" class="text-amber-600 font-black">Rp 0</span> via QRIS</p>
                         </div>
-                    </div>
 
-                    <div id="area-qris" class="hidden p-3 bg-white/70 rounded-xl border border-slate-200 text-center">
-                        <p class="text-sm text-slate-500 font-bold leading-relaxed">Harap pastikan uang masuk senilai <span id="qris-amount-text" class="text-amber-600 font-black">Rp 0</span> di e-wallet Anda.</p>
+                        <button onclick="bayarSekarang()" class="btn-bayar-mobile w-full mt-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-white font-black text-sm p-3.5 rounded-xl shadow-md active:scale-95 transition hover:shadow-lg">
+                            🚀 BAYAR SEKARANG
+                        </button>
                     </div>
-
-                    <button onclick="bayarSekarang()" class="w-full mt-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white font-black text-sm p-4 rounded-xl shadow-md active:scale-95 transition hover:shadow-lg">
-                        🚀 BAYAR SEKARANG
-                    </button>
                 </div>
             </div>
             
@@ -759,16 +902,18 @@
         </section>
     </main>
 
-    <!-- NAVIGATION BAR -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-2 px-6 shadow-xl flex justify-around items-center z-40 max-w-7xl mx-auto rounded-t-2xl">
-        <button id="nav-kasir" onclick="navigasiKe('kasir')" class="flex flex-col items-center justify-center text-amber-600 font-bold transition">
-            <span class="text-xl mb-0.5">🛒</span>
-            <span class="text-[11px] uppercase tracking-wide">Kasir</span>
-        </button>
-        <button id="nav-laporan" onclick="navigasiKe('laporan')" class="flex flex-col items-center justify-center text-slate-400 font-bold transition">
-            <span class="text-xl mb-0.5">📊</span>
-            <span class="text-[11px] uppercase tracking-wide">Laporan Shift</span>
-        </button>
+    <!-- NAVIGATION BAR - DIPERBAIKI -->
+    <nav class="nav-footer">
+        <div class="max-w-7xl mx-auto flex justify-around items-center">
+            <button id="nav-kasir" onclick="navigasiKe('kasir')" class="flex flex-col items-center justify-center text-amber-600 font-bold transition py-1">
+                <span class="text-xl mb-0.5">🛒</span>
+                <span class="text-[11px] uppercase tracking-wide">Kasir</span>
+            </button>
+            <button id="nav-laporan" onclick="navigasiKe('laporan')" class="flex flex-col items-center justify-center text-slate-400 font-bold transition py-1">
+                <span class="text-xl mb-0.5">📊</span>
+                <span class="text-[11px] uppercase tracking-wide">Laporan Shift</span>
+            </button>
+        </div>
     </nav>
 
     <!-- LOGIKA JAVASCRIPT -->
@@ -910,13 +1055,21 @@
             if(halaman === 'kasir') {
                 if(pKasir) pKasir.classList.remove('hidden');
                 if(pLaporan) pLaporan.classList.add('hidden');
-                if(nKasir) nKasir.className = "flex flex-col items-center justify-center text-amber-600 font-bold transition";
-                if(nLaporan) nLaporan.className = "flex flex-col items-center justify-center text-slate-400 font-bold transition";
+                if(nKasir) {
+                    nKasir.className = "flex flex-col items-center justify-center text-amber-600 font-bold transition py-1";
+                }
+                if(nLaporan) {
+                    nLaporan.className = "flex flex-col items-center justify-center text-slate-400 font-bold transition py-1";
+                }
             } else {
                 if(pKasir) pKasir.classList.add('hidden');
                 if(pLaporan) pLaporan.classList.remove('hidden');
-                if(nKasir) nKasir.className = "flex flex-col items-center justify-center text-slate-400 font-bold transition";
-                if(nLaporan) nLaporan.className = "flex flex-col items-center justify-center text-amber-600 font-bold transition";
+                if(nKasir) {
+                    nKasir.className = "flex flex-col items-center justify-center text-slate-400 font-bold transition py-1";
+                }
+                if(nLaporan) {
+                    nLaporan.className = "flex flex-col items-center justify-center text-amber-600 font-bold transition py-1";
+                }
                 prosesLaporanHarian();
             }
         }
@@ -1022,7 +1175,7 @@
             const idAman = item.nama.replace(/\s+/g, '_');
             const isHabis = item.status && item.status.toLowerCase() === "habis";
             
-            let classItem = "pt-2 pb-2 block w-full text-left relative";
+            let classItem = "pt-1.5 pb-1.5 block w-full text-left relative";
             if (isHabis) classItem += " item-habis";
             
             let stampHtml = "";
@@ -1042,7 +1195,7 @@
                 ${stampHtml}
                 <div class="item-content">
                     <div class="nama-item text-slate-800 leading-tight break-words max-w-full">${item.nama}</div>
-                    <div class="harga-item font-black text-amber-600 mb-1.5">Rp ${(item.harga || 0).toLocaleString('id-ID')}</div>
+                    <div class="harga-item font-black text-amber-600 mb-1">Rp ${(item.harga || 0).toLocaleString('id-ID')}</div>
                     <div class="qty-controls">
                         <button onclick="ubahQty('${item.nama.replace(/'/g, "\\'")}', -1)" class="btn-qty rounded bg-slate-100 text-slate-600 font-black active:scale-90 transition flex items-center justify-center shadow-sm hover:bg-slate-200">−</button>
                         <span id="qty-${idAman}" class="qty-number text-center font-black text-slate-700">${orderan[item.nama]}</span>
@@ -1111,12 +1264,12 @@
             if (!container) return;
 
             if(grandTotal === 0) {
-                container.innerHTML = "<p class='col-span-2 text-center text-sm text-slate-400 py-1'>Keranjang kosong</p>";
+                container.innerHTML = "<p class='col-span-2 text-center text-xs text-slate-400 py-0.5'>Keranjang kosong</p>";
                 setUangFisik(0);
                 return;
             }
 
-            let html = `<button onclick="setUangFisik(${grandTotal})" class="p-2.5 text-sm font-bold rounded-xl border border-dashed border-slate-300 text-slate-600 active:scale-95 transition bg-slate-50">💵 PAS</button>`;
+            let html = `<button onclick="setUangFisik(${grandTotal})" class="p-1.5 text-xs font-bold rounded-xl border border-dashed border-slate-300 text-slate-600 active:scale-95 transition bg-slate-50">💵 PAS</button>`;
             let gridStatis = [5000, 10000, 20000, 50000, 100000];
             let pilihanUang = [];
 
@@ -1132,7 +1285,7 @@
 
             pilihanUang.sort((a, b) => a.nominal - b.nominal);
             pilihanUang.slice(0, 5).forEach(item => {
-                html += `<button onclick="setUangFisik(${item.nominal})" class="p-2.5 text-sm font-black rounded-xl shadow-sm ${item.style}">Rp ${item.nominal.toLocaleString('id-ID')}</button>`;
+                html += `<button onclick="setUangFisik(${item.nominal})" class="p-1.5 text-xs font-black rounded-xl shadow-sm ${item.style}">Rp ${item.nominal.toLocaleString('id-ID')}</button>`;
             });
             container.innerHTML = html;
             
@@ -1191,13 +1344,13 @@
             if(opsi === "TUNAI") {
                 if(areaTunai) areaTunai.classList.remove("hidden");
                 if(areaQris) areaQris.classList.add("hidden");
-                if(tabTunai) tabTunai.className = "p-3 font-bold rounded-xl border-2 border-amber-500 bg-amber-50 text-amber-700 transition shadow-sm";
-                if(tabQris) tabQris.className = "p-3 font-bold rounded-xl border border-slate-200 text-slate-600 transition";
+                if(tabTunai) tabTunai.className = "p-2.5 font-bold rounded-xl border-2 border-amber-500 bg-amber-50 text-amber-700 transition shadow-sm text-xs";
+                if(tabQris) tabQris.className = "p-2.5 font-bold rounded-xl border border-slate-200 text-slate-600 transition text-xs";
             } else {
                 if(areaTunai) areaTunai.classList.add("hidden");
                 if(areaQris) areaQris.classList.remove("hidden");
-                if(tabQris) tabQris.className = "p-3 font-bold rounded-xl border-2 border-amber-500 bg-amber-50 text-amber-700 transition shadow-sm";
-                if(tabTunai) tabTunai.className = "p-3 font-bold rounded-xl border border-slate-200 text-slate-600 transition";
+                if(tabQris) tabQris.className = "p-2.5 font-bold rounded-xl border-2 border-amber-500 bg-amber-50 text-amber-700 transition shadow-sm text-xs";
+                if(tabTunai) tabTunai.className = "p-2.5 font-bold rounded-xl border border-slate-200 text-slate-600 transition text-xs";
             }
         }
 
