@@ -121,7 +121,6 @@
         .card-3d:hover::after {
             opacity: 1;
         }
-        /* Shadow 3D di bagian bawah */
         .card-3d::before {
             content: '';
             position: absolute;
@@ -168,33 +167,52 @@
 
         /* TOMBOL QTY - JARAK DIPERLEBAR */
         .btn-qty {
-            width: 34px !important;
-            height: 34px !important;
-            font-size: 16px !important;
+            width: 32px !important;
+            height: 32px !important;
+            font-size: 14px !important;
             font-weight: 900;
-            min-width: 34px !important;
-            min-height: 34px !important;
+            min-width: 32px !important;
+            min-height: 32px !important;
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
         }
         .qty-number {
-            font-size: 16px !important;
+            font-size: 14px !important;
             font-weight: 900;
-            width: 28px !important;
-            min-width: 28px !important;
+            width: 24px !important;
+            min-width: 24px !important;
             text-align: center !important;
         }
         .qty-controls {
             display: flex !important;
             align-items: center !important;
-            gap: 4px !important;
+            gap: 3px !important;
+        }
+
+        /* UKURAN FONT MENU - DIKURANGI */
+        .nama-item {
+            font-size: 13px !important;
+            font-weight: 800;
+            line-height: 1.25;
+        }
+        .harga-item {
+            font-size: 11px !important;
+            font-weight: 900;
+        }
+        .kategori-title {
+            font-size: 12px !important;
+            font-weight: 900;
+        }
+        .total-nota {
+            font-size: 22px !important;
+            font-weight: 900;
         }
 
         /* LOGO TOKO - PUTIH DENGAN BAYANGAN MERAH */
         .logo-3d {
             font-family: 'Poppins', 'Segoe UI', 'Arial Black', sans-serif !important;
-            font-size: 30px !important;
+            font-size: 26px !important;
             font-weight: 900;
             color: #ffffff !important;
             -webkit-text-fill-color: #ffffff;
@@ -207,7 +225,7 @@
                 0 4px 20px rgba(220, 38, 38, 0.15);
             position: relative;
             display: inline-block;
-            letter-spacing: 1.5px;
+            letter-spacing: 1px;
             transform: perspective(500px) rotateX(2deg) rotateY(-2deg);
             transition: transform 0.3s ease;
             filter: drop-shadow(0 0 30px rgba(220, 38, 38, 0.1));
@@ -223,9 +241,9 @@
         }
         .logo-3d::after {
             content: '🏪';
-            font-size: 24px;
+            font-size: 20px;
             -webkit-text-fill-color: initial;
-            margin-right: 8px;
+            margin-right: 6px;
             filter: drop-shadow(2px 2px 8px rgba(0,0,0,0.3));
             animation: iconBounce 2.5s ease-in-out infinite;
         }
@@ -235,8 +253,8 @@
         }
         .logo-wrapper {
             background: linear-gradient(145deg, #1a1a2e, #16213e, #0f172a);
-            padding: 8px 22px 8px 12px;
-            border-radius: 20px;
+            padding: 6px 18px 6px 10px;
+            border-radius: 16px;
             border: 2px solid #dc2626;
             box-shadow: 
                 0 8px 32px rgba(220, 38, 38, 0.2),
@@ -286,7 +304,7 @@
         .blink-text {
             display: inline-block;
             font-weight: 700;
-            font-size: 13px;
+            font-size: 12px;
             animation: colorBlink 3s ease-in-out infinite;
             text-shadow: 0 0 20px rgba(255,255,255,0.1);
             white-space: normal;
@@ -340,35 +358,22 @@
             100% { background-position: -200% 0; }
         }
 
+        /* RESPONSIF */
         @media (max-width: 640px) {
-            .logo-3d { font-size: 22px !important; }
-            .logo-3d::after { font-size: 18px !important; }
-            .logo-wrapper { padding: 5px 14px 5px 8px; border-radius: 14px; }
-            .blink-text { font-size: 11px; }
+            .logo-3d { font-size: 20px !important; }
+            .logo-3d::after { font-size: 16px !important; }
+            .logo-wrapper { padding: 4px 12px 4px 8px; border-radius: 12px; }
+            .blink-text { font-size: 10px; }
+            
+            .nama-item { font-size: 12px !important; }
+            .harga-item { font-size: 10px !important; }
+            .kategori-title { font-size: 11px !important; }
+            .total-nota { font-size: 18px !important; }
+            
             .item-habis .stamp-habis .stamp-text { font-size: 10px; }
             .item-habis .stamp-habis .stamp-sub { font-size: 6px; }
             .item-habis .stamp-habis .stamp-box { padding: 2px 8px; min-width: 45px; border-radius: 6px; }
-            .btn-qty {
-                width: 30px !important;
-                height: 30px !important;
-                font-size: 14px !important;
-                min-width: 30px !important;
-                min-height: 30px !important;
-            }
-            .qty-number {
-                font-size: 14px !important;
-                width: 24px !important;
-                min-width: 24px !important;
-            }
-        }
-        @media (max-width: 480px) {
-            .logo-3d { font-size: 18px !important; }
-            .logo-3d::after { font-size: 14px !important; }
-            .logo-wrapper { padding: 4px 10px 4px 6px; border-radius: 10px; }
-            .blink-text { font-size: 10px; }
-            .item-habis .stamp-habis .stamp-text { font-size: 8px; letter-spacing: 0.5px; }
-            .item-habis .stamp-habis .stamp-sub { font-size: 5px; letter-spacing: 1px; }
-            .item-habis .stamp-habis .stamp-box { padding: 2px 6px; min-width: 38px; border-radius: 4px; border-width: 2px; }
+            
             .btn-qty {
                 width: 28px !important;
                 height: 28px !important;
@@ -380,6 +385,34 @@
                 font-size: 13px !important;
                 width: 22px !important;
                 min-width: 22px !important;
+            }
+        }
+        @media (max-width: 480px) {
+            .logo-3d { font-size: 17px !important; }
+            .logo-3d::after { font-size: 13px !important; }
+            .logo-wrapper { padding: 3px 8px 3px 6px; border-radius: 10px; border-width: 1.5px; }
+            .blink-text { font-size: 9px; }
+            
+            .nama-item { font-size: 11px !important; }
+            .harga-item { font-size: 9px !important; }
+            .kategori-title { font-size: 10px !important; }
+            .total-nota { font-size: 16px !important; }
+            
+            .item-habis .stamp-habis .stamp-text { font-size: 8px; letter-spacing: 0.5px; }
+            .item-habis .stamp-habis .stamp-sub { font-size: 5px; letter-spacing: 1px; }
+            .item-habis .stamp-habis .stamp-box { padding: 2px 6px; min-width: 38px; border-radius: 4px; border-width: 2px; }
+            
+            .btn-qty {
+                width: 26px !important;
+                height: 26px !important;
+                font-size: 12px !important;
+                min-width: 26px !important;
+                min-height: 26px !important;
+            }
+            .qty-number {
+                font-size: 12px !important;
+                width: 20px !important;
+                min-width: 20px !important;
             }
             .card-3d:hover {
                 transform: perspective(600px) rotateX(0deg) rotateY(0deg) translateY(-2px);
@@ -494,19 +527,19 @@
             <div class="space-y-3">
               
               <div class="card-utama card-3d rounded-2xl p-3 shadow-sm border min-h-[150px]">
-                <h2 class="kategori-title header-utama font-black uppercase tracking-wider mb-2.5 flex items-center"><span class="mr-1.5 text-base">🍛</span>Menu Utama</h2>
+                <h2 class="kategori-title header-utama font-black uppercase tracking-wider mb-2 flex items-center"><span class="mr-1.5 text-base">🍛</span>Menu Utama</h2>
                 <div id="kolom-utama" class="grid grid-cols-2 gap-2"></div>
               </div>
 
               <div class="card-lauk card-3d rounded-2xl p-3 shadow-sm border min-h-[150px]">
-                <h2 class="kategori-title header-lauk font-black uppercase tracking-wider mb-2.5 flex items-center"><span class="mr-1.5 text-base">🍗</span> Lauk</h2>
+                <h2 class="kategori-title header-lauk font-black uppercase tracking-wider mb-2 flex items-center"><span class="mr-1.5 text-base">🍗</span> Lauk</h2>
                 <div id="kolom-lauk" class="grid grid-cols-2 gap-2"></div>
               </div>
 
             </div>
 
             <div class="card-sembako card-3d rounded-2xl p-3 shadow-sm border min-h-[300px]">
-              <h2 class="kategori-title header-sembako font-black uppercase tracking-wider mb-2.5 flex items-center"><span class="mr-1.5 text-base">🌾</span>Sembako</h2>
+              <h2 class="kategori-title header-sembako font-black uppercase tracking-wider mb-2 flex items-center"><span class="mr-1.5 text-base">🌾</span>Sembako</h2>
               <div id="kolom-sembako" class="grid grid-cols-2 gap-2"></div>
             </div>
             </div>
@@ -515,7 +548,7 @@
             <div class="lg:col-span-5 space-y-3">
                 <div class="card-nota card-3d rounded-2xl p-4 shadow-sm border sticky top-20">
                     <div class="bg-slate-900 text-right p-3 rounded-xl mb-3 border border-slate-800">
-                        <span class="text-[11px] text-amber-400 font-black tracking-wider block mb-0.5">TOTAL NOTA</span>
+                        <span class="text-[10px] text-amber-400 font-black tracking-wider block mb-0.5">TOTAL NOTA</span>
                         <div id="total-screen" class="total-nota font-black text-white">Rp 0</div>
                     </div>
 
@@ -526,11 +559,11 @@
 
                     <div id="area-tunai" class="space-y-3">
                         <div>
-                            <label class="text-[11px] font-black text-slate-400 uppercase tracking-wider block mb-1.5">Pilihan Uang Lembaran</label>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1.5">Pilihan Uang Lembaran</label>
                             <div id="rupiah-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-1.5"></div>
                         </div>
                         <div>
-                            <label class="text-[11px] font-black text-slate-400 uppercase tracking-wider block mb-1">Ketik Manual Nominal Uang</label>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1">Ketik Manual Nominal Uang</label>
                             <div class="relative">
                                 <span class="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-slate-400 text-sm">Rp</span>
                                 <input type="text" id="input-manual-bayar" oninput="handleInputManual(this.value)" placeholder="0" class="w-full bg-white border border-slate-200 rounded-xl p-3 pl-10 text-sm font-black focus:outline-none focus:ring-2 focus:ring-amber-400 text-slate-700">
