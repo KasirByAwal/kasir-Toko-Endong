@@ -89,22 +89,20 @@
             filter: blur(0.5px);
         }
 
-        /* EFEK 3D PADA KARTU MENU */
+        /* EFEK 3D PADA KARTU - TIDAK MIRING BERLEBIHAN */
         .card-3d {
             position: relative;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            transform: perspective(600px) rotateX(0deg) rotateY(0deg);
-            transform-style: preserve-3d;
+            transition: all 0.25s ease;
+            transform: translateY(0);
             box-shadow: 
-                0 4px 12px rgba(0,0,0,0.08),
-                0 2px 4px rgba(0,0,0,0.04);
+                0 2px 8px rgba(0,0,0,0.06),
+                0 1px 3px rgba(0,0,0,0.04);
         }
         .card-3d:hover {
-            transform: perspective(600px) rotateX(2deg) rotateY(4deg) translateY(-4px);
+            transform: translateY(-3px);
             box-shadow: 
-                0 12px 40px rgba(0,0,0,0.15),
-                0 4px 12px rgba(0,0,0,0.08),
-                0 0 60px rgba(251, 191, 36, 0.05);
+                0 8px 25px rgba(0,0,0,0.10),
+                0 2px 8px rgba(0,0,0,0.06);
         }
         .card-3d::after {
             content: '';
@@ -114,28 +112,12 @@
             right: 0;
             bottom: 0;
             border-radius: inherit;
-            background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 50%, rgba(0,0,0,0.05) 100%);
+            background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 50%, rgba(0,0,0,0.03) 100%);
             pointer-events: none;
             opacity: 0;
             transition: opacity 0.3s ease;
         }
         .card-3d:hover::after {
-            opacity: 1;
-        }
-        .card-3d::before {
-            content: '';
-            position: absolute;
-            bottom: -8px;
-            left: 10%;
-            right: 10%;
-            height: 20px;
-            background: radial-gradient(ellipse at center, rgba(0,0,0,0.15) 0%, transparent 70%);
-            filter: blur(10px);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            pointer-events: none;
-        }
-        .card-3d:hover::before {
             opacity: 1;
         }
 
@@ -168,34 +150,34 @@
 
         /* TOMBOL QTY - JARAK DIPERLEBAR */
         .btn-qty {
-            width: 32px !important;
-            height: 32px !important;
-            font-size: 14px !important;
+            width: 30px !important;
+            height: 30px !important;
+            font-size: 13px !important;
             font-weight: 900;
-            min-width: 32px !important;
-            min-height: 32px !important;
+            min-width: 30px !important;
+            min-height: 30px !important;
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
         }
         .qty-number {
-            font-size: 14px !important;
+            font-size: 13px !important;
             font-weight: 900;
-            width: 24px !important;
-            min-width: 24px !important;
+            width: 22px !important;
+            min-width: 22px !important;
             text-align: center !important;
         }
         .qty-controls {
             display: flex !important;
             align-items: center !important;
-            gap: 3px !important;
+            gap: 2px !important;
         }
 
-        /* UKURAN FONT MENU - DIKURANGI */
+        /* UKURAN FONT MENU */
         .nama-item {
             font-size: 13px !important;
             font-weight: 800;
-            line-height: 1.25;
+            line-height: 1.2;
         }
         .harga-item {
             font-size: 11px !important;
@@ -227,12 +209,11 @@
             position: relative;
             display: inline-block;
             letter-spacing: 1px;
-            transform: perspective(500px) rotateX(2deg) rotateY(-2deg);
             transition: transform 0.3s ease;
             filter: drop-shadow(0 0 30px rgba(220, 38, 38, 0.1));
         }
         .logo-3d:hover {
-            transform: perspective(500px) rotateX(0deg) rotateY(0deg) scale(1.03);
+            transform: scale(1.02);
             text-shadow: 
                 0 0 20px rgba(220, 38, 38, 0.5),
                 0 0 40px rgba(220, 38, 38, 0.3),
@@ -359,18 +340,18 @@
             100% { background-position: -200% 0; }
         }
 
-        /* STICKY NOTA - PERBAIKAN */
+        /* STICKY NOTA - TANPA SCROLLBAR */
         .sticky-nota-wrapper {
             position: sticky;
             top: 80px;
             z-index: 20;
         }
         .sticky-nota-wrapper .card-nota {
-            max-height: calc(100vh - 190px);
-            overflow-y: auto;
+            max-height: calc(100vh - 180px);
+            overflow: visible;
         }
 
-        /* NAVIGASI FOOTER - TETAP DI BAWAH */
+        /* NAVIGASI FOOTER */
         .nav-footer {
             position: fixed;
             bottom: 0;
@@ -388,6 +369,10 @@
             body {
                 padding-bottom: 100px !important;
             }
+            .sticky-nota-wrapper .card-nota {
+                max-height: calc(100vh - 170px);
+                overflow: visible;
+            }
         }
 
         @media (max-width: 768px) {
@@ -398,13 +383,13 @@
                 top: 75px;
             }
             .sticky-nota-wrapper .card-nota {
-                max-height: calc(100vh - 170px);
+                max-height: calc(100vh - 160px);
+                overflow: visible;
                 padding: 12px !important;
             }
             .card-nota .p-4 {
                 padding: 12px !important;
             }
-            /* Kurangi gap antar kartu di mobile */
             .gap-4 {
                 gap: 10px !important;
             }
@@ -453,13 +438,13 @@
                 top: 70px;
             }
             .sticky-nota-wrapper .card-nota {
-                max-height: calc(100vh - 155px);
+                max-height: calc(100vh - 150px);
+                overflow: visible;
                 padding: 10px !important;
             }
             .card-nota .p-4 {
                 padding: 10px !important;
             }
-            /* Kurangi gap antar elemen di mobile */
             .gap-4 {
                 gap: 8px !important;
             }
@@ -475,7 +460,6 @@
             .p-3 {
                 padding: 8px !important;
             }
-            /* Tombol bayar di mobile */
             .btn-bayar-mobile {
                 padding: 12px !important;
                 font-size: 13px !important;
@@ -512,20 +496,17 @@
                 width: 20px !important;
                 min-width: 20px !important;
             }
-            .card-3d:hover {
-                transform: perspective(600px) rotateX(0deg) rotateY(0deg) translateY(-2px);
-            }
             .sticky-nota-wrapper {
                 top: 65px;
             }
             .sticky-nota-wrapper .card-nota {
-                max-height: calc(100vh - 140px);
+                max-height: calc(100vh - 135px);
+                overflow: visible;
                 padding: 8px !important;
             }
             .card-nota .p-4 {
                 padding: 8px !important;
             }
-            /* Kurangi gap lebih agresif di mobile kecil */
             .gap-4 {
                 gap: 6px !important;
             }
@@ -553,7 +534,6 @@
             .nav-footer .text-\\[11px\\] {
                 font-size: 9px !important;
             }
-            /* Tombol bayar di mobile kecil */
             .btn-bayar-mobile {
                 padding: 10px !important;
                 font-size: 12px !important;
@@ -662,11 +642,10 @@
         <!-- ================= PAGE 1: KASIR UTAMA ================= -->
         <section id="page-kasir" class="lg:col-span-12 grid grid-cols-1 lg:grid-cols-12 gap-3 w-full">
             
+            <!-- KOLOM KIRI: Menu -->
             <div class="lg:col-span-7 grid grid-cols-2 gap-2 items-start">
               
-            <!-- KOLOM KIRI: Menu Utama & Lauk -->
             <div class="space-y-2">
-              
               <div class="card-utama card-3d rounded-2xl p-2 shadow-sm border min-h-[140px]">
                 <h2 class="kategori-title header-utama font-black uppercase tracking-wider mb-1.5 flex items-center"><span class="mr-1 text-base">🍛</span>Menu Utama</h2>
                 <div id="kolom-utama" class="grid grid-cols-2 gap-1.5"></div>
@@ -676,7 +655,6 @@
                 <h2 class="kategori-title header-lauk font-black uppercase tracking-wider mb-1.5 flex items-center"><span class="mr-1 text-base">🍗</span> Lauk</h2>
                 <div id="kolom-lauk" class="grid grid-cols-2 gap-1.5"></div>
               </div>
-
             </div>
 
             <div class="card-sembako card-3d rounded-2xl p-2 shadow-sm border min-h-[280px]">
@@ -685,7 +663,7 @@
             </div>
             </div>
 
-            <!-- Bagian Nota - Sticky dengan wrapper -->
+            <!-- KOLOM KANAN: Nota -->
             <div class="lg:col-span-5 space-y-2">
                 <div class="sticky-nota-wrapper">
                     <div class="card-nota card-3d rounded-2xl p-3 shadow-sm border">
@@ -902,7 +880,7 @@
         </section>
     </main>
 
-    <!-- NAVIGATION BAR - DIPERBAIKI -->
+    <!-- NAVIGATION BAR -->
     <nav class="nav-footer">
         <div class="max-w-7xl mx-auto flex justify-around items-center">
             <button id="nav-kasir" onclick="navigasiKe('kasir')" class="flex flex-col items-center justify-center text-amber-600 font-bold transition py-1">
