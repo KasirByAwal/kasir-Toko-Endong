@@ -11,6 +11,16 @@
             -webkit-tap-highlight-color: transparent;
             user-select: none;
         }
+        .item-habis {
+            text-decoration: line-through;
+            opacity: 0.5;
+            pointer-events: none;
+            cursor: not-allowed;
+        }
+        .item-habis .qty-controls {
+            opacity: 0.3;
+            pointer-events: none;
+        }
     </style>
     <!-- Masukkan ini di dalam <head> setelah Tailwind CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -79,7 +89,7 @@
         <!-- Info Toko & Jam -->
         <div class="text-center sm:text-left w-full sm:w-auto">
           <h1 class="text-xs font-black tracking-wide text-amber-400">TOKO N-Dhonk</h1>
-          <p id="jam-digital" class="text-[9px] text-slate-300 font-medium mt-0.5">Memuat jam...</p>
+          <p id="info-buka" class="text-[9px] text-slate-300 font-medium mt-0.5">Memuat informasi...</p>
         </div>
 
         <!-- TOMBOL SINKRON DATA -->
@@ -374,19 +384,42 @@
         let cashDiterima = 0;
         let dataTransaksiTunda = null;
 
+        // Tanggal pembukaan toko (04 Juli 2026)
+        const TANGGAL_BUKA = new Date(2026, 6, 4); // bulan 0-index, jadi 6 = Juli
+
         document.addEventListener("DOMContentLoaded", () => {
-            updateJamDigital();
-            setInterval(updateJamDigital, 1000);
+            updateInfoBuka();
+            setInterval(updateInfoBuka, 60000); // update setiap menit
             setDefaultTanggal();
             muatMenu(); 
         });
 
-        function updateJamDigital() {
+        function updateInfoBuka() {
             const sekarang = new Date();
-            const opsiFormat = { timeZone: 'Asia/Makassar', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
-            const stringWaktu = sekarang.toLocaleTimeString('id-ID', opsiFormat);
-            const elemenJam = document.getElementById("jam-digital");
-            if (elemenJam) { elemenJam.innerText = "Sekarang Jam " + stringWaktu.replace(/\./g, ':'); }
+            const selisihMs = sekarang.getTime() - TANGGAL_BUKA.getTime();
+            
+            // Hitung tahun, bulan, hari
+            let tahun = Math.floor(selisihMs / (365.25 * 24 * 60 * 60 * 1000));
+            let sisaMs = selisihMs % (365.25 * 24 * 60 * 60 * 1000);
+            let bulan = Math.floor(sisaMs / (30.44 * 24 * 60 * 60 * 1000));
+            sisaMs = sisaMs % (30.44 * 24 * 60 * 60 * 1000);
+            let hari = Math.floor(sisaMs / (24 * 60 * 60 * 1000));
+
+            // Format tanggal buka
+            const hariIndonesia = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+            const bulanIndonesia = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            
+            const hariNama = hariIndonesia[TANGGAL_BUKA.getDay()];
+            const tgl = String(TANGGAL_BUKA.getDate()).padStart(2, '0');
+            const bln = bulanIndonesia[TANGGAL_BUKA.getMonth()];
+            const thn = TANGGAL_BUKA.getFullYear();
+
+            let infoText = `Kios Dibuka Sejak ${hariNama}, ${tgl}-${bln}-${thn} (${tahun} tahun, ${bulan} bulan, ${hari} hari)`;
+            
+            const elemenInfo = document.getElementById("info-buka");
+            if(elemenInfo) {
+                elemenInfo.innerText = infoText;
+            }
         }
 
         function triggerNotif(msg, type) {
@@ -481,7 +514,8 @@
                 itemMenu = menuData.map(item => ({
                     nama: item.nama ? item.nama.toString() : "Tanpa Nama",
                     harga: isNaN(Number(item.harga)) ? 0 : Number(item.harga),
-                    kategori: item.kategori ? item.kategori.toString().trim().toLowerCase() : "utama"
+                    kategori: item.kategori ? item.kategori.toString().trim().toLowerCase() : "utama",
+                    status: item.status ? item.status.toString().trim() : "Tersedia" // Tambahkan status
                 }));
 
                 if(loadingText) loadingText.classList.add("hidden");
@@ -499,11 +533,17 @@
         function createItemHtml(item) {
             if(!orderan[item.nama]) orderan[item.nama] = 0;
             const idAman = item.nama.replace(/\s+/g, '_');
+            const isHabis = item.status && item.status.toLowerCase() === "habis";
+            
+            // Tambahkan class item-habis jika status Habis
+            let classItem = "pt-2 pb-2 block w-full text-left";
+            if (isHabis) classItem += " item-habis";
+            
             return `
-            <div class="pt-2 pb-2 block w-full text-left">
+            <div class="${classItem}">
                 <div class="font-bold text-slate-800 text-[11px] leading-tight break-words max-w-full">${item.nama}</div>
                 <div class="text-[10px] font-black text-amber-600 mb-1.5">Rp ${(item.harga || 0).toLocaleString('id-ID')}</div>
-                <div class="flex items-center space-x-1">
+                <div class="flex items-center space-x-1 qty-controls">
                     <button onclick="ubahQty('${item.nama.replace(/'/g, "\\'")}', -1)" class="w-6 h-6 rounded bg-slate-100 text-slate-600 font-black text-xs active:scale-90 transition flex items-center justify-center shadow-sm">-</button>
                     <span id="qty-${idAman}" class="w-4 text-center text-[11px] font-black text-slate-700">${orderan[item.nama]}</span>
                     <button onclick="ubahQty('${item.nama.replace(/'/g, "\\'")}', 1)" class="w-6 h-6 rounded bg-amber-500 text-white font-black text-xs active:scale-90 transition flex items-center justify-center shadow-sm">+</button>
@@ -536,6 +576,13 @@
         }
 
         function ubahQty(nama, delta) {
+            // Cek apakah item habis
+            const item = itemMenu.find(i => i.nama === nama);
+            if (item && item.status && item.status.toLowerCase() === "habis") {
+                triggerNotif("Maaf, item ini sedang habis!", "error");
+                return;
+            }
+            
             orderan[nama] = Math.max(0, (orderan[nama] || 0) + delta);
             const idAman = nama.replace(/\s+/g, '_');
             const elemenQty = document.getElementById(`qty-${idAman}`);
@@ -550,7 +597,11 @@
 
         function kalkulasiNota() {
             grandTotal = 0;
-            itemMenu.forEach(item => { grandTotal += (orderan[item.nama] || 0) * (item.harga || 0); });
+            itemMenu.forEach(item => { 
+                // Skip jika item habis
+                if (item.status && item.status.toLowerCase() === "habis") return;
+                grandTotal += (orderan[item.nama] || 0) * (item.harga || 0); 
+            });
             safeSetText("total-screen", "Rp " + grandTotal.toLocaleString('id-ID'));
             safeSetText("qris-amount-text", "Rp " + grandTotal.toLocaleString('id-ID'));
             renderUangRupiah();
@@ -627,7 +678,6 @@
                 if(tabTunai) tabTunai.className = "p-2.5 font-bold rounded-xl border-2 border-amber-500 bg-amber-50 text-amber-700 transition shadow-sm";
                 if(tabQris) tabQris.className = "p-2.5 font-bold rounded-xl border border-slate-200 text-slate-600 transition";
             } else {
-                // PERBAIKAN: Menyesuaikan styling agar tab QRIS yang menyala kuning saat dipilih
                 if(areaTunai) areaTunai.classList.add("hidden");
                 if(areaQris) areaQris.classList.remove("hidden");
                 if(tabQris) tabQris.className = "p-2.5 font-bold rounded-xl border-2 border-amber-500 bg-amber-50 text-amber-700 transition shadow-sm";
@@ -748,7 +798,6 @@
             rincianSembakoBaris.push(htmlBarisDetail);
         } 
         
-        // PERBAIKAN: Menghapus "else" di sini agar menu lain juga diproses ke Rincian Pagi/Malam
         if(adaMenuLain) {
             if(isWaktuPagi) rincianPagiBaris.push(htmlBarisDetail);
             else rincianMalamBaris.push(htmlBarisDetail);
@@ -825,7 +874,6 @@
     setTeks("grand-qty-utama", totalQtyUtamaGlobal);
     setTeks("grand-qty-lauk", totalQtyLaukGlobal);
     
-    // PERBAIKAN: Menampilkan Qty Sembako pada elemen 'grand-qty-sembako'
     const elGrandSembako = document.getElementById("grand-qty-sembako");
     if (elGrandSembako) {
         elGrandSembako.innerText = qtySembakoTotal;
