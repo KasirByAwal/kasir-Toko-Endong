@@ -43,11 +43,9 @@
                 transform: translateX(-100%);
             }
         }
-        /* Untuk pause saat hover */
         .marquee-container:hover .marquee-text {
             animation-play-state: paused;
         }
-        /* Perbaikan font size untuk mobile */
         .nama-toko {
             font-size: 18px !important;
             font-weight: 900;
@@ -80,36 +78,62 @@
             font-size: 24px !important;
             font-weight: 900;
         }
-        /* Warna kartu kategori */
+        /* Warna kartu kategori - lebih soft */
         .card-utama {
-            background-color: #fff8e1 !important; /* Kuning muda */
-            border-color: #ffe082 !important;
+            background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%) !important;
+            border-color: #ffd54f !important;
+            border-width: 2px !important;
         }
         .card-lauk {
-            background-color: #fff3e0 !important; /* Orange muda */
-            border-color: #ffcc80 !important;
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%) !important;
+            border-color: #ffab91 !important;
+            border-width: 2px !important;
         }
         .card-sembako {
-            background-color: #e8f5e9 !important; /* Hijau muda */
-            border-color: #a5d6a7 !important;
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%) !important;
+            border-color: #81c784 !important;
+            border-width: 2px !important;
         }
         .card-nota {
-            background-color: #e3f2fd !important; /* Biru muda */
-            border-color: #90caf9 !important;
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%) !important;
+            border-color: #64b5f6 !important;
+            border-width: 2px !important;
         }
         /* Warna header kategori */
-        .header-utama {
-            color: #f57f17 !important;
+        .header-utama { color: #f57f17 !important; }
+        .header-lauk { color: #e65100 !important; }
+        .header-sembako { color: #2e7d32 !important; }
+        .header-nota { color: #0d47a1 !important; }
+        
+        /* Warna shift laporan */
+        .shift-pagi {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%) !important;
+            border-color: #ffab91 !important;
         }
-        .header-lauk {
-            color: #e65100 !important;
+        .shift-malam {
+            background: linear-gradient(135deg, #e8eaf6 0%, #c5cae9 100%) !important;
+            border-color: #9fa8da !important;
         }
-        .header-sembako {
-            color: #2e7d32 !important;
+        .shift-sembako {
+            background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%) !important;
+            border-color: #4dd0e1 !important;
         }
-        .header-nota {
-            color: #0d47a1 !important;
+        .shift-pagi .shift-header { background: #ff6f00 !important; color: white !important; }
+        .shift-malam .shift-header { background: #283593 !important; color: white !important; }
+        .shift-sembako .shift-header { background: #00695c !important; color: white !important; }
+        
+        /* Skeleton loading */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 8px;
         }
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
         @media (max-width: 640px) {
             .marquee-text {
                 font-size: 12px !important;
@@ -125,14 +149,13 @@
             }
         }
     </style>
-    <!-- Masukkan ini di dalam <head> setelah Tailwind CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
 </head>
 <body class="bg-slate-100 font-sans text-slate-800 min-h-screen flex flex-col pb-24">
 
-    <!-- DIALOG NOTIFIKASI KUSTOM (TENGAH LAYAR) -->
+    <!-- DIALOG NOTIFIKASI -->
     <div id="notif-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xs overflow-hidden text-center transform scale-95 transition-all p-5">
             <div id="notif-icon" class="text-4xl mb-2"></div>
@@ -142,7 +165,7 @@
         </div>
     </div>
 
-    <!-- DIALOG KONFIRMASI ITEM TERJUAL (TENGAH LAYAR) -->
+    <!-- DIALOG KONFIRMASI -->
     <div id="modal-konfirmasi" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden transform scale-95 transition-all">
             <div class="bg-amber-500 p-4 text-white text-center font-black text-sm tracking-wider flex items-center justify-center space-x-2">
@@ -188,31 +211,30 @@
     <!-- TOP HEADER -->
     <header class="bg-gradient-to-r from-slate-900 to-slate-800 text-white p-3 sticky top-0 z-30 shadow-md relative">
       <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-1 pr-10 sm:pr-0">
-        
-        <!-- Info Toko dengan Teks Berjalan -->
         <div class="text-center sm:text-left w-full sm:w-auto overflow-hidden">
           <h1 class="nama-toko tracking-wide text-amber-400">🏪 TOKO N-Dhonk</h1>
-          <!-- Teks berjalan (marquee) -->
           <div class="marquee-container mt-1">
-              <span id="info-buka" class="marquee-text text-slate-300">
-                  Memuat informasi...
-              </span>
+              <span id="info-buka" class="marquee-text text-slate-300">Memuat informasi...</span>
           </div>
         </div>
-
-        <!-- TOMBOL SINKRON DATA -->
         <button onclick="sinkronDataManual()" class="absolute right-3 top-1/2 -translate-y-1/2 sm:relative sm:top-0 sm:translate-y-0 w-9 h-9 sm:w-auto sm:h-auto bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm p-2 sm:px-4 rounded-xl border border-slate-700 flex items-center justify-center shadow-sm active:scale-95 transition flex-shrink-0">
           <span class="text-base">🔄</span>
           <span class="hidden sm:inline ml-1.5">Sinkron Data</span>
         </button>
-
       </div>
     </header>
 
-    <!-- LOADING SCREEN -->
+    <!-- LOADING SKELETON -->
     <div id="loading-text" class="flex-1 flex flex-col items-center justify-center p-8 text-center">
         <div class="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mb-3"></div>
-        <p class="text-sm text-slate-500 font-bold">Sinkronisasi data, Harap Tunggu...</p>
+        <p class="text-sm text-slate-500 font-bold">Memuat data, Harap Tunggu...</p>
+        <!-- Skeleton Loading -->
+        <div class="w-full max-w-md mt-6 space-y-3">
+            <div class="skeleton h-12 w-full"></div>
+            <div class="skeleton h-12 w-full"></div>
+            <div class="skeleton h-12 w-full"></div>
+            <div class="skeleton h-12 w-full"></div>
+        </div>
     </div>
 
     <!-- MAIN APP CONTAINER -->
@@ -221,40 +243,30 @@
         <!-- ================= PAGE 1: KASIR UTAMA ================= -->
         <section id="page-kasir" class="lg:col-span-12 grid grid-cols-1 lg:grid-cols-12 gap-4 w-full">
             
-            <!-- Grid Menu Berdampingan 2 Kolom (Kiri & Kanan) -->
             <div class="lg:col-span-7 grid grid-cols-2 gap-3 items-start">
               
             <!-- KOLOM KIRI: Menu Utama & Lauk -->
-<div class="space-y-3">
-  
-  <!-- Sub-Kolom: Menu Utama - KUNING MUDA -->
-  <div class="card-utama rounded-2xl p-3 shadow-sm border min-h-[150px]">
-    <h2 class="kategori-title header-utama font-black uppercase tracking-wider mb-2.5 flex items-center"><span class="mr-1.5 text-base">🍛</span>Menu Utama</h2>
-    <div id="kolom-utama" class="grid grid-cols-2 gap-2">
-      <!-- Render Otomatis -->
-    </div>
-  </div>
+            <div class="space-y-3">
+              
+              <div class="card-utama rounded-2xl p-3 shadow-sm border min-h-[150px]">
+                <h2 class="kategori-title header-utama font-black uppercase tracking-wider mb-2.5 flex items-center"><span class="mr-1.5 text-base">🍛</span>Menu Utama</h2>
+                <div id="kolom-utama" class="grid grid-cols-2 gap-2"></div>
+              </div>
 
- <!-- KOLOM KANAN / BAWAH: Lauk Pauk - ORANGE MUDA -->
-<div class="card-lauk rounded-2xl p-3 shadow-sm border min-h-[150px]">
-  <h2 class="kategori-title header-lauk font-black uppercase tracking-wider mb-2.5 flex items-center"><span class="mr-1.5 text-base">🍗</span> Lauk</h2>
-  <div id="kolom-lauk" class="grid grid-cols-2 gap-2">
-    <!-- Render Otomatis -->
-  </div>
-</div>
+              <div class="card-lauk rounded-2xl p-3 shadow-sm border min-h-[150px]">
+                <h2 class="kategori-title header-lauk font-black uppercase tracking-wider mb-2.5 flex items-center"><span class="mr-1.5 text-base">🍗</span> Lauk</h2>
+                <div id="kolom-lauk" class="grid grid-cols-2 gap-2"></div>
+              </div>
 
-</div>
-
-<!-- KOLOM KANAN: Sembako - HIJAU MUDA -->
-<div class="card-sembako rounded-2xl p-3 shadow-sm border min-h-[300px]">
-  <h2 class="kategori-title header-sembako font-black uppercase tracking-wider mb-2.5 flex items-center"><span class="mr-1.5 text-base">🌾</span>Sembako</h2>
-  <div id="kolom-sembako" class="grid grid-cols-2 gap-2">
-    <!-- Render Otomatis -->
-  </div>
-</div>
             </div>
 
-            <!-- Bagian Nota Pembayaran Sisi Kanan - BIRU MUDA -->
+            <div class="card-sembako rounded-2xl p-3 shadow-sm border min-h-[300px]">
+              <h2 class="kategori-title header-sembako font-black uppercase tracking-wider mb-2.5 flex items-center"><span class="mr-1.5 text-base">🌾</span>Sembako</h2>
+              <div id="kolom-sembako" class="grid grid-cols-2 gap-2"></div>
+            </div>
+            </div>
+
+            <!-- Bagian Nota -->
             <div class="lg:col-span-5 space-y-3">
                 <div class="card-nota rounded-2xl p-4 shadow-sm border sticky top-20">
                     <div class="bg-slate-900 text-right p-3 rounded-xl mb-3 border border-slate-800">
@@ -289,7 +301,7 @@
                         <p class="text-sm text-slate-500 font-bold leading-relaxed">Harap pastikan uang masuk senilai <span id="qris-amount-text" class="text-amber-600 font-black">Rp 0</span> di e-wallet Anda.</p>
                     </div>
 
-                    <button onclick="bayarSekarang()" class="w-full mt-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white font-black text-sm p-4 rounded-xl shadow-md active:scale-95 transition">
+                    <button onclick="bayarSekarang()" class="w-full mt-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white font-black text-sm p-4 rounded-xl shadow-md active:scale-95 transition hover:shadow-lg">
                         🚀 BAYAR SEKARANG
                     </button>
                 </div>
@@ -300,169 +312,169 @@
         <!-- ================= PAGE 2: LAPORAN REKAP SHIFT ================= -->
         <section id="page-laporan" class="lg:col-span-12 space-y-4 hidden w-full">
             
-            <!-- TEMPAT PILIHAN TANGGAL -->
             <div class="bg-white rounded-2xl p-3 shadow-sm border border-slate-200/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                 <span class="text-sm font-black text-slate-700">📅 Lihat Laporan Tanggal:</span>
                 <input type="text" id="filter-tanggal" class="w-full sm:w-auto bg-slate-100 text-slate-800 font-black text-sm p-2 px-4 rounded-xl border border-slate-200 focus:outline-none cursor-pointer text-center" placeholder="Pilih Tanggal" readonly>
             </div>
 
-            <!-- RINGKASAN GRAND TOTAL GLOBAL -->
-            <div class="bg-slate-900 rounded-2xl p-4 text-white border border-slate-800 shadow-md">
+            <!-- RINGKASAN GRAND TOTAL -->
+            <div class="bg-gradient-to-r from-slate-900 to-slate-800 rounded-2xl p-4 text-white shadow-lg">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div>
-                        <h4 class="text-[11px] font-black text-amber-400 uppercase tracking-wider">TOTAL PENJUALAN Harian</h4>
+                        <h4 class="text-[11px] font-black text-amber-400 uppercase tracking-wider">📊 TOTAL PENJUALAN Harian</h4>
                         <p class="text-[10px] text-slate-400 font-bold mt-0.5">Akumulasi Penjualan Harian</p>
                     </div>
-                    <div class="grid grid-cols-2 gap-4 text-left sm:text-right border-t sm:border-t-0 border-slate-800 pt-2 sm:pt-0">
-                        <div>
-                            <span class="text-[10px] text-slate-400 font-bold block">TOTAL TUNAI</span>
+                    <div class="grid grid-cols-2 gap-4 text-left sm:text-right border-t sm:border-t-0 border-slate-700 pt-2 sm:pt-0">
+                        <div class="bg-emerald-900/30 p-2 rounded-lg">
+                            <span class="text-[9px] text-emerald-300 font-bold block">💵 TUNAI</span>
                             <span id="grand-tunai-gabungan" class="text-sm font-black text-emerald-400">Rp 0</span>
                         </div>
-                        <div>
-                            <span class="text-[10px] text-slate-400 font-bold block">TOTAL QRIS</span>
+                        <div class="bg-sky-900/30 p-2 rounded-lg">
+                            <span class="text-[9px] text-sky-300 font-bold block">📱 QRIS</span>
                             <span id="grand-qris-gabungan" class="text-sm font-black text-sky-400">Rp 0</span>
                         </div>
                     </div>
                 </div>
-                <div class="border-t border-slate-800 mt-3 pt-2.5 flex justify-between items-center text-sm font-bold text-slate-300">
-    <span>TOTAL QTY TERJUAL:</span>
-    <span class="text-white font-black">Sembako: <span id="grand-qty-sembako" class="text-amber-400">0</span> | Nasi Kuning: <span id="grand-qty-utama" class="text-amber-400">0</span> | Lauk: <span id="grand-qty-lauk" class="text-amber-400">0</span></span>
-</div>
-<div class="border-t border-slate-800 mt-2 pt-2.5 flex justify-between items-center">
-    <span class="text-sm font-black text-slate-200">GRAND TOTAL PENJUALAN:</span>
-    <span id="grand-total-hari-ini" class="text-xl font-black text-amber-400">Rp 0</span>
-</div>
+                <div class="border-t border-slate-700 mt-3 pt-2.5 flex flex-col sm:flex-row justify-between items-center text-sm font-bold text-slate-300 gap-2">
+                    <span>TOTAL QTY TERJUAL:</span>
+                    <div class="flex flex-wrap gap-2 text-white">
+                        <span class="bg-green-900/30 px-3 py-1 rounded-lg">🌾 Sembako: <span id="grand-qty-sembako" class="text-emerald-400">0</span></span>
+                        <span class="bg-amber-900/30 px-3 py-1 rounded-lg">🍛 Nasi: <span id="grand-qty-utama" class="text-amber-400">0</span></span>
+                        <span class="bg-orange-900/30 px-3 py-1 rounded-lg">🍗 Lauk: <span id="grand-qty-lauk" class="text-orange-400">0</span></span>
+                    </div>
+                </div>
+                <div class="border-t border-slate-700 mt-2 pt-2.5 flex justify-between items-center">
+                    <span class="text-sm font-black text-slate-200">🏆 GRAND TOTAL:</span>
+                    <span id="grand-total-hari-ini" class="text-xl font-black text-amber-400">Rp 0</span>
+                </div>
             </div>
 
-            <!-- SHIFT 1: PAGI -->
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/60 overflow-hidden">
-                <div class="bg-slate-50 p-3.5 border-b border-slate-100 flex justify-between items-center">
+            <!-- SHIFT PAGI -->
+            <div class="shift-pagi rounded-2xl shadow-sm border overflow-hidden">
+                <div class="shift-header p-3.5 flex justify-between items-center">
                     <div>
-                        <h3 class="font-black text-slate-800 text-sm flex items-center">🌅 Penjualan Pagi</h3>
-                        <p class="text-[10px] text-slate-400 font-bold">Jam 06:00 s/d 15:59</p>
+                        <h3 class="font-black text-sm flex items-center">🌅 Penjualan Pagi</h3>
+                        <p class="text-[10px] opacity-80 font-bold">Jam 06:00 s/d 15:59</p>
                     </div>
-                    <button id="btn-toggle-pagi" onclick="gantiTampilanLaporan('pagi')" class="text-[11px] font-bold text-amber-600 bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-200 shadow-sm">📋 Rincian</button>
+                    <button id="btn-toggle-pagi" onclick="gantiTampilanLaporan('pagi')" class="text-[11px] font-bold text-white bg-white/20 px-3 py-1.5 rounded-lg border border-white/30 backdrop-blur-sm hover:bg-white/30 transition">📋 Rincian</button>
                 </div>
-                <div id="area-rekap-pagi" class="p-3 overflow-x-auto">
+                <div id="area-rekap-pagi" class="p-3 overflow-x-auto bg-white/50">
                     <table class="w-full text-sm text-left border-collapse">
                         <thead>
-                            <tr class="bg-slate-50 text-slate-400 font-black uppercase text-[10px] border-b border-slate-100">
+                            <tr class="text-slate-600 font-black uppercase text-[10px] border-b border-slate-200">
                                 <th class="p-2.5">Menu</th>
                                 <th class="p-2.5 text-center">Qty</th>
                                 <th class="p-2.5 text-right">Tunai</th>
                                 <th class="p-2.5 text-right">QRIS</th>
                             </tr>
                         </thead>
-                        <tbody id="body-tabel-pagi" class="divide-y divide-slate-100 font-bold text-slate-700"></tbody>
+                        <tbody id="body-tabel-pagi" class="divide-y divide-slate-200 font-bold text-slate-700"></tbody>
                     </table>
                 </div>
-                <div id="area-rincian-pagi" class="p-3 overflow-x-auto hidden">
+                <div id="area-rincian-pagi" class="p-3 overflow-x-auto bg-white/50 hidden">
                     <table class="w-full text-sm text-left border-collapse">
                         <thead>
-                            <tr class="bg-slate-50 text-slate-400 font-black uppercase text-[10px] border-b border-slate-100">
+                            <tr class="text-slate-600 font-black uppercase text-[10px] border-b border-slate-200">
                                 <th class="p-2.5">Jam</th>
                                 <th class="p-2.5">Item</th>
                                 <th class="p-2.5 text-center">Metode</th>
                                 <th class="p-2.5 text-right">Total</th>
                             </tr>
                         </thead>
-                        <tbody id="body-rincian-pagi" class="divide-y divide-slate-100 font-bold text-slate-700"></tbody>
+                        <tbody id="body-rincian-pagi" class="divide-y divide-slate-200 font-bold text-slate-700"></tbody>
                     </table>
                 </div>
-                <div class="bg-slate-50 p-3 border-t border-slate-100 grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm font-bold text-slate-600">
-                    <div class="bg-white p-2 rounded-lg border border-slate-100">Qty: <span>Nasi Kuning: <span id="qty-pagi-utama" class="text-amber-500 font-bold">0</span> | Lauk: <span id="qty-pagi-lauk" class="text-amber-500 font-bold">0</span></span></div>
-                    <div class="bg-white p-2 rounded-lg border border-slate-100">Tunai: <span id="tunai-pagi" class="block font-black text-emerald-600">Rp 0</span></div>
-                    <div class="bg-white p-2 rounded-lg border border-slate-100">QRIS: <span id="qris-pagi" class="block font-black text-sky-600">Rp 0</span></div>
-                    <div class="bg-amber-50 p-2 rounded-lg border border-amber-100">GRAND TOTAL: <span id="total-pagi" class="block font-black text-amber-700">Rp 0</span></div>
+                <div class="bg-white/60 p-3 border-t border-slate-200 grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm font-bold text-slate-600">
+                    <div class="bg-white/80 p-2 rounded-lg border border-slate-200">Qty: Nasi: <span id="qty-pagi-utama" class="text-amber-600 font-bold">0</span> | Lauk: <span id="qty-pagi-lauk" class="text-orange-600 font-bold">0</span></div>
+                    <div class="bg-white/80 p-2 rounded-lg border border-slate-200">💵 Tunai: <span id="tunai-pagi" class="block font-black text-emerald-600">Rp 0</span></div>
+                    <div class="bg-white/80 p-2 rounded-lg border border-slate-200">📱 QRIS: <span id="qris-pagi" class="block font-black text-sky-600">Rp 0</span></div>
+                    <div class="bg-amber-50 p-2 rounded-lg border border-amber-200">💰 TOTAL: <span id="total-pagi" class="block font-black text-amber-700">Rp 0</span></div>
                 </div>
             </div>
 
-            <!-- SHIFT 2: MALAM -->
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/60 overflow-hidden">
-                <div class="bg-slate-50 p-3.5 border-b border-slate-100 flex justify-between items-center">
+            <!-- SHIFT MALAM -->
+            <div class="shift-malam rounded-2xl shadow-sm border overflow-hidden">
+                <div class="shift-header p-3.5 flex justify-between items-center">
                     <div>
-                        <h3 class="font-black text-slate-800 text-sm flex items-center">🌃 Penjualan Malam</h3>
-                        <p class="text-[10px] text-slate-400 font-bold">Jam 16:00 s/d 05:59</p>
+                        <h3 class="font-black text-sm flex items-center">🌃 Penjualan Malam</h3>
+                        <p class="text-[10px] opacity-80 font-bold">Jam 16:00 s/d 05:59</p>
                     </div>
-                    <button id="btn-toggle-malam" onclick="gantiTampilanLaporan('malam')" class="text-[11px] font-bold text-amber-600 bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-200 shadow-sm">📋 Rincian</button>
+                    <button id="btn-toggle-malam" onclick="gantiTampilanLaporan('malam')" class="text-[11px] font-bold text-white bg-white/20 px-3 py-1.5 rounded-lg border border-white/30 backdrop-blur-sm hover:bg-white/30 transition">📋 Rincian</button>
                 </div>
-                <div id="area-rekap-malam" class="p-3 overflow-x-auto">
+                <div id="area-rekap-malam" class="p-3 overflow-x-auto bg-white/50">
                     <table class="w-full text-sm text-left border-collapse">
                         <thead>
-                            <tr class="bg-slate-50 text-slate-400 font-black uppercase text-[10px] border-b border-slate-100">
+                            <tr class="text-slate-600 font-black uppercase text-[10px] border-b border-slate-200">
                                 <th class="p-2.5">Menu</th>
                                 <th class="p-2.5 text-center">Qty</th>
                                 <th class="p-2.5 text-right">Tunai</th>
                                 <th class="p-2.5 text-right">QRIS</th>
                             </tr>
                         </thead>
-                        <tbody id="body-tabel-malam" class="divide-y divide-slate-100 font-bold text-slate-700"></tbody>
+                        <tbody id="body-tabel-malam" class="divide-y divide-slate-200 font-bold text-slate-700"></tbody>
                     </table>
                 </div>
-                <div id="area-rincian-malam" class="p-3 overflow-x-auto hidden">
+                <div id="area-rincian-malam" class="p-3 overflow-x-auto bg-white/50 hidden">
                     <table class="w-full text-sm text-left border-collapse">
                         <thead>
-                            <tr class="bg-slate-50 text-slate-400 font-black uppercase text-[10px] border-b border-slate-100">
+                            <tr class="text-slate-600 font-black uppercase text-[10px] border-b border-slate-200">
                                 <th class="p-2.5">Jam</th>
                                 <th class="p-2.5">Item</th>
                                 <th class="p-2.5 text-center">Metode</th>
                                 <th class="p-2.5 text-right">Total</th>
                             </tr>
                         </thead>
-                        <tbody id="body-rincian-malam" class="divide-y divide-slate-100 font-bold text-slate-700"></tbody>
+                        <tbody id="body-rincian-malam" class="divide-y divide-slate-200 font-bold text-slate-700"></tbody>
                     </table>
                 </div>
-                <div class="bg-slate-50 p-3 border-t border-slate-100 grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm font-bold text-slate-600">
-                    <div class="bg-white p-2 rounded-lg border border-slate-100">Qty: <span>Nasi Kuning: <span id="qty-malam-utama" class="text-amber-500 font-bold">0</span> | Lauk: <span id="qty-malam-lauk" class="text-amber-500 font-bold">0</span></span></div>
-                    <div class="bg-white p-2 rounded-lg border border-slate-100">Tunai: <span id="tunai-malam" class="block font-black text-emerald-600">Rp 0</span></div>
-                    <div class="bg-white p-2 rounded-lg border border-slate-100">QRIS: <span id="qris-malam" class="block font-black text-sky-600">Rp 0</span></div>
-                    <div class="bg-amber-50 p-2 rounded-lg border border-amber-100">GRAND TOTAL: <span id="total-malam" class="block font-black text-amber-700">Rp 0</span></div>
+                <div class="bg-white/60 p-3 border-t border-slate-200 grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm font-bold text-slate-600">
+                    <div class="bg-white/80 p-2 rounded-lg border border-slate-200">Qty: Nasi: <span id="qty-malam-utama" class="text-amber-600 font-bold">0</span> | Lauk: <span id="qty-malam-lauk" class="text-orange-600 font-bold">0</span></div>
+                    <div class="bg-white/80 p-2 rounded-lg border border-slate-200">💵 Tunai: <span id="tunai-malam" class="block font-black text-emerald-600">Rp 0</span></div>
+                    <div class="bg-white/80 p-2 rounded-lg border border-slate-200">📱 QRIS: <span id="qris-malam" class="block font-black text-sky-600">Rp 0</span></div>
+                    <div class="bg-amber-50 p-2 rounded-lg border border-amber-200">💰 TOTAL: <span id="total-malam" class="block font-black text-amber-700">Rp 0</span></div>
                 </div>
             </div>
 
-            <!-- KATEGORI TAMBAHAN: REKAP SEMBAKO (Hanya di Page Laporan) -->
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/60 overflow-hidden">
-                <div class="bg-slate-50 p-3.5 border-b border-slate-100 flex justify-between items-center">
+            <!-- REKAP SEMBAKO -->
+            <div class="shift-sembako rounded-2xl shadow-sm border overflow-hidden">
+                <div class="shift-header p-3.5 flex justify-between items-center">
                     <div>
-                        <h3 class="font-black text-slate-800 text-sm flex items-center">📦 Penjualan Sembako</h3>
-                        <p class="text-[10px] text-slate-400 font-bold">Akumulasi Penjualan Produk Sembako</p>
+                        <h3 class="font-black text-sm flex items-center">📦 Penjualan Sembako</h3>
+                        <p class="text-[10px] opacity-80 font-bold">Akumulasi Penjualan Produk Sembako</p>
                     </div>
-                    <button id="btn-toggle-sembako" onclick="gantiTampilanLaporan('sembako')" class="text-[11px] font-bold text-amber-600 bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-200 shadow-sm">📋 Rincian</button>
+                    <button id="btn-toggle-sembako" onclick="gantiTampilanLaporan('sembako')" class="text-[11px] font-bold text-white bg-white/20 px-3 py-1.5 rounded-lg border border-white/30 backdrop-blur-sm hover:bg-white/30 transition">📋 Rincian</button>
                 </div>
-                
-                <div id="area-rekap-sembako" class="p-3 overflow-x-auto">
+                <div id="area-rekap-sembako" class="p-3 overflow-x-auto bg-white/50">
                     <table class="w-full text-sm text-left border-collapse">
                         <thead>
-                            <tr class="bg-slate-50 text-slate-400 font-black uppercase text-[10px] border-b border-slate-100">
+                            <tr class="text-slate-600 font-black uppercase text-[10px] border-b border-slate-200">
                                 <th class="p-2.5">Nama Barang</th>
                                 <th class="p-2.5 text-center">Qty</th>
                                 <th class="p-2.5 text-right">Tunai</th>
                                 <th class="p-2.5 text-right">QRIS</th>
                             </tr>
                         </thead>
-                        <tbody id="body-tabel-sembako" class="divide-y divide-slate-100 font-bold text-slate-700"></tbody>
+                        <tbody id="body-tabel-sembako" class="divide-y divide-slate-200 font-bold text-slate-700"></tbody>
                     </table>
                 </div>
-
-                <div id="area-rincian-sembako" class="p-3 overflow-x-auto hidden">
+                <div id="area-rincian-sembako" class="p-3 overflow-x-auto bg-white/50 hidden">
                     <table class="w-full text-sm text-left border-collapse">
                         <thead>
-                            <tr class="bg-slate-50 text-slate-400 font-black uppercase text-[10px] border-b border-slate-100">
+                            <tr class="text-slate-600 font-black uppercase text-[10px] border-b border-slate-200">
                                 <th class="p-2.5">Jam</th>
                                 <th class="p-2.5">Item</th>
                                 <th class="p-2.5 text-center">Metode</th>
                                 <th class="p-2.5 text-right">Total</th>
                             </tr>
                         </thead>
-                        <tbody id="body-rincian-sembako" class="divide-y divide-slate-100 font-bold text-slate-700"></tbody>
+                        <tbody id="body-rincian-sembako" class="divide-y divide-slate-200 font-bold text-slate-700"></tbody>
                     </table>
                 </div>
-
-                <div class="bg-slate-50 p-3 border-t border-slate-100 grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm font-bold text-slate-600">
-                    <div class="bg-white p-2 rounded-lg border border-slate-100">Qty: <span id="qty-sembako-total" class="block font-black text-amber-600">0</span></div>
-                    <div class="bg-white p-2 rounded-lg border border-slate-100">Tunai: <span id="tunai-sembako" class="block font-black text-emerald-600">Rp 0</span></div>
-                    <div class="bg-white p-2 rounded-lg border border-slate-100">QRIS: <span id="qris-sembako" class="block font-black text-sky-600">Rp 0</span></div>
-                    <div class="bg-amber-50 p-2 rounded-lg border border-amber-100">TOTAL SEMBAKO: <span id="total-sembako" class="block font-black text-amber-700">Rp 0</span></div>
+                <div class="bg-white/60 p-3 border-t border-slate-200 grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm font-bold text-slate-600">
+                    <div class="bg-white/80 p-2 rounded-lg border border-slate-200">📦 Qty: <span id="qty-sembako-total" class="block font-black text-amber-600">0</span></div>
+                    <div class="bg-white/80 p-2 rounded-lg border border-slate-200">💵 Tunai: <span id="tunai-sembako" class="block font-black text-emerald-600">Rp 0</span></div>
+                    <div class="bg-white/80 p-2 rounded-lg border border-slate-200">📱 QRIS: <span id="qris-sembako" class="block font-black text-sky-600">Rp 0</span></div>
+                    <div class="bg-teal-50 p-2 rounded-lg border border-teal-200">💰 TOTAL: <span id="total-sembako" class="block font-black text-teal-700">Rp 0</span></div>
                 </div>
             </div>
             
@@ -480,6 +492,7 @@
             <span class="text-[11px] uppercase tracking-wide">Laporan Shift</span>
         </button>
     </nav>
+
     <!-- LOGIKA JAVASCRIPT -->
     <script>
         const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwo4Be97S21PHDVAsijxPLKWW2PDQRzwy8DtMblKo7pPMgAhnmeNLypOwyMN3vf3zZZ2A/exec"; 
@@ -491,15 +504,34 @@
         let caraBayar = "TUNAI";
         let cashDiterima = 0;
         let dataTransaksiTunda = null;
+        let syncInterval = null;
 
-        // Tanggal pembukaan toko (04 Juni 2026)
         const TANGGAL_BUKA = new Date(2026, 5, 4);
 
         document.addEventListener("DOMContentLoaded", () => {
             updateInfoBuka();
             setInterval(updateInfoBuka, 60000);
             setDefaultTanggal();
-            muatMenu(); 
+            muatMenu();
+            
+            // Sinkron otomatis setiap 30 detik (jika halaman aktif)
+            syncInterval = setInterval(() => {
+                if (!document.hidden) {
+                    sinkronDataOtomatis();
+                }
+            }, 30000);
+        });
+
+        // Hentikan interval saat halaman tidak aktif
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && syncInterval) {
+                clearInterval(syncInterval);
+                syncInterval = null;
+            } else if (!document.hidden && !syncInterval) {
+                syncInterval = setInterval(() => {
+                    sinkronDataOtomatis();
+                }, 30000);
+            }
         });
 
         function updateInfoBuka() {
@@ -520,7 +552,7 @@
             const bln = bulanIndonesia[TANGGAL_BUKA.getMonth()];
             const thn = TANGGAL_BUKA.getFullYear();
 
-            let infoText = `Pertama buka Hari ${hariNama}, ${tgl}-${bln}-${thn} (${tahun} tahun, ${bulan} bulan, ${hari} hari)`;
+            let infoText = `Kios Dibuka Hari ${hariNama}, ${tgl}-${bln}-${thn} (${tahun} tahun, ${bulan} bulan, ${hari} hari) 🏪`;
             
             const elemenInfo = document.getElementById("info-buka");
             if(elemenInfo) {
@@ -549,6 +581,11 @@
                 title.innerText = "Memproses...";
                 btn.innerText = "Mohon Tunggu";
                 btn.className = "w-full py-3 bg-slate-400 text-white font-bold rounded-xl cursor-not-allowed text-sm";
+            } else if (type === "info") {
+                icon.innerText = "ℹ️";
+                title.innerText = "Informasi";
+                btn.innerText = "Ok";
+                btn.className = "w-full py-3 bg-blue-600 text-white font-bold rounded-xl active:scale-95 transition text-sm shadow-md";
             } else {
                 icon.innerText = "❌";
                 title.innerText = "Perhatian/Error";
@@ -605,7 +642,30 @@
             if(loadingText) loadingText.classList.remove("hidden");
             if(menuContainer) menuContainer.classList.add("hidden");
             
+            triggerNotif("Sedang menyinkronkan data...", "loading");
             muatMenu();
+        }
+
+        async function sinkronDataOtomatis() {
+            try {
+                let res = await fetch(APPS_SCRIPT_URL);
+                let rawData = await res.json();
+                let menuData = Array.isArray(rawData) ? rawData : (rawData.menu || []);
+                let newDataTransaksi = rawData.transaksi || [];
+                
+                // Cek apakah ada data baru
+                if (newDataTransaksi.length > dataTransaksiSemua.length) {
+                    dataTransaksiSemua = newDataTransaksi;
+                    // Refresh laporan jika sedang di halaman laporan
+                    if (!document.getElementById('page-laporan').classList.contains('hidden')) {
+                        prosesLaporanHarian();
+                    }
+                    // Tampilkan notifikasi ringan
+                    console.log("Data baru tersinkronisasi");
+                }
+            } catch (e) {
+                console.log("Sinkron otomatis gagal:", e);
+            }
         }
 
         async function muatMenu() {
@@ -624,14 +684,54 @@
                     status: item.status ? item.status.toString().trim() : "Tersedia"
                 }));
 
+                // Simpan ke localStorage untuk cache
+                try {
+                    localStorage.setItem('menuCache', JSON.stringify({
+                        itemMenu: itemMenu,
+                        dataTransaksiSemua: dataTransaksiSemua,
+                        timestamp: Date.now()
+                    }));
+                } catch(e) {}
+
                 if(loadingText) loadingText.classList.add("hidden");
                 if(menuContainer) menuContainer.classList.remove("hidden");
                 
                 renderMenu();
                 renderUangRupiah();
                 prosesLaporanHarian();
+                
+                tutupNotifModal();
+                triggerNotif("Data berhasil dimuat!", "success");
+                setTimeout(tutupNotifModal, 1500);
             } catch (err) {
-                if(loadingText) { loadingText.innerHTML = "<p class='text-sm font-black text-rose-600'>❌ Sinkronisasi Gagal! Periksa Internet Anda.</p><button onclick='sinkronDataManual()' class='mt-2 text-sm bg-slate-800 text-white p-2 px-3 rounded-lg font-bold'>Coba Lagi</button>"; }
+                // Coba ambil dari cache
+                try {
+                    const cache = localStorage.getItem('menuCache');
+                    if (cache) {
+                        const data = JSON.parse(cache);
+                        if (data.itemMenu && data.itemMenu.length > 0) {
+                            itemMenu = data.itemMenu;
+                            dataTransaksiSemua = data.dataTransaksiSemua || [];
+                            if(loadingText) loadingText.classList.add("hidden");
+                            if(menuContainer) menuContainer.classList.remove("hidden");
+                            renderMenu();
+                            renderUangRupiah();
+                            prosesLaporanHarian();
+                            triggerNotif("Menggunakan data cache. Sinkronisasi gagal!", "info");
+                            setTimeout(tutupNotifModal, 2000);
+                            return;
+                        }
+                    }
+                } catch(e) {}
+                
+                if(loadingText) { 
+                    loadingText.innerHTML = `
+                        <div class="text-4xl mb-3">⚠️</div>
+                        <p class='text-sm font-black text-rose-600'>Sinkronisasi Gagal!</p>
+                        <p class='text-xs text-slate-500 mt-1'>Periksa koneksi internet Anda.</p>
+                        <button onclick='sinkronDataManual()' class='mt-4 text-sm bg-slate-800 text-white p-3 px-6 rounded-lg font-bold hover:bg-slate-700 transition'>Coba Lagi</button>
+                    `; 
+                }
                 console.error(err);
             }
         }
@@ -742,7 +842,6 @@
             
             let manualInput = document.getElementById("input-manual-bayar");
             if (manualInput && manualInput.value !== "") { 
-                // Hapus titik sebelum parsing
                 let cleanValue = manualInput.value.replace(/\./g, '');
                 handleInputManual(cleanValue);
             } else {
@@ -753,16 +852,13 @@
         }
 
         function handleInputManual(val) {
-            // Hapus titik dan karakter non-digit
             let cleanVal = val.toString().replace(/\./g, '').replace(/[^0-9]/g, '');
             let parsed = parseInt(cleanVal, 10);
             if (isNaN(parsed) || parsed < 0) parsed = 0;
             cashDiterima = parsed;
             
-            // Tampilkan dengan pemisah ribuan
             let inputField = document.getElementById("input-manual-bayar");
             if (inputField) {
-                // Cegah infinite loop
                 if (inputField.value !== parsed.toLocaleString('id-ID')) {
                     inputField.value = parsed.toLocaleString('id-ID');
                 }
@@ -824,188 +920,189 @@
             }
         }
 
-      function prosesLaporanHarian() {
-    const filterTglInput = document.getElementById("filter-tanggal");
-    if(!filterTglInput) return;
-    
-    let tglTerpilih = "";
-
-    if (filterTglInput._flatpickr && filterTglInput._flatpickr.selectedDates.length > 0) {
-        const d = filterTglInput._flatpickr.selectedDates[0];
-        const yyyy = d.getFullYear();
-        const mm = String(d.getMonth() + 1).padStart(2, '0');
-        const dd = String(d.getDate()).padStart(2, '0');
-        tglTerpilih = `${yyyy}-${mm}-${dd}`; 
-    } else {
-        tglTerpilih = filterTglInput.value;
-    }
-
-    if(!tglTerpilih) return;
-
-    let pagiMulai = new Date(`${tglTerpilih}T06:00:00+08:00`);
-    let pagiAkhir = new Date(`${tglTerpilih}T15:59:59+08:00`);
-    let malamMulai = new Date(`${tglTerpilih}T16:00:00+08:00`);
-    let besok = new Date(malamMulai); besok.setDate(besok.getDate() + 1);
-    let malamAkhir = new Date(besok); malamAkhir.setHours(5, 59, 59, 999);
-
-    let rekapPagi = {}; let rekapMalam = {}; let rekapSembako = {};
-    let rincianPagiBaris = []; let rincianMalamBaris = []; let rincianSembakoBaris = [];
-
-    itemMenu.forEach(m => {
-        let kat = (m.kategori || "utama").toString().toLowerCase().trim();
-        if (kat === "sembako") {
-            rekapSembako[m.nama] = { nama: m.nama, qty: 0, tunai: 0, qris: 0, harga: m.harga, kategori: kat };
-        } else {
-            rekapPagi[m.nama] = { nama: m.nama, qty: 0, tunai: 0, qris: 0, harga: m.harga, kategori: kat };
-            rekapMalam[m.nama] = { nama: m.nama, qty: 0, tunai: 0, qris: 0, harga: m.harga, kategori: kat };
-        }
-    });
-
-    dataTransaksiSemua.forEach(tx => {
-        if(!tx.tanggal) return;
-        let txDate = new Date(tx.tanggal);
-        if(isNaN(txDate.getTime())) return;
-
-        let isWaktuPagi = (txDate >= pagiMulai && txDate <= pagiAkhir);
-        let isWaktuMalam = (txDate >= malamMulai && txDate <= malamAkhir);
-        if(!isWaktuPagi && !isWaktuMalam) return;
-
-        let metodeStr = tx.metode ? tx.metode.toString().toUpperCase() : "TUNAI";
-        let itemRaw = tx.item ? tx.item.toString() : "";
-        let bagianItem = itemRaw.split(",");
-        
-        let badgeMetode = metodeStr === "QRIS" 
-            ? `<span class="px-1.5 text-[10px] font-bold bg-sky-50 text-sky-600 border border-sky-100">QRIS</span>`
-            : `<span class="px-1.5 text-[10px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-100">CASH</span>`;
-
-        let jamMenit = txDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false }).replace(/\./g, ':');
-        let htmlBarisDetail = `<tr class="border-b border-slate-100"><td class="p-2 text-slate-400 font-medium">${jamMenit}</td><td class="p-2 text-slate-800 leading-tight max-w-[150px] break-words text-sm font-bold">${tx.item}</td><td class="p-2 text-center">${badgeMetode}</td><td class="p-2 text-right text-slate-700 font-bold">Rp ${Number(tx.total).toLocaleString('id-ID')}</td></tr>`;
-
-        let adaSembako = false;
-        let adaMenuLain = false;
-
-        bagianItem.forEach(bag => {
-            let bersihkan = bag.trim(); if(!bersihkan) return;
-            let namaMenu = bersihkan; let qtyMenu = 1;
-            let cocokQty = bersihkan.match(/(.+)\s\((\d+)x\)/);
-            if(cocokQty) { namaMenu = cocokQty[1].trim(); qtyMenu = parseInt(cocokQty[2], 10); }
-
-            let namaMenuBersih = namaMenu.replace(/\\'/g, "'").trim();
-            let matchMenu = itemMenu.find(m => m.nama.toLowerCase().trim() === namaMenuBersih.toLowerCase());
+        function prosesLaporanHarian() {
+            const filterTglInput = document.getElementById("filter-tanggal");
+            if(!filterTglInput) return;
             
-            let namaMenuKey = matchMenu ? matchMenu.nama : namaMenuBersih; 
-            let kategoriMenu = matchMenu ? (matchMenu.kategori || "utama") : "utama";
-            kategoriMenu = kategoriMenu.toString().toLowerCase().trim();
+            let tglTerpilih = "";
 
-            let hargaBawaan = matchMenu ? matchMenu.harga : 0;
-            let subTotalItem = qtyMenu * hargaBawaan;
-
-            if(kategoriMenu === "sembako") {
-                adaSembako = true;
-                if(!rekapSembako[namaMenuKey]) { 
-                    rekapSembako[namaMenuKey] = { nama: namaMenuKey, qty: 0, tunai: 0, qris: 0, harga: hargaBawaan, kategori: kategoriMenu }; 
-                }
-                rekapSembako[namaMenuKey].qty += qtyMenu;
-                if(metodeStr === "QRIS") { rekapSembako[namaMenuKey].qris += subTotalItem; } else { rekapSembako[namaMenuKey].tunai += subTotalItem; }
+            if (filterTglInput._flatpickr && filterTglInput._flatpickr.selectedDates.length > 0) {
+                const d = filterTglInput._flatpickr.selectedDates[0];
+                const yyyy = d.getFullYear();
+                const mm = String(d.getMonth() + 1).padStart(2, '0');
+                const dd = String(d.getDate()).padStart(2, '0');
+                tglTerpilih = `${yyyy}-${mm}-${dd}`; 
             } else {
-                adaMenuLain = true;
-                let targetRekap = isWaktuPagi ? rekapPagi : rekapMalam;
-                if(!targetRekap[namaMenuKey]) { 
-                    targetRekap[namaMenuKey] = { nama: namaMenuKey, qty: 0, tunai: 0, qris: 0, harga: hargaBawaan, kategori: kategoriMenu }; 
-                }
-                targetRekap[namaMenuKey].qty += qtyMenu;
-                if(metodeStr === "QRIS") { targetRekap[namaMenuKey].qris += subTotalItem; } else { targetRekap[namaMenuKey].tunai += subTotalItem; }
+                tglTerpilih = filterTglInput.value;
             }
-        });
 
-        if(adaSembako) {
-            rincianSembakoBaris.push(htmlBarisDetail);
-        } 
-        
-        if(adaMenuLain) {
-            if(isWaktuPagi) rincianPagiBaris.push(htmlBarisDetail);
-            else rincianMalamBaris.push(htmlBarisDetail);
+            if(!tglTerpilih) return;
+
+            let pagiMulai = new Date(`${tglTerpilih}T06:00:00+08:00`);
+            let pagiAkhir = new Date(`${tglTerpilih}T15:59:59+08:00`);
+            let malamMulai = new Date(`${tglTerpilih}T16:00:00+08:00`);
+            let besok = new Date(malamMulai); besok.setDate(besok.getDate() + 1);
+            let malamAkhir = new Date(besok); malamAkhir.setHours(5, 59, 59, 999);
+
+            let rekapPagi = {}; let rekapMalam = {}; let rekapSembako = {};
+            let rincianPagiBaris = []; let rincianMalamBaris = []; let rincianSembakoBaris = [];
+
+            itemMenu.forEach(m => {
+                let kat = (m.kategori || "utama").toString().toLowerCase().trim();
+                if (kat === "sembako") {
+                    rekapSembako[m.nama] = { nama: m.nama, qty: 0, tunai: 0, qris: 0, harga: m.harga, kategori: kat };
+                } else {
+                    rekapPagi[m.nama] = { nama: m.nama, qty: 0, tunai: 0, qris: 0, harga: m.harga, kategori: kat };
+                    rekapMalam[m.nama] = { nama: m.nama, qty: 0, tunai: 0, qris: 0, harga: m.harga, kategori: kat };
+                }
+            });
+
+            dataTransaksiSemua.forEach(tx => {
+                if(!tx.tanggal) return;
+                let txDate = new Date(tx.tanggal);
+                if(isNaN(txDate.getTime())) return;
+
+                let isWaktuPagi = (txDate >= pagiMulai && txDate <= pagiAkhir);
+                let isWaktuMalam = (txDate >= malamMulai && txDate <= malamAkhir);
+                if(!isWaktuPagi && !isWaktuMalam) return;
+
+                let metodeStr = tx.metode ? tx.metode.toString().toUpperCase() : "TUNAI";
+                let itemRaw = tx.item ? tx.item.toString() : "";
+                let bagianItem = itemRaw.split(",");
+                
+                let badgeMetode = metodeStr === "QRIS" 
+                    ? `<span class="px-1.5 text-[10px] font-bold bg-sky-50 text-sky-600 border border-sky-100 rounded">📱 QRIS</span>`
+                    : `<span class="px-1.5 text-[10px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-100 rounded">💵 CASH</span>`;
+
+                let jamMenit = txDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false }).replace(/\./g, ':');
+                let htmlBarisDetail = `<tr class="border-b border-slate-100 hover:bg-slate-50 transition"><td class="p-2 text-slate-400 font-medium">${jamMenit}</td><td class="p-2 text-slate-800 leading-tight max-w-[150px] break-words text-sm font-bold">${tx.item}</td><td class="p-2 text-center">${badgeMetode}</td><td class="p-2 text-right text-slate-700 font-bold">Rp ${Number(tx.total).toLocaleString('id-ID')}</td></tr>`;
+
+                let adaSembako = false;
+                let adaMenuLain = false;
+
+                bagianItem.forEach(bag => {
+                    let bersihkan = bag.trim(); if(!bersihkan) return;
+                    let namaMenu = bersihkan; let qtyMenu = 1;
+                    let cocokQty = bersihkan.match(/(.+)\s\((\d+)x\)/);
+                    if(cocokQty) { namaMenu = cocokQty[1].trim(); qtyMenu = parseInt(cocokQty[2], 10); }
+
+                    let namaMenuBersih = namaMenu.replace(/\\'/g, "'").trim();
+                    let matchMenu = itemMenu.find(m => m.nama.toLowerCase().trim() === namaMenuBersih.toLowerCase());
+                    
+                    let namaMenuKey = matchMenu ? matchMenu.nama : namaMenuBersih; 
+                    let kategoriMenu = matchMenu ? (matchMenu.kategori || "utama") : "utama";
+                    kategoriMenu = kategoriMenu.toString().toLowerCase().trim();
+
+                    let hargaBawaan = matchMenu ? matchMenu.harga : 0;
+                    let subTotalItem = qtyMenu * hargaBawaan;
+
+                    if(kategoriMenu === "sembako") {
+                        adaSembako = true;
+                        if(!rekapSembako[namaMenuKey]) { 
+                            rekapSembako[namaMenuKey] = { nama: namaMenuKey, qty: 0, tunai: 0, qris: 0, harga: hargaBawaan, kategori: kategoriMenu }; 
+                        }
+                        rekapSembako[namaMenuKey].qty += qtyMenu;
+                        if(metodeStr === "QRIS") { rekapSembako[namaMenuKey].qris += subTotalItem; } else { rekapSembako[namaMenuKey].tunai += subTotalItem; }
+                    } else {
+                        adaMenuLain = true;
+                        let targetRekap = isWaktuPagi ? rekapPagi : rekapMalam;
+                        if(!targetRekap[namaMenuKey]) { 
+                            targetRekap[namaMenuKey] = { nama: namaMenuKey, qty: 0, tunai: 0, qris: 0, harga: hargaBawaan, kategori: kategoriMenu }; 
+                        }
+                        targetRekap[namaMenuKey].qty += qtyMenu;
+                        if(metodeStr === "QRIS") { targetRekap[namaMenuKey].qris += subTotalItem; } else { targetRekap[namaMenuKey].tunai += subTotalItem; }
+                    }
+                });
+
+                if(adaSembako) {
+                    rincianSembakoBaris.push(htmlBarisDetail);
+                } 
+                
+                if(adaMenuLain) {
+                    if(isWaktuPagi) rincianPagiBaris.push(htmlBarisDetail);
+                    else rincianMalamBaris.push(htmlBarisDetail);
+                }
+            });
+
+            const setTeks = (id, txt) => { const el = document.getElementById(id); if(el) el.innerText = txt; };
+            const setHtml = (id, html) => { const el = document.getElementById(id); if(el) el.innerHTML = html; };
+
+            // RENDER REKAP & TOTAL PAGI
+            let htmlPagi = ""; let tPagi = 0, qrPagi = 0; let qtyPagiUtama = 0; let qtyPagiLauk = 0;
+            for(let key in rekapPagi) {
+                let r = rekapPagi[key];
+                if(r.qty > 0) {
+                    tPagi += r.tunai; qrPagi += r.qris;
+                    if(r.kategori === "lauk") qtyPagiLauk += r.qty;
+                    else qtyPagiUtama += r.qty;
+                    htmlPagi += `<tr class="border-b border-slate-100 hover:bg-slate-50 transition"><td class="p-2 text-slate-800 font-bold text-sm">${r.nama}</td><td class="p-2 text-center text-sm font-bold">${r.qty}</td><td class="p-2 text-right text-emerald-600 text-sm font-bold">Rp ${r.tunai.toLocaleString('id-ID')}</td><td class="p-2 text-right text-sky-600 text-sm font-bold">Rp ${r.qris.toLocaleString('id-ID')}</td></tr>`;
+                }
+            }
+            setHtml("body-tabel-pagi", htmlPagi || `<tr><td colspan="4" class="p-4 text-center text-slate-400 italic text-sm">📭 Tidak ada data</td></tr>`);
+            
+            setTeks("qty-pagi-utama", qtyPagiUtama);
+            setTeks("qty-pagi-lauk", qtyPagiLauk);
+            setTeks("tunai-pagi", "Rp " + tPagi.toLocaleString('id-ID'));
+            setTeks("qris-pagi", "Rp " + qrPagi.toLocaleString('id-ID'));
+            setTeks("total-pagi", "Rp " + (tPagi + qrPagi).toLocaleString('id-ID'));
+            setHtml("body-rincian-pagi", rincianPagiBaris.join('') || `<tr><td colspan="4" class="p-4 text-center text-slate-400 italic text-sm">📭 Tidak ada data</td></tr>`);
+
+            // RENDER REKAP & TOTAL MALAM
+            let htmlMalam = ""; let tMalam = 0, qrMalam = 0; let qtyMalamUtama = 0; let qtyMalamLauk = 0;
+            for(let key in rekapMalam) {
+                let r = rekapMalam[key];
+                if(r.qty > 0) {
+                    tMalam += r.tunai; qrMalam += r.qris;
+                    if(r.kategori === "lauk") qtyMalamLauk += r.qty;
+                    else qtyMalamUtama += r.qty;
+                    htmlMalam += `<tr class="border-b border-slate-100 hover:bg-slate-50 transition"><td class="p-2 text-slate-800 font-bold text-sm">${r.nama}</td><td class="p-2 text-center text-sm font-bold">${r.qty}</td><td class="p-2 text-right text-emerald-600 text-sm font-bold">Rp ${r.tunai.toLocaleString('id-ID')}</td><td class="p-2 text-right text-sky-600 text-sm font-bold">Rp ${r.qris.toLocaleString('id-ID')}</td></tr>`;
+                }
+            }
+            setHtml("body-tabel-malam", htmlMalam || `<tr><td colspan="4" class="p-4 text-center text-slate-400 italic text-sm">📭 Tidak ada data</td></tr>`);
+            setTeks("qty-malam-utama", qtyMalamUtama);
+            setTeks("qty-malam-lauk", qtyMalamLauk);
+            setTeks("tunai-malam", "Rp " + tMalam.toLocaleString('id-ID'));
+            setTeks("qris-malam", "Rp " + qrMalam.toLocaleString('id-ID'));
+            setTeks("total-malam", "Rp " + (tMalam + qrMalam).toLocaleString('id-ID'));
+            setHtml("body-rincian-malam", rincianMalamBaris.join('') || `<tr><td colspan="4" class="p-4 text-center text-slate-400 italic text-sm">📭 Tidak ada data</td></tr>`);
+
+            // RENDER REKAP & TOTAL SEMBAKO
+            let htmlSembako = ""; let tSembako = 0, qrSembako = 0; let qtySembakoTotal = 0;
+            for(let key in rekapSembako) {
+                let r = rekapSembako[key];
+                if(r.qty > 0) {
+                    tSembako += r.tunai; qrSembako += r.qris;
+                    qtySembakoTotal += r.qty;
+                    htmlSembako += `<tr class="border-b border-slate-100 hover:bg-slate-50 transition"><td class="p-2 text-slate-800 font-bold text-sm">${r.nama}</td><td class="p-2 text-center text-sm font-bold">${r.qty}</td><td class="p-2 text-right text-emerald-600 text-sm font-bold">Rp ${r.tunai.toLocaleString('id-ID')}</td><td class="p-2 text-right text-sky-600 text-sm font-bold">Rp ${r.qris.toLocaleString('id-ID')}</td></tr>`;
+                }
+            }
+            setHtml("body-tabel-sembako", htmlSembako || `<tr><td colspan="4" class="p-4 text-center text-slate-400 italic text-sm">📭 Tidak ada data</td></tr>`);
+            setTeks("qty-sembako-total", qtySembakoTotal);
+            setTeks("tunai-sembako", "Rp " + tSembako.toLocaleString('id-ID'));
+            setTeks("qris-sembako", "Rp " + qrSembako.toLocaleString('id-ID'));
+            setTeks("total-sembako", "Rp " + (tSembako + qrSembako).toLocaleString('id-ID'));
+            setHtml("body-rincian-sembako", rincianSembakoBaris.join('') || `<tr><td colspan="4" class="p-4 text-center text-slate-400 italic text-sm">📭 Tidak ada data</td></tr>`);
+
+            // GRAND TOTAL GLOBAL
+            let totalQtyUtamaGlobal = qtyPagiUtama + qtyMalamUtama;
+            let totalQtyLaukGlobal = qtyPagiLauk + qtyMalamLauk;
+            let akumulasiTunaiGlobal = tPagi + tMalam + tSembako;
+            let akumulasiQrisGlobal = qrPagi + qrMalam + qrSembako;
+            let omsetTotalHariIni = akumulasiTunaiGlobal + akumulasiQrisGlobal;
+
+            setTeks("grand-qty-utama", totalQtyUtamaGlobal);
+            setTeks("grand-qty-lauk", totalQtyLaukGlobal);
+            
+            const elGrandSembako = document.getElementById("grand-qty-sembako");
+            if (elGrandSembako) {
+                elGrandSembako.innerText = qtySembakoTotal;
+            }
+
+            setTeks("grand-tunai-gabungan", "Rp " + akumulasiTunaiGlobal.toLocaleString('id-ID'));
+            setTeks("grand-qris-gabungan", "Rp " + akumulasiQrisGlobal.toLocaleString('id-ID'));
+            setTeks("grand-total-hari-ini", "Rp " + omsetTotalHariIni.toLocaleString('id-ID'));
         }
-    });
 
-    const setTeks = (id, txt) => { const el = document.getElementById(id); if(el) el.innerText = txt; };
-    const setHtml = (id, html) => { const el = document.getElementById(id); if(el) el.innerHTML = html; };
-
-    // --- RENDER REKAP & TOTAL PAGI ---
-    let htmlPagi = ""; let tPagi = 0, qrPagi = 0; let qtyPagiUtama = 0; let qtyPagiLauk = 0;
-    for(let key in rekapPagi) {
-        let r = rekapPagi[key];
-        if(r.qty > 0) {
-            tPagi += r.tunai; qrPagi += r.qris;
-            if(r.kategori === "lauk") qtyPagiLauk += r.qty;
-            else qtyPagiUtama += r.qty;
-            htmlPagi += `<tr class="border-b border-slate-100"><td class="p-2 text-slate-800 font-bold text-sm">${r.nama}</td><td class="p-2 text-center text-sm font-bold">${r.qty}</td><td class="p-2 text-right text-emerald-600 text-sm font-bold">Rp ${r.tunai.toLocaleString('id-ID')}</td><td class="p-2 text-right text-sky-600 text-sm font-bold">Rp ${r.qris.toLocaleString('id-ID')}</td></tr>`;
-        }
-    }
-    setHtml("body-tabel-pagi", htmlPagi || `<tr><td colspan="4" class="p-4 text-center text-slate-400 italic text-sm">Kosong</td></tr>`);
-    
-    setTeks("qty-pagi-utama", qtyPagiUtama);
-    setTeks("qty-pagi-lauk", qtyPagiLauk);
-    setTeks("tunai-pagi", "Rp " + tPagi.toLocaleString('id-ID'));
-    setTeks("qris-pagi", "Rp " + qrPagi.toLocaleString('id-ID'));
-    setTeks("total-pagi", "Rp " + (tPagi + qrPagi).toLocaleString('id-ID'));
-    setHtml("body-rincian-pagi", rincianPagiBaris.join('') || `<tr><td colspan="4" class="p-4 text-center text-slate-400 italic text-sm">Kosong</td></tr>`);
-
-    // --- RENDER REKAP & TOTAL MALAM ---
-    let htmlMalam = ""; let tMalam = 0, qrMalam = 0; let qtyMalamUtama = 0; let qtyMalamLauk = 0;
-    for(let key in rekapMalam) {
-        let r = rekapMalam[key];
-        if(r.qty > 0) {
-            tMalam += r.tunai; qrMalam += r.qris;
-            if(r.kategori === "lauk") qtyMalamLauk += r.qty;
-            else qtyMalamUtama += r.qty;
-            htmlMalam += `<tr class="border-b border-slate-100"><td class="p-2 text-slate-800 font-bold text-sm">${r.nama}</td><td class="p-2 text-center text-sm font-bold">${r.qty}</td><td class="p-2 text-right text-emerald-600 text-sm font-bold">Rp ${r.tunai.toLocaleString('id-ID')}</td><td class="p-2 text-right text-sky-600 text-sm font-bold">Rp ${r.qris.toLocaleString('id-ID')}</td></tr>`;
-        }
-    }
-    setHtml("body-tabel-malam", htmlMalam || `<tr><td colspan="4" class="p-4 text-center text-slate-400 italic text-sm">Kosong</td></tr>`);
-    setTeks("qty-malam-utama", qtyMalamUtama);
-    setTeks("qty-malam-lauk", qtyMalamLauk);
-    setTeks("tunai-malam", "Rp " + tMalam.toLocaleString('id-ID'));
-    setTeks("qris-malam", "Rp " + qrMalam.toLocaleString('id-ID'));
-    setTeks("total-malam", "Rp " + (tMalam + qrMalam).toLocaleString('id-ID'));
-    setHtml("body-rincian-malam", rincianMalamBaris.join('') || `<tr><td colspan="4" class="p-4 text-center text-slate-400 italic text-sm">Kosong</td></tr>`);
-
-    // --- RENDER REKAP & TOTAL SEMBAKO (GABUNGAN) ---
-    let htmlSembako = ""; let tSembako = 0, qrSembako = 0; let qtySembakoTotal = 0;
-    for(let key in rekapSembako) {
-        let r = rekapSembako[key];
-        if(r.qty > 0) {
-            tSembako += r.tunai; qrSembako += r.qris;
-            qtySembakoTotal += r.qty;
-            htmlSembako += `<tr class="border-b border-slate-100"><td class="p-2 text-slate-800 font-bold text-sm">${r.nama}</td><td class="p-2 text-center text-sm font-bold">${r.qty}</td><td class="p-2 text-right text-emerald-600 text-sm font-bold">Rp ${r.tunai.toLocaleString('id-ID')}</td><td class="p-2 text-right text-sky-600 text-sm font-bold">Rp ${r.qris.toLocaleString('id-ID')}</td></tr>`;
-        }
-    }
-    setHtml("body-tabel-sembako", htmlSembako || `<tr><td colspan="4" class="p-4 text-center text-slate-400 italic text-sm">Kosong</td></tr>`);
-    setTeks("qty-sembako-total", qtySembakoTotal);
-    setTeks("tunai-sembako", "Rp " + tSembako.toLocaleString('id-ID'));
-    setTeks("qris-sembako", "Rp " + qrSembako.toLocaleString('id-ID'));
-    setTeks("total-sembako", "Rp " + (tSembako + qrSembako).toLocaleString('id-ID'));
-    setHtml("body-rincian-sembako", rincianSembakoBaris.join('') || `<tr><td colspan="4" class="p-4 text-center text-slate-400 italic text-sm">Kosong</td></tr>`);
-
-    // --- GRAND TOTAL GLOBAL ---
-    let totalQtyUtamaGlobal = qtyPagiUtama + qtyMalamUtama;
-    let totalQtyLaukGlobal = qtyPagiLauk + qtyMalamLauk;
-    let akumulasiTunaiGlobal = tPagi + tMalam + tSembako;
-    let akumulasiQrisGlobal = qrPagi + qrMalam + qrSembako;
-    let omsetTotalHariIni = akumulasiTunaiGlobal + akumulasiQrisGlobal;
-
-    setTeks("grand-qty-utama", totalQtyUtamaGlobal);
-    setTeks("grand-qty-lauk", totalQtyLaukGlobal);
-    
-    const elGrandSembako = document.getElementById("grand-qty-sembako");
-    if (elGrandSembako) {
-        elGrandSembako.innerText = qtySembakoTotal;
-    }
-
-    setTeks("grand-tunai-gabungan", "Rp " + akumulasiTunaiGlobal.toLocaleString('id-ID'));
-    setTeks("grand-qris-gabungan", "Rp " + akumulasiQrisGlobal.toLocaleString('id-ID'));
-    setTeks("grand-total-hari-ini", "Rp " + omsetTotalHariIni.toLocaleString('id-ID'));
-}
         function bayarSekarang() {
             if(grandTotal === 0) { triggerNotif("Isi dulu item belanjaan kasir!", "error"); return; }
             if(caraBayar === "TUNAI" && cashDiterima < grandTotal) { triggerNotif("Uang cash kurang!", "error"); return; }
