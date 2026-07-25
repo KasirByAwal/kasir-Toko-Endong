@@ -624,8 +624,8 @@
       </div>
     </header>
 
-    <!-- LOADING SKELETON -->
-    <div id="loading-text" class="flex-1 flex flex-col items-center justify-center p-8 text-center">
+    <!-- LOADING SKELETON - HILANGKAN SAAT PERTAMA KALI DIBUKA -->
+    <div id="loading-text" class="flex-1 flex flex-col items-center justify-center p-8 text-center hidden">
         <div class="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mb-3"></div>
         <p class="text-sm text-slate-500 font-bold">Memuat data, Harap Tunggu...</p>
         <div class="w-full max-w-md mt-6 space-y-3">
@@ -637,7 +637,7 @@
     </div>
 
     <!-- MAIN APP CONTAINER -->
-    <main id="menu-container" class="max-w-7xl mx-auto p-3 w-full grid grid-cols-1 lg:grid-cols-12 gap-3 flex-1 hidden">
+    <main id="menu-container" class="max-w-7xl mx-auto p-3 w-full grid grid-cols-1 lg:grid-cols-12 gap-3 flex-1">
         
         <!-- ================= PAGE 1: KASIR UTAMA ================= -->
         <section id="page-kasir" class="lg:col-span-12 grid grid-cols-1 lg:grid-cols-12 gap-3 w-full">
@@ -913,25 +913,14 @@
             updateInfoBuka();
             setInterval(updateInfoBuka, 60000);
             setDefaultTanggal();
+            // LANGSUNG LOAD MENU TANPA LOADING SKELETON
             muatMenu();
             
-            syncInterval = setInterval(() => {
-                if (!document.hidden) {
-                    sinkronDataOtomatis();
-                }
-            }, 30000);
+            // Tidak ada auto sync, hanya saat tombol sinkron dipencet
         });
 
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden && syncInterval) {
-                clearInterval(syncInterval);
-                syncInterval = null;
-            } else if (!document.hidden && !syncInterval) {
-                syncInterval = setInterval(() => {
-                    sinkronDataOtomatis();
-                }, 30000);
-            }
-        });
+        // Hapus visibility change listener untuk auto sync
+        // document.addEventListener('visibilitychange', ...) dihapus
 
         function updateInfoBuka() {
             const sekarang = new Date();
@@ -1056,31 +1045,17 @@
             const loadingText = document.getElementById("loading-text");
             const menuContainer = document.getElementById("menu-container");
             
+            // Tampilkan loading saat sinkron
             if(loadingText) loadingText.classList.remove("hidden");
             if(menuContainer) menuContainer.classList.add("hidden");
             
             triggerNotif("Sedang menyinkronkan data...", "loading");
+            
+            // Panggil muatMenu untuk refresh data
             muatMenu();
         }
 
-        async function sinkronDataOtomatis() {
-            try {
-                let res = await fetch(APPS_SCRIPT_URL);
-                let rawData = await res.json();
-                let menuData = Array.isArray(rawData) ? rawData : (rawData.menu || []);
-                let newDataTransaksi = rawData.transaksi || [];
-                
-                if (newDataTransaksi.length > dataTransaksiSemua.length) {
-                    dataTransaksiSemua = newDataTransaksi;
-                    if (!document.getElementById('page-laporan').classList.contains('hidden')) {
-                        prosesLaporanHarian();
-                    }
-                    console.log("Data baru tersinkronisasi");
-                }
-            } catch (e) {
-                console.log("Sinkron otomatis gagal:", e);
-            }
-        }
+        // Fungsi sinkron otomatis dihapus (tidak digunakan)
 
         async function muatMenu() {
             const loadingText = document.getElementById("loading-text");
@@ -1106,6 +1081,7 @@
                     }));
                 } catch(e) {}
 
+                // Sembunyikan loading dan tampilkan container
                 if(loadingText) loadingText.classList.add("hidden");
                 if(menuContainer) menuContainer.classList.remove("hidden");
                 
@@ -1117,6 +1093,7 @@
                 triggerNotif("Data berhasil dimuat!", "success");
                 setTimeout(tutupNotifModal, 1500);
             } catch (err) {
+                // Jika gagal, coba ambil dari cache
                 try {
                     const cache = localStorage.getItem('menuCache');
                     if (cache) {
@@ -1136,13 +1113,15 @@
                     }
                 } catch(e) {}
                 
+                // Jika tidak ada cache, tampilkan error
                 if(loadingText) { 
                     loadingText.innerHTML = `
                         <div class="text-4xl mb-3">⚠️</div>
                         <p class='text-sm font-black text-rose-600'>Sinkronisasi Gagal!</p>
                         <p class='text-xs text-slate-500 mt-1'>Periksa koneksi internet Anda.</p>
                         <button onclick='sinkronDataManual()' class='mt-4 text-sm bg-slate-800 text-white p-3 px-6 rounded-lg font-bold hover:bg-slate-700 transition'>Coba Lagi</button>
-                    `; 
+                    `;
+                    loadingText.classList.remove("hidden");
                 }
                 console.error(err);
             }
