@@ -762,6 +762,11 @@
             border-color: #10b981;
         }
         
+        .fab-sub.pilih-bulan {
+            background: #fae8ff;
+            border-color: #d946ef;
+        }
+        
         @keyframes fabSlideUp {
             from {
                 opacity: 0;
@@ -889,6 +894,54 @@
         .tab-bulanan button:hover:not(.active) {
             border-color: #94a3b8;
         }
+
+        /* SELECT BULAN & TAHUN */
+        .filter-bulan-tahun {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .filter-bulan-tahun select {
+            padding: 6px 12px;
+            border-radius: 10px;
+            border: 2px solid #e2e8f0;
+            background: white;
+            font-size: 12px;
+            font-weight: 700;
+            color: #334155;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        
+        .filter-bulan-tahun select:focus {
+            border-color: #f59e0b;
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+        }
+        
+        .filter-bulan-tahun .btn-terapkan {
+            padding: 6px 16px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            font-weight: 700;
+            font-size: 12px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .filter-bulan-tahun .btn-terapkan:hover {
+            transform: scale(1.02);
+            box-shadow: 0 2px 10px rgba(245, 158, 11, 0.3);
+        }
+        
+        .filter-bulan-tahun .btn-terapkan:active {
+            transform: scale(0.95);
+        }
         
         /* TABEL LAPORAN BULANAN */
         .table-bulanan {
@@ -1014,6 +1067,14 @@
             .tab-bulanan button {
                 font-size: 10px;
                 padding: 4px 10px;
+            }
+            .filter-bulan-tahun select {
+                font-size: 10px;
+                padding: 4px 8px;
+            }
+            .filter-bulan-tahun .btn-terapkan {
+                font-size: 10px;
+                padding: 4px 12px;
             }
         }
         
@@ -1406,6 +1467,9 @@
         <div class="fab-sub tahun-ini" onclick="bukaLaporanBulanan('tahun_ini')" id="fabTahunIni">
             📈
         </div>
+        <div class="fab-sub pilih-bulan" onclick="bukaLaporanBulanan('custom')" id="fabPilihBulan">
+            🗓️
+        </div>
     </div>
 
     <!-- ================= MODAL LAPORAN BULANAN ================= -->
@@ -1419,11 +1483,34 @@
                 <button class="btn-close-modal" onclick="tutupModalBulanan()">✕</button>
             </div>
             
+            <!-- Filter Pilih Bulan & Tahun -->
+            <div class="filter-bulan-tahun" id="filterBulanTahun" style="display:none;">
+                <select id="selectBulan">
+                    <option value="0">Januari</option>
+                    <option value="1">Februari</option>
+                    <option value="2">Maret</option>
+                    <option value="3">April</option>
+                    <option value="4">Mei</option>
+                    <option value="5">Juni</option>
+                    <option value="6">Juli</option>
+                    <option value="7">Agustus</option>
+                    <option value="8">September</option>
+                    <option value="9">Oktober</option>
+                    <option value="10">November</option>
+                    <option value="11">Desember</option>
+                </select>
+                <select id="selectTahun">
+                    <!-- Akan diisi oleh JavaScript -->
+                </select>
+                <button class="btn-terapkan" onclick="terapkanFilterBulanTahun()">📊 Terapkan</button>
+            </div>
+            
             <!-- Tab Filter -->
             <div class="tab-bulanan" id="tabBulanan">
                 <button class="active" data-period="bulan_ini" onclick="ubahPeriodBulanan('bulan_ini')">📅 Bulan Ini</button>
                 <button data-period="bulan_lalu" onclick="ubahPeriodBulanan('bulan_lalu')">📆 Bulan Lalu</button>
                 <button data-period="tahun_ini" onclick="ubahPeriodBulanan('tahun_ini')">📈 Tahun Ini</button>
+                <button data-period="custom" onclick="ubahPeriodBulanan('custom')">🗓️ Pilih</button>
             </div>
             
             <!-- Tabel Laporan -->
@@ -1652,6 +1739,7 @@
             setDefaultTanggal();
             muatMenu();
             updateBadgeBulan();
+            isiSelectTahun();
         });
 
         function updateInfoBuka() {
@@ -1763,7 +1851,7 @@
                 }
                 // Sembunyikan FAB di halaman kasir
                 if(fabContainer) {
-                    fabContainer.classList.add('hidden');
+                    fabContainer.style.display = 'none';
                 }
                 // Tutup FAB jika terbuka
                 if (isFabOpen) {
@@ -1781,7 +1869,7 @@
                 }
                 // Tampilkan FAB di halaman laporan
                 if(fabContainer) {
-                    fabContainer.classList.remove('hidden');
+                    fabContainer.style.display = 'flex';
                 }
                 prosesLaporanHarian();
             }
@@ -2410,8 +2498,35 @@
             });
         }
 
+        function isiSelectTahun() {
+            const selectTahun = document.getElementById('selectTahun');
+            const tahunSekarang = new Date().getFullYear();
+            selectTahun.innerHTML = '';
+            for (let i = tahunSekarang; i >= tahunSekarang - 10; i--) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                selectTahun.appendChild(option);
+            }
+            // Set default ke tahun sekarang
+            selectTahun.value = tahunSekarang;
+        }
+
         function bukaLaporanBulanan(period) {
             periodeBulanan = period;
+            
+            // Tampilkan/sembunyikan filter custom
+            const filterDiv = document.getElementById('filterBulanTahun');
+            if (period === 'custom') {
+                filterDiv.style.display = 'flex';
+                // Set default ke bulan dan tahun sekarang
+                const now = new Date();
+                document.getElementById('selectBulan').value = now.getMonth();
+                document.getElementById('selectTahun').value = now.getFullYear();
+            } else {
+                filterDiv.style.display = 'none';
+            }
+            
             // Tutup FAB
             isFabOpen = true;
             toggleFab();
@@ -2432,36 +2547,31 @@
             const titles = {
                 'bulan_ini': '📅 Laporan Bulan Ini',
                 'bulan_lalu': '📆 Laporan Bulan Lalu',
-                'tahun_ini': '📈 Laporan Tahun Ini'
+                'tahun_ini': '📈 Laporan Tahun Ini',
+                'custom': '🗓️ Laporan Pilihan'
             };
             document.getElementById('modalBulananTitle').innerText = titles[period] || 'Laporan Bulanan';
             
             // Generate laporan
-            generateLaporanBulanan(period);
+            if (period === 'custom') {
+                terapkanFilterBulanTahun();
+            } else {
+                generateLaporanBulanan(period);
+            }
         }
 
-        function tutupModalBulanan() {
-            document.getElementById('modalBulanan').classList.remove('show');
-        }
-
-        function ubahPeriodBulanan(period) {
-            periodeBulanan = period;
+        function terapkanFilterBulanTahun() {
+            const bulan = parseInt(document.getElementById('selectBulan').value);
+            const tahun = parseInt(document.getElementById('selectTahun').value);
             
-            document.querySelectorAll('#tabBulanan button').forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.dataset.period === period) {
-                    btn.classList.add('active');
-                }
-            });
+            const startDate = new Date(tahun, bulan, 1);
+            const endDate = new Date(tahun, bulan + 1, 0, 23, 59, 59);
             
-            const titles = {
-                'bulan_ini': '📅 Laporan Bulan Ini',
-                'bulan_lalu': '📆 Laporan Bulan Lalu',
-                'tahun_ini': '📈 Laporan Tahun Ini'
-            };
-            document.getElementById('modalBulananTitle').innerText = titles[period] || 'Laporan Bulanan';
+            const bulanNama = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
+                               'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            document.getElementById('modalBulananTitle').innerText = '🗓️ ' + bulanNama[bulan] + ' ' + tahun;
             
-            generateLaporanBulanan(period);
+            generateLaporanBulananCustom(startDate, endDate);
         }
 
         function generateLaporanBulanan(period) {
@@ -2480,6 +2590,10 @@
                 endDate = new Date(now.getFullYear(), 11, 31, 23, 59, 59);
             }
             
+            generateLaporanBulananCustom(startDate, endDate);
+        }
+
+        function generateLaporanBulananCustom(startDate, endDate) {
             // Filter transaksi berdasarkan periode
             let transaksiFilter = dataTransaksiSemua.filter(tx => {
                 if (!tx.tanggal) return false;
@@ -2599,6 +2713,40 @@
             document.getElementById('totalTunaiBulanan').innerText = 'Rp ' + totalTunai.toLocaleString('id-ID');
             document.getElementById('totalQrisBulanan').innerText = 'Rp ' + totalQris.toLocaleString('id-ID');
             document.getElementById('totalOmsetBulanan').innerText = 'Rp ' + totalOmset.toLocaleString('id-ID');
+        }
+
+        function tutupModalBulanan() {
+            document.getElementById('modalBulanan').classList.remove('show');
+        }
+
+        function ubahPeriodBulanan(period) {
+            periodeBulanan = period;
+            
+            document.querySelectorAll('#tabBulanan button').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.period === period) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Tampilkan/sembunyikan filter custom
+            const filterDiv = document.getElementById('filterBulanTahun');
+            if (period === 'custom') {
+                filterDiv.style.display = 'flex';
+                const now = new Date();
+                document.getElementById('selectBulan').value = now.getMonth();
+                document.getElementById('selectTahun').value = now.getFullYear();
+                terapkanFilterBulanTahun();
+            } else {
+                filterDiv.style.display = 'none';
+                const titles = {
+                    'bulan_ini': '📅 Laporan Bulan Ini',
+                    'bulan_lalu': '📆 Laporan Bulan Lalu',
+                    'tahun_ini': '📈 Laporan Tahun Ini'
+                };
+                document.getElementById('modalBulananTitle').innerText = titles[period] || 'Laporan Bulanan';
+                generateLaporanBulanan(period);
+            }
         }
 
         function updateBadgeBulan() {
