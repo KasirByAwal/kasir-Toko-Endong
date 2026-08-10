@@ -672,7 +672,7 @@
             bottom: 100px;
             right: 20px;
             z-index: 100;
-            display: flex;
+            display: none;
             flex-direction: column;
             align-items: center;
             gap: 10px;
@@ -943,7 +943,7 @@
             transform: scale(0.95);
         }
         
-        /* TABEL LAPORAN BULANAN */
+        /* TABEL LAPORAN BULANAN - Untuk tahun hanya total bulanan */
         .table-bulanan {
             width: 100%;
             border-collapse: collapse;
@@ -1450,7 +1450,7 @@
     </main>
 
     <!-- ================= FAB - LAPORAN BULANAN ================= -->
-    <div class="fab-container hidden" id="fabContainer">
+    <div class="fab-container" id="fabContainer">
         <!-- Tombol FAB Utama -->
         <div class="fab-main" onclick="toggleFab()" id="fabMain">
             📊
@@ -1521,16 +1521,16 @@
             <!-- Total Kartu -->
             <div class="total-kartu-bulanan" id="totalKartuBulanan">
                 <div class="kartu">
-                    <span class="label">💵 Tunai</span>
-                    <span class="value tunai" id="totalTunaiBulanan">Rp 0</span>
+                    <span class="label">🍛 Menu Utama + Lauk</span>
+                    <span class="value total" id="totalMenuUtamaBulanan" style="color:#d97706;">Rp 0</span>
                 </div>
                 <div class="kartu">
-                    <span class="label">📱 QRIS</span>
-                    <span class="value qris" id="totalQrisBulanan">Rp 0</span>
+                    <span class="label">🌾 Sembako</span>
+                    <span class="value total" id="totalSembakoBulanan" style="color:#059669;">Rp 0</span>
                 </div>
                 <div class="kartu">
-                    <span class="label">💰 Total</span>
-                    <span class="value total" id="totalOmsetBulanan">Rp 0</span>
+                    <span class="label">💰 Total Omset</span>
+                    <span class="value total" id="totalOmsetBulanan" style="color:#0f172a;">Rp 0</span>
                 </div>
             </div>
         </div>
@@ -2547,7 +2547,7 @@
             const titles = {
                 'bulan_ini': '📅 Laporan Bulan Ini',
                 'bulan_lalu': '📆 Laporan Bulan Lalu',
-                'tahun_ini': '📈 Laporan Tahun Ini',
+                'tahun_ini': '📈 Laporan Tahun Ini (Total per Bulan)',
                 'custom': '🗓️ Laporan Pilihan'
             };
             document.getElementById('modalBulananTitle').innerText = titles[period] || 'Laporan Bulanan';
@@ -2601,46 +2601,111 @@
                 return txDate >= startDate && txDate <= endDate;
             });
             
-            // Kelompokkan berdasarkan tanggal
+            // Kelompokkan berdasarkan bulan untuk tahun, atau tanggal untuk bulan
+            let isTahun = periodeBulanan === 'tahun_ini';
             let grouped = {};
-            let totalTunai = 0;
-            let totalQris = 0;
-            let totalOmset = 0;
+            let totalMenuUtama = 0;
+            let totalSembako = 0;
             
             transaksiFilter.forEach(tx => {
                 let tgl = new Date(tx.tanggal);
-                let key = tgl.toLocaleDateString('id-ID', { 
-                    day: '2-digit', 
-                    month: 'short', 
-                    year: 'numeric' 
-                });
+                let key;
+                
+                if (isTahun) {
+                    // Untuk tahun, kelompokkan per bulan
+                    const bulanNama = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 
+                                      'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+                    key = bulanNama[tgl.getMonth()] + ' ' + tgl.getFullYear();
+                } else {
+                    // Untuk bulan, kelompokkan per tanggal
+                    key = tgl.toLocaleDateString('id-ID', { 
+                        day: '2-digit', 
+                        month: 'short', 
+                        year: 'numeric' 
+                    });
+                }
                 
                 if (!grouped[key]) {
-                    grouped[key] = { tunai: 0, qris: 0, total: 0, count: 0 };
+                    grouped[key] = { 
+                        menuUtama: 0, 
+                        sembako: 0, 
+                        total: 0,
+                        count: 0 
+                    };
                 }
                 
-                let metode = tx.metode ? tx.metode.toString().toUpperCase() : 'TUNAI';
+                // Parse item untuk memisahkan Menu Utama + Lauk dan Sembako
+                let itemRaw = tx.item ? tx.item.toString() : "";
+                let bagianItem = itemRaw.split(",");
                 let nominal = Number(tx.total) || 0;
                 
-                if (metode === 'QRIS') {
-                    grouped[key].qris += nominal;
-                    totalQris += nominal;
-                } else {
-                    grouped[key].tunai += nominal;
-                    totalTunai += nominal;
+                let isSembako = false;
+                let isMenuUtama = false;
+                
+                bagianItem.forEach(bag => {
+                    let bersihkan = bag.trim(); 
+                    if(!bersihkan) return;
+                    let namaMenu = bersihkan;
+                    let cocokQty = bersihkan.match(/(.+)\s\((\d+)x\)/);
+                    if(cocokQty) { 
+                        namaMenu = cocokQty[1].trim(); 
+                    }
+                    
+                    let namaMenuBersih = namaMenu.replace(/\\'/g, "'").trim();
+                    let matchMenu = itemMenu.find(m => m.nama.toLowerCase().trim() === namaMenuBersih.toLowerCase());
+                    let kategoriMenu = matchMenu ? (matchMenu.kategori || "utama") : "utama";
+                    kategoriMenu = kategoriMenu.toString().toLowerCase().trim();
+                    
+                    if (kategoriMenu === "sembako") {
+                        isSembako = true;
+                    } else {
+                        isMenuUtama = true;
+                    }
+                });
+                
+                // Alokasikan total ke kategori yang sesuai
+                if (isSembako && !isMenuUtama) {
+                    // Hanya sembako
+                    grouped[key].sembako += nominal;
+                    totalSembako += nominal;
+                } else if (isMenuUtama && !isSembako) {
+                    // Hanya menu utama + lauk
+                    grouped[key].menuUtama += nominal;
+                    totalMenuUtama += nominal;
+                } else if (isMenuUtama && isSembako) {
+                    // Gabungan - bagi rata (alternatif: bisa proporsional)
+                    // Karena kita tidak punya data detail per item, bagi rata
+                    let half = nominal / 2;
+                    grouped[key].menuUtama += half;
+                    grouped[key].sembako += half;
+                    totalMenuUtama += half;
+                    totalSembako += half;
                 }
+                
                 grouped[key].total += nominal;
                 grouped[key].count += 1;
-                totalOmset += nominal;
             });
             
             // Buat HTML tabel
-            let keys = Object.keys(grouped).sort((a, b) => {
-                // Parse tanggal untuk sorting
-                let dateA = new Date(a.split(' ').join(' '));
-                let dateB = new Date(b.split(' ').join(' '));
-                return dateA - dateB;
-            });
+            let keys = Object.keys(grouped);
+            
+            // Sort keys
+            if (isTahun) {
+                // Sort berdasarkan bulan (Jan, Feb, ...)
+                const bulanOrder = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 
+                                   'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+                keys.sort((a, b) => {
+                    let bulanA = a.split(' ')[0];
+                    let bulanB = b.split(' ')[0];
+                    return bulanOrder.indexOf(bulanA) - bulanOrder.indexOf(bulanB);
+                });
+            } else {
+                keys.sort((a, b) => {
+                    let dateA = new Date(a.split(' ').join(' '));
+                    let dateB = new Date(b.split(' ').join(' '));
+                    return dateA - dateB;
+                });
+            }
             
             let html = '';
             
@@ -2653,29 +2718,30 @@
                     </div>
                 `;
             } else {
+                let kolomLabel = isTahun ? 'Bulan' : 'Tanggal';
                 html = `
                     <table class="table-bulanan">
                         <thead>
                             <tr>
-                                <th>Tanggal</th>
+                                <th>${kolomLabel}</th>
                                 <th class="text-center">Transaksi</th>
-                                <th class="text-right">💵 Tunai</th>
-                                <th class="text-right">📱 QRIS</th>
+                                <th class="text-right">🍛 Menu Utama + Lauk</th>
+                                <th class="text-right">🌾 Sembako</th>
                                 <th class="text-right">💰 Total</th>
                             </tr>
                         </thead>
                         <tbody>
                 `;
                 
-                let grandTunai = 0;
-                let grandQris = 0;
+                let grandMenuUtama = 0;
+                let grandSembako = 0;
                 let grandTotal = 0;
                 let grandCount = 0;
                 
                 keys.forEach(key => {
                     let data = grouped[key];
-                    grandTunai += data.tunai;
-                    grandQris += data.qris;
+                    grandMenuUtama += data.menuUtama;
+                    grandSembako += data.sembako;
                     grandTotal += data.total;
                     grandCount += data.count;
                     
@@ -2683,9 +2749,9 @@
                         <tr>
                             <td class="font-bold text-slate-700">${key}</td>
                             <td class="text-center text-slate-500">${data.count}x</td>
-                            <td class="text-right text-emerald-600">Rp ${data.tunai.toLocaleString('id-ID')}</td>
-                            <td class="text-right text-blue-600">Rp ${data.qris.toLocaleString('id-ID')}</td>
-                            <td class="text-right font-black text-amber-700">Rp ${data.total.toLocaleString('id-ID')}</td>
+                            <td class="text-right text-amber-700">Rp ${Math.round(data.menuUtama).toLocaleString('id-ID')}</td>
+                            <td class="text-right text-emerald-700">Rp ${Math.round(data.sembako).toLocaleString('id-ID')}</td>
+                            <td class="text-right font-black text-slate-800">Rp ${Math.round(data.total).toLocaleString('id-ID')}</td>
                         </tr>
                     `;
                 });
@@ -2695,9 +2761,9 @@
                         <tr class="total-row">
                             <td class="font-black">🏆 TOTAL</td>
                             <td class="text-center font-black">${grandCount}x</td>
-                            <td class="text-right font-black text-emerald-700">Rp ${grandTunai.toLocaleString('id-ID')}</td>
-                            <td class="text-right font-black text-blue-700">Rp ${grandQris.toLocaleString('id-ID')}</td>
-                            <td class="text-right font-black text-amber-800">Rp ${grandTotal.toLocaleString('id-ID')}</td>
+                            <td class="text-right font-black text-amber-800">Rp ${Math.round(grandMenuUtama).toLocaleString('id-ID')}</td>
+                            <td class="text-right font-black text-emerald-800">Rp ${Math.round(grandSembako).toLocaleString('id-ID')}</td>
+                            <td class="text-right font-black text-slate-900">Rp ${Math.round(grandTotal).toLocaleString('id-ID')}</td>
                         </tr>
                 `;
                 
@@ -2710,9 +2776,9 @@
             document.getElementById('containerTabelBulanan').innerHTML = html;
             
             // Update total kartu
-            document.getElementById('totalTunaiBulanan').innerText = 'Rp ' + totalTunai.toLocaleString('id-ID');
-            document.getElementById('totalQrisBulanan').innerText = 'Rp ' + totalQris.toLocaleString('id-ID');
-            document.getElementById('totalOmsetBulanan').innerText = 'Rp ' + totalOmset.toLocaleString('id-ID');
+            document.getElementById('totalMenuUtamaBulanan').innerText = 'Rp ' + Math.round(totalMenuUtama).toLocaleString('id-ID');
+            document.getElementById('totalSembakoBulanan').innerText = 'Rp ' + Math.round(totalSembako).toLocaleString('id-ID');
+            document.getElementById('totalOmsetBulanan').innerText = 'Rp ' + Math.round(totalMenuUtama + totalSembako).toLocaleString('id-ID');
         }
 
         function tutupModalBulanan() {
@@ -2742,7 +2808,7 @@
                 const titles = {
                     'bulan_ini': '📅 Laporan Bulan Ini',
                     'bulan_lalu': '📆 Laporan Bulan Lalu',
-                    'tahun_ini': '📈 Laporan Tahun Ini'
+                    'tahun_ini': '📈 Laporan Tahun Ini (Total per Bulan)'
                 };
                 document.getElementById('modalBulananTitle').innerText = titles[period] || 'Laporan Bulanan';
                 generateLaporanBulanan(period);
