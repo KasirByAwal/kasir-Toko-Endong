@@ -665,6 +665,373 @@
         .btn-reset span {
             font-size: 12px;
         }
+
+        /* ========== STYLE FAB - FLOATING ACTION BUTTON ========== */
+        .fab-container {
+            position: fixed;
+            bottom: 100px;
+            right: 20px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .fab-main {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border: 2px solid #f59e0b;
+            color: white;
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .fab-main:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 30px rgba(0,0,0,0.4);
+        }
+        
+        .fab-main:active {
+            transform: scale(0.95);
+        }
+        
+        .fab-main .badge-bulan {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #f59e0b;
+            color: #0f172a;
+            font-size: 9px;
+            font-weight: 900;
+            padding: 2px 6px;
+            border-radius: 10px;
+            border: 1px solid #0f172a;
+        }
+        
+        .fab-sub {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid #e2e8f0;
+            color: #0f172a;
+            font-size: 18px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .fab-sub.show {
+            display: flex;
+            animation: fabSlideUp 0.3s ease forwards;
+        }
+        
+        .fab-sub:hover {
+            transform: scale(1.05);
+            border-color: #f59e0b;
+        }
+        
+        .fab-sub:active {
+            transform: scale(0.95);
+        }
+        
+        .fab-sub.bulan-ini {
+            background: #fef3c7;
+            border-color: #f59e0b;
+        }
+        
+        .fab-sub.bulan-lalu {
+            background: #dbeafe;
+            border-color: #3b82f6;
+        }
+        
+        .fab-sub.tahun-ini {
+            background: #d1fae5;
+            border-color: #10b981;
+        }
+        
+        @keyframes fabSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        /* MODAL LAPORAN BULANAN */
+        .modal-bulanan {
+            position: fixed;
+            inset: 0;
+            z-index: 200;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+        
+        .modal-bulanan.show {
+            display: flex;
+            animation: modalFadeIn 0.3s ease;
+        }
+        
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .modal-bulanan-content {
+            background: white;
+            border-radius: 20px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        
+        .modal-bulanan-content::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .modal-bulanan-content::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        
+        .modal-header-bulanan {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .modal-header-bulanan h3 {
+            font-size: 16px;
+            font-weight: 900;
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-close-modal {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #f1f5f9;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-close-modal:hover {
+            background: #e2e8f0;
+            transform: rotate(90deg);
+        }
+        
+        /* TAB BULANAN */
+        .tab-bulanan {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        
+        .tab-bulanan button {
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 2px solid #e2e8f0;
+            background: white;
+            font-size: 11px;
+            font-weight: 700;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .tab-bulanan button.active {
+            background: #0f172a;
+            color: white;
+            border-color: #0f172a;
+        }
+        
+        .tab-bulanan button:hover:not(.active) {
+            border-color: #94a3b8;
+        }
+        
+        /* TABEL LAPORAN BULANAN */
+        .table-bulanan {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+        
+        .table-bulanan thead th {
+            background: #f1f5f9;
+            padding: 8px 10px;
+            text-align: left;
+            font-weight: 800;
+            color: #475569;
+            text-transform: uppercase;
+            font-size: 10px;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .table-bulanan tbody td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #f1f5f9;
+            color: #334155;
+            font-weight: 600;
+        }
+        
+        .table-bulanan tbody tr:hover {
+            background: #f8fafc;
+        }
+        
+        .table-bulanan .total-row {
+            background: #fef3c7 !important;
+            font-weight: 900;
+        }
+        
+        .table-bulanan .total-row td {
+            border-top: 2px solid #f59e0b;
+            color: #78350f;
+        }
+        
+        .text-right {
+            text-align: right;
+        }
+        .text-center {
+            text-align: center;
+        }
+        
+        /* TOTAL KARTU BULANAN */
+        .total-kartu-bulanan {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 2px solid #f1f5f9;
+        }
+        
+        .total-kartu-bulanan .kartu {
+            background: #f8fafc;
+            padding: 10px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .total-kartu-bulanan .kartu .label {
+            font-size: 9px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            display: block;
+        }
+        
+        .total-kartu-bulanan .kartu .value {
+            font-size: 14px;
+            font-weight: 900;
+            color: #0f172a;
+            display: block;
+            margin-top: 2px;
+        }
+        
+        .total-kartu-bulanan .kartu .value.tunai { color: #059669; }
+        .total-kartu-bulanan .kartu .value.qris { color: #2563eb; }
+        .total-kartu-bulanan .kartu .value.total { color: #d97706; }
+        
+        /* RESPONSIF FAB */
+        @media (max-width: 640px) {
+            .fab-main {
+                width: 52px;
+                height: 52px;
+                font-size: 22px;
+            }
+            .fab-sub {
+                width: 44px;
+                height: 44px;
+                font-size: 16px;
+            }
+            .fab-container {
+                bottom: 85px;
+                right: 12px;
+            }
+            .modal-bulanan-content {
+                padding: 16px;
+                margin: 8px;
+            }
+            .table-bulanan {
+                font-size: 10px;
+            }
+            .table-bulanan thead th,
+            .table-bulanan tbody td {
+                padding: 5px 6px;
+            }
+            .total-kartu-bulanan {
+                grid-template-columns: 1fr 1fr 1fr;
+                gap: 4px;
+            }
+            .total-kartu-bulanan .kartu {
+                padding: 6px;
+            }
+            .total-kartu-bulanan .kartu .value {
+                font-size: 12px;
+            }
+            .tab-bulanan button {
+                font-size: 10px;
+                padding: 4px 10px;
+            }
+        }
+        
+        @media (max-width: 400px) {
+            .fab-main {
+                width: 46px;
+                height: 46px;
+                font-size: 18px;
+            }
+            .fab-sub {
+                width: 38px;
+                height: 38px;
+                font-size: 14px;
+            }
+            .table-bulanan {
+                font-size: 9px;
+            }
+        }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -1021,6 +1388,67 @@
         </section>
     </main>
 
+    <!-- ================= FAB - LAPORAN BULANAN ================= -->
+    <div class="fab-container hidden" id="fabContainer">
+        <!-- Tombol FAB Utama -->
+        <div class="fab-main" onclick="toggleFab()" id="fabMain">
+            📊
+            <span class="badge-bulan" id="badgeBulan">Bulan</span>
+        </div>
+        
+        <!-- Sub Tombol -->
+        <div class="fab-sub bulan-ini" onclick="bukaLaporanBulanan('bulan_ini')" id="fabBulanIni">
+            📅
+        </div>
+        <div class="fab-sub bulan-lalu" onclick="bukaLaporanBulanan('bulan_lalu')" id="fabBulanLalu">
+            📆
+        </div>
+        <div class="fab-sub tahun-ini" onclick="bukaLaporanBulanan('tahun_ini')" id="fabTahunIni">
+            📈
+        </div>
+    </div>
+
+    <!-- ================= MODAL LAPORAN BULANAN ================= -->
+    <div class="modal-bulanan" id="modalBulanan">
+        <div class="modal-bulanan-content">
+            <div class="modal-header-bulanan">
+                <h3>
+                    <span>📊</span>
+                    <span id="modalBulananTitle">Laporan Bulanan</span>
+                </h3>
+                <button class="btn-close-modal" onclick="tutupModalBulanan()">✕</button>
+            </div>
+            
+            <!-- Tab Filter -->
+            <div class="tab-bulanan" id="tabBulanan">
+                <button class="active" data-period="bulan_ini" onclick="ubahPeriodBulanan('bulan_ini')">📅 Bulan Ini</button>
+                <button data-period="bulan_lalu" onclick="ubahPeriodBulanan('bulan_lalu')">📆 Bulan Lalu</button>
+                <button data-period="tahun_ini" onclick="ubahPeriodBulanan('tahun_ini')">📈 Tahun Ini</button>
+            </div>
+            
+            <!-- Tabel Laporan -->
+            <div id="containerTabelBulanan">
+                <!-- Akan diisi oleh JavaScript -->
+            </div>
+            
+            <!-- Total Kartu -->
+            <div class="total-kartu-bulanan" id="totalKartuBulanan">
+                <div class="kartu">
+                    <span class="label">💵 Tunai</span>
+                    <span class="value tunai" id="totalTunaiBulanan">Rp 0</span>
+                </div>
+                <div class="kartu">
+                    <span class="label">📱 QRIS</span>
+                    <span class="value qris" id="totalQrisBulanan">Rp 0</span>
+                </div>
+                <div class="kartu">
+                    <span class="label">💰 Total</span>
+                    <span class="value total" id="totalOmsetBulanan">Rp 0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- NAVIGATION BAR -->
     <nav class="nav-footer">
         <div class="max-w-7xl mx-auto flex justify-around items-center">
@@ -1223,6 +1651,7 @@
             setInterval(updateInfoBuka, 60000);
             setDefaultTanggal();
             muatMenu();
+            updateBadgeBulan();
         });
 
         function updateInfoBuka() {
@@ -1321,6 +1750,7 @@
             const pLaporan = document.getElementById('page-laporan');
             const nKasir = document.getElementById('nav-kasir');
             const nLaporan = document.getElementById('nav-laporan');
+            const fabContainer = document.getElementById('fabContainer');
 
             if(halaman === 'kasir') {
                 if(pKasir) pKasir.classList.remove('hidden');
@@ -1331,6 +1761,15 @@
                 if(nLaporan) {
                     nLaporan.className = "flex flex-col items-center justify-center text-slate-400 font-bold transition py-1";
                 }
+                // Sembunyikan FAB di halaman kasir
+                if(fabContainer) {
+                    fabContainer.classList.add('hidden');
+                }
+                // Tutup FAB jika terbuka
+                if (isFabOpen) {
+                    isFabOpen = true;
+                    toggleFab();
+                }
             } else {
                 if(pKasir) pKasir.classList.add('hidden');
                 if(pLaporan) pLaporan.classList.remove('hidden');
@@ -1339,6 +1778,10 @@
                 }
                 if(nLaporan) {
                     nLaporan.className = "flex flex-col items-center justify-center text-amber-600 font-bold transition py-1";
+                }
+                // Tampilkan FAB di halaman laporan
+                if(fabContainer) {
+                    fabContainer.classList.remove('hidden');
                 }
                 prosesLaporanHarian();
             }
@@ -1944,6 +2387,243 @@
                 console.error(e);
             }
         }
+
+        // ========== FUNGSI FAB LAPORAN BULANAN ==========
+        let isFabOpen = false;
+        let periodeBulanan = 'bulan_ini';
+
+        function toggleFab() {
+            isFabOpen = !isFabOpen;
+            const subs = document.querySelectorAll('.fab-sub');
+            const main = document.getElementById('fabMain');
+            
+            subs.forEach((el, index) => {
+                if (isFabOpen) {
+                    setTimeout(() => {
+                        el.classList.add('show');
+                    }, index * 80);
+                    main.style.transform = 'rotate(45deg)';
+                } else {
+                    el.classList.remove('show');
+                    main.style.transform = 'rotate(0deg)';
+                }
+            });
+        }
+
+        function bukaLaporanBulanan(period) {
+            periodeBulanan = period;
+            // Tutup FAB
+            isFabOpen = true;
+            toggleFab();
+            
+            // Buka modal
+            const modal = document.getElementById('modalBulanan');
+            modal.classList.add('show');
+            
+            // Update tab aktif
+            document.querySelectorAll('#tabBulanan button').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.period === period) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Update title
+            const titles = {
+                'bulan_ini': '📅 Laporan Bulan Ini',
+                'bulan_lalu': '📆 Laporan Bulan Lalu',
+                'tahun_ini': '📈 Laporan Tahun Ini'
+            };
+            document.getElementById('modalBulananTitle').innerText = titles[period] || 'Laporan Bulanan';
+            
+            // Generate laporan
+            generateLaporanBulanan(period);
+        }
+
+        function tutupModalBulanan() {
+            document.getElementById('modalBulanan').classList.remove('show');
+        }
+
+        function ubahPeriodBulanan(period) {
+            periodeBulanan = period;
+            
+            document.querySelectorAll('#tabBulanan button').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.period === period) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            const titles = {
+                'bulan_ini': '📅 Laporan Bulan Ini',
+                'bulan_lalu': '📆 Laporan Bulan Lalu',
+                'tahun_ini': '📈 Laporan Tahun Ini'
+            };
+            document.getElementById('modalBulananTitle').innerText = titles[period] || 'Laporan Bulanan';
+            
+            generateLaporanBulanan(period);
+        }
+
+        function generateLaporanBulanan(period) {
+            const now = new Date();
+            let startDate, endDate;
+            
+            // Tentukan periode
+            if (period === 'bulan_ini') {
+                startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+                endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+            } else if (period === 'bulan_lalu') {
+                startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                endDate = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+            } else { // tahun_ini
+                startDate = new Date(now.getFullYear(), 0, 1);
+                endDate = new Date(now.getFullYear(), 11, 31, 23, 59, 59);
+            }
+            
+            // Filter transaksi berdasarkan periode
+            let transaksiFilter = dataTransaksiSemua.filter(tx => {
+                if (!tx.tanggal) return false;
+                let txDate = new Date(tx.tanggal);
+                return txDate >= startDate && txDate <= endDate;
+            });
+            
+            // Kelompokkan berdasarkan tanggal
+            let grouped = {};
+            let totalTunai = 0;
+            let totalQris = 0;
+            let totalOmset = 0;
+            
+            transaksiFilter.forEach(tx => {
+                let tgl = new Date(tx.tanggal);
+                let key = tgl.toLocaleDateString('id-ID', { 
+                    day: '2-digit', 
+                    month: 'short', 
+                    year: 'numeric' 
+                });
+                
+                if (!grouped[key]) {
+                    grouped[key] = { tunai: 0, qris: 0, total: 0, count: 0 };
+                }
+                
+                let metode = tx.metode ? tx.metode.toString().toUpperCase() : 'TUNAI';
+                let nominal = Number(tx.total) || 0;
+                
+                if (metode === 'QRIS') {
+                    grouped[key].qris += nominal;
+                    totalQris += nominal;
+                } else {
+                    grouped[key].tunai += nominal;
+                    totalTunai += nominal;
+                }
+                grouped[key].total += nominal;
+                grouped[key].count += 1;
+                totalOmset += nominal;
+            });
+            
+            // Buat HTML tabel
+            let keys = Object.keys(grouped).sort((a, b) => {
+                // Parse tanggal untuk sorting
+                let dateA = new Date(a.split(' ').join(' '));
+                let dateB = new Date(b.split(' ').join(' '));
+                return dateA - dateB;
+            });
+            
+            let html = '';
+            
+            if (keys.length === 0) {
+                html = `
+                    <div class="text-center py-8">
+                        <div class="text-4xl mb-3">📭</div>
+                        <p class="text-sm text-slate-500 font-bold">Belum ada transaksi</p>
+                        <p class="text-xs text-slate-400">pada periode ini</p>
+                    </div>
+                `;
+            } else {
+                html = `
+                    <table class="table-bulanan">
+                        <thead>
+                            <tr>
+                                <th>Tanggal</th>
+                                <th class="text-center">Transaksi</th>
+                                <th class="text-right">💵 Tunai</th>
+                                <th class="text-right">📱 QRIS</th>
+                                <th class="text-right">💰 Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                let grandTunai = 0;
+                let grandQris = 0;
+                let grandTotal = 0;
+                let grandCount = 0;
+                
+                keys.forEach(key => {
+                    let data = grouped[key];
+                    grandTunai += data.tunai;
+                    grandQris += data.qris;
+                    grandTotal += data.total;
+                    grandCount += data.count;
+                    
+                    html += `
+                        <tr>
+                            <td class="font-bold text-slate-700">${key}</td>
+                            <td class="text-center text-slate-500">${data.count}x</td>
+                            <td class="text-right text-emerald-600">Rp ${data.tunai.toLocaleString('id-ID')}</td>
+                            <td class="text-right text-blue-600">Rp ${data.qris.toLocaleString('id-ID')}</td>
+                            <td class="text-right font-black text-amber-700">Rp ${data.total.toLocaleString('id-ID')}</td>
+                        </tr>
+                    `;
+                });
+                
+                // Baris total
+                html += `
+                        <tr class="total-row">
+                            <td class="font-black">🏆 TOTAL</td>
+                            <td class="text-center font-black">${grandCount}x</td>
+                            <td class="text-right font-black text-emerald-700">Rp ${grandTunai.toLocaleString('id-ID')}</td>
+                            <td class="text-right font-black text-blue-700">Rp ${grandQris.toLocaleString('id-ID')}</td>
+                            <td class="text-right font-black text-amber-800">Rp ${grandTotal.toLocaleString('id-ID')}</td>
+                        </tr>
+                `;
+                
+                html += `
+                        </tbody>
+                    </table>
+                `;
+            }
+            
+            document.getElementById('containerTabelBulanan').innerHTML = html;
+            
+            // Update total kartu
+            document.getElementById('totalTunaiBulanan').innerText = 'Rp ' + totalTunai.toLocaleString('id-ID');
+            document.getElementById('totalQrisBulanan').innerText = 'Rp ' + totalQris.toLocaleString('id-ID');
+            document.getElementById('totalOmsetBulanan').innerText = 'Rp ' + totalOmset.toLocaleString('id-ID');
+        }
+
+        function updateBadgeBulan() {
+            const now = new Date();
+            const bulan = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 
+                          'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+            const badge = document.getElementById('badgeBulan');
+            if (badge) {
+                badge.innerText = bulan[now.getMonth()];
+            }
+        }
+
+        // Tutup modal dengan klik di luar
+        document.getElementById('modalBulanan').addEventListener('click', function(e) {
+            if (e.target === this) {
+                tutupModalBulanan();
+            }
+        });
+
+        // Tutup modal dengan ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                tutupModalBulanan();
+            }
+        });
     </script>
 </body>
 </html>
