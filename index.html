@@ -1256,7 +1256,7 @@
                                 <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1">Manual</label>
                                 <div class="relative">
                                     <span class="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-slate-400 text-xs">Rp</span>
-                                    <input type="text" id="input-manual-bayar" oninput="handleInputManual(this.value)" placeholder="0" class="w-full bg-white border border-slate-200 rounded-xl p-2.5 pl-8 text-sm font-black focus:outline-none focus:ring-2 focus:ring-amber-400 text-slate-700">
+                                    <input type="number" id="input-manual-bayar" oninput="handleInputManual(this.value)" placeholder="0" class="w-full bg-white border border-slate-200 rounded-xl p-2.5 pl-8 text-sm font-black focus:outline-none focus:ring-2 focus:ring-amber-400 text-slate-700">
                                 </div>
                             </div>
                             <div class="grid grid-cols-2 gap-1.5 bg-white/70 p-2 rounded-xl border border-slate-100 text-xs font-bold text-slate-600">
@@ -2029,43 +2029,46 @@ function generatePilihanUang(total) {
         }
 
         function handleInputManual(val) {
-            var cleanVal = val.toString().replace(/\./g, '').replace(/[^0-9]/g, '');
-            var parsed = parseInt(cleanVal, 10);
-            if (isNaN(parsed) || parsed < 0) parsed = 0;
-            cashDiterima = parsed;
-            
-            var inputField = document.getElementById("input-manual-bayar");
-            if (inputField) {
-                if (inputField.value !== parsed.toLocaleString('id-ID')) {
-                    inputField.value = parsed.toLocaleString('id-ID');
-                }
-            }
-            
-            safeSetText("txt-cash-in", "Rp " + cashDiterima.toLocaleString('id-ID'));
-            var sisa = cashDiterima - grandTotal;
-            var txtChange = document.getElementById("txt-change");
-            if (txtChange) {
-                if (sisa >= 0) {
-                    txtChange.className = "block font-black kembalian-besar mt-0.5";
-                    txtChange.innerText = "Rp " + sisa.toLocaleString('id-ID');
-                } else {
-                    txtChange.className = "block font-black kembalian-besar-negatif mt-0.5";
-                    txtChange.innerText = "Kurang Rp " + Math.abs(sisa).toLocaleString('id-ID');
-                }
-            }
+    // Hanya ambil angka (tanpa format)
+    var cleanVal = val.toString().replace(/[^0-9]/g, '');
+    var parsed = parseInt(cleanVal, 10);
+    if (isNaN(parsed) || parsed < 0) parsed = 0;
+    cashDiterima = parsed;
+    
+    // Tampilkan angka tanpa format titik ribuan di input
+    var inputField = document.getElementById("input-manual-bayar");
+    if (inputField) {
+        if (inputField.value !== cleanVal) {
+            inputField.value = cleanVal;
         }
-
+    }
+    
+    // Tetap tampilkan dengan format Rp di area lain
+    safeSetText("txt-cash-in", "Rp " + cashDiterima.toLocaleString('id-ID'));
+    var sisa = cashDiterima - grandTotal;
+    var txtChange = document.getElementById("txt-change");
+    if (txtChange) {
+        if (sisa >= 0) {
+            txtChange.className = "block font-black kembalian-besar mt-0.5";
+            txtChange.innerText = "Rp " + sisa.toLocaleString('id-ID');
+        } else {
+            txtChange.className = "block font-black kembalian-besar-negatif mt-0.5";
+            txtChange.innerText = "Kurang Rp " + Math.abs(sisa).toLocaleString('id-ID');
+        }
+    }
+}
         function setUangFisik(jumlah) {
-            var amanJumlah = isNaN(Number(jumlah)) ? 0 : Number(jumlah);
-            cashDiterima = amanJumlah;
-            var mInput = document.getElementById("input-manual-bayar");
-            if(mInput) {
-                if (amanJumlah === grandTotal) {
-                    mInput.value = "";
-                } else {
-                    mInput.value = amanJumlah.toLocaleString('id-ID');
-                }
-            }
+    var amanJumlah = isNaN(Number(jumlah)) ? 0 : Number(jumlah);
+    cashDiterima = amanJumlah;
+    var mInput = document.getElementById("input-manual-bayar");
+    if(mInput) {
+        if (amanJumlah === grandTotal) {
+            mInput.value = "";
+        } else {
+            // Tampilkan angka tanpa format titik ribuan
+            mInput.value = amanJumlah.toString();
+        }
+    }
             safeSetText("txt-cash-in", "Rp " + cashDiterima.toLocaleString('id-ID'));
             var sisa = cashDiterima - grandTotal;
             var txtChange = document.getElementById("txt-change");
