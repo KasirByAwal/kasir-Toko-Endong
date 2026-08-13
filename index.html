@@ -1612,129 +1612,128 @@
         }
 
         // ========== LOGIKA PILIHAN UANG YANG LEBIH TEPAT ==========
-        function generatePilihanUang(total) {
-            var hasil = new Set();
-            
-            // 1. PAS (tepat sesuai total) - PRIORITAS UTAMA
-            hasil.add(total);
-            
-            // 2. Fungsi untuk membulatkan ke kelipatan
-            function bulatkan(nilai, kelipatan) {
-                return Math.ceil(nilai / kelipatan) * kelipatan;
-            }
-            
-            // 3. Tentukan kelipatan berdasarkan total belanja
-            var kelipatanDasar = 1000;
-            
-            if (total < 5000) {
-                kelipatanDasar = 500;
-            } else if (total < 20000) {
-                kelipatanDasar = 1000;
-            } else if (total < 50000) {
-                kelipatanDasar = 5000;
-            } else if (total < 100000) {
-                kelipatanDasar = 10000;
-            } else if (total < 500000) {
-                kelipatanDasar = 10000;
-            } else {
-                kelipatanDasar = 50000;
-            }
-            
-            // 4. Tambahkan pembulatan ke kelipatan dasar
-            var bulat1 = bulatkan(total, kelipatanDasar);
-            if (bulat1 > total) hasil.add(bulat1);
-            
-            // 5. Tambahkan pembulatan ke 2x kelipatan dasar
-            var bulat2 = bulatkan(total, kelipatanDasar * 2);
-            if (bulat2 > total && bulat2 !== bulat1) hasil.add(bulat2);
-            
-            // 6. Tambahkan pembulatan ke 5x kelipatan dasar
-            var bulat5 = bulatkan(total, kelipatanDasar * 5);
-            if (bulat5 > total && bulat5 !== bulat1 && bulat5 !== bulat2) hasil.add(bulat5);
-            
-            // 7. TAMBAHKAN PECAHAN STANDAR YANG TERSEDIA
-            var pecahanTersedia = [];
-            for (var i = 0; i < PECAHAN_UANG.length; i++) {
-                var p = PECAHAN_UANG[i];
-                if (p >= total && !hasil.has(p)) {
-                    pecahanTersedia.push(p);
-                }
-            }
-            
-            for (var j = 0; j < pecahanTersedia.length; j++) {
-                if (hasil.size < 6) {
-                    hasil.add(pecahanTersedia[j]);
-                }
-            }
-            
-            // 8. Untuk total di bawah 50rb, tambahkan opsi yang masuk akal
-            if (total < 50000) {
-                var isPecahanStandar = false;
-                for (var k = 0; k < PECAHAN_UANG.length; k++) {
-                    if (PECAHAN_UANG[k] === total) {
-                        isPecahanStandar = true;
-                        break;
-                    }
-                }
-                
-                if (!isPecahanStandar) {
-                    var plus5 = total + 5000;
-                    if (plus5 > total && !hasil.has(plus5) && plus5 < 100000) {
-                        hasil.add(plus5);
-                    }
-                    
-                    var plus10 = total + 10000;
-                    if (plus10 > total && !hasil.has(plus10) && plus10 < 100000) {
-                        hasil.add(plus10);
-                    }
-                }
-                
-                // ========== TAMBAHAN: SELALU TAMBAHKAN 50.000 DAN 100.000 UNTUK BELANJA DI BAWAH 25.000 ==========
-                if (total < 25000) {
-                    if (!hasil.has(50000)) {
-                        hasil.add(50000);
-                    }
-                    if (!hasil.has(100000)) {
-                        hasil.add(100000);
-                    }
-                }
-            }
-            
-            // 9. Untuk total di atas 50rb, tambahkan opsi tambahan
-            if (total > 50000) {
-                var plus50 = total + 50000;
-                if (plus50 > total && !hasil.has(plus50)) {
-                    hasil.add(plus50);
-                }
-                
-                if (total < 200000) {
-                    if (150000 >= total && !hasil.has(150000)) {
-                        hasil.add(150000);
-                    }
-                    if (200000 >= total && !hasil.has(200000)) {
-                        hasil.add(200000);
-                    }
-                }
-            }
-            
-            // 10. Urutkan dan ambil maksimal 5 pilihan
-            var sorted = Array.from(hasil).sort(function(a, b) {
-                return a - b;
-            });
-            
-            // Pastikan PAS tetap di urutan pertama
-            var pasIndex = sorted.indexOf(total);
-            if (pasIndex > 0) {
-                sorted.splice(pasIndex, 1);
-                sorted.unshift(total);
-            }
-            
-            // Ambil maksimal 5 pilihan
-            var finalPilihan = sorted.slice(0, 5);
-            
-            return finalPilihan;
+       // ========== LOGIKA PILIHAN UANG YANG LEBIH TEPAT ==========
+function generatePilihanUang(total) {
+    var hasil = new Set();
+    
+    // 1. PAS (tepat sesuai total) - PRIORITAS UTAMA
+    hasil.add(total);
+    
+    // 2. Fungsi untuk membulatkan ke kelipatan
+    function bulatkan(nilai, kelipatan) {
+        return Math.ceil(nilai / kelipatan) * kelipatan;
+    }
+    
+    // 3. Tentukan kelipatan berdasarkan total belanja
+    var kelipatanDasar = 1000;
+    
+    if (total < 5000) {
+        kelipatanDasar = 500;
+    } else if (total < 20000) {
+        kelipatanDasar = 1000;
+    } else if (total < 50000) {
+        kelipatanDasar = 5000;
+    } else if (total < 100000) {
+        kelipatanDasar = 10000;
+    } else if (total < 500000) {
+        kelipatanDasar = 10000;
+    } else {
+        kelipatanDasar = 50000;
+    }
+    
+    // 4. Tambahkan pembulatan ke kelipatan dasar
+    var bulat1 = bulatkan(total, kelipatanDasar);
+    if (bulat1 > total) hasil.add(bulat1);
+    
+    // 5. Tambahkan pembulatan ke 2x kelipatan dasar
+    var bulat2 = bulatkan(total, kelipatanDasar * 2);
+    if (bulat2 > total && bulat2 !== bulat1) hasil.add(bulat2);
+    
+    // 6. Tambahkan pembulatan ke 5x kelipatan dasar
+    var bulat5 = bulatkan(total, kelipatanDasar * 5);
+    if (bulat5 > total && bulat5 !== bulat1 && bulat5 !== bulat2) hasil.add(bulat5);
+    
+    // 7. TAMBAHKAN PECAHAN STANDAR YANG TERSEDIA
+    var pecahanTersedia = [];
+    for (var i = 0; i < PECAHAN_UANG.length; i++) {
+        var p = PECAHAN_UANG[i];
+        if (p >= total && !hasil.has(p)) {
+            pecahanTersedia.push(p);
         }
-
+    }
+    
+    for (var j = 0; j < pecahanTersedia.length; j++) {
+        if (hasil.size < 6) {
+            hasil.add(pecahanTersedia[j]);
+        }
+    }
+    
+    // 8. Untuk total di bawah 50rb, tambahkan opsi yang masuk akal
+    if (total < 50000) {
+        var isPecahanStandar = false;
+        for (var k = 0; k < PECAHAN_UANG.length; k++) {
+            if (PECAHAN_UANG[k] === total) {
+                isPecahanStandar = true;
+                break;
+            }
+        }
+        
+        if (!isPecahanStandar) {
+            var plus5 = total + 5000;
+            if (plus5 > total && !hasil.has(plus5) && plus5 < 100000) {
+                hasil.add(plus5);
+            }
+            
+            var plus10 = total + 10000;
+            if (plus10 > total && !hasil.has(plus10) && plus10 < 100000) {
+                hasil.add(plus10);
+            }
+        }
+        
+        // ========== PERBAIKAN: SELALU TAMBAHKAN 50.000 DAN 100.000 UNTUK BELANJA DI BAWAH 25.000 ==========
+        if (total < 25000) {
+            // Hapus dulu jika ada (untuk memastikan posisinya)
+            // Tambahkan 50.000
+            hasil.add(50000);
+            // Tambahkan 100.000
+            hasil.add(100000);
+        }
+    }
+    
+    // 9. Untuk total di atas 50rb, tambahkan opsi tambahan
+    if (total > 50000) {
+        var plus50 = total + 50000;
+        if (plus50 > total && !hasil.has(plus50)) {
+            hasil.add(plus50);
+        }
+        
+        if (total < 200000) {
+            if (150000 >= total && !hasil.has(150000)) {
+                hasil.add(150000);
+            }
+            if (200000 >= total && !hasil.has(200000)) {
+                hasil.add(200000);
+            }
+        }
+    }
+    
+    // 10. Urutkan dan ambil maksimal 5 pilihan
+    var sorted = Array.from(hasil).sort(function(a, b) {
+        return a - b;
+    });
+    
+    // Pastikan PAS tetap di urutan pertama
+    var pasIndex = sorted.indexOf(total);
+    if (pasIndex > 0) {
+        sorted.splice(pasIndex, 1);
+        sorted.unshift(total);
+    }
+    
+    // Ambil maksimal 5 pilihan
+    var finalPilihan = sorted.slice(0, 5);
+    
+    return finalPilihan;
+}
         document.addEventListener("DOMContentLoaded", function() {
             updateInfoBuka();
             setInterval(updateInfoBuka, 60000);
