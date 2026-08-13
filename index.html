@@ -1615,132 +1615,118 @@
             }
         }
 
-        // ========== LOGIKA PILIHAN UANG ==========
-        function generatePilihanUang(total) {
-            let hasil = new Set();
-            
-            // 1. TAMBAHKAN PAS (tepat sesuai total)
-            hasil.add(total);
-            
-            // 2. Fungsi untuk membulatkan ke kelipatan
-            function bulatkan(nilai, kelipatan) {
-                return Math.ceil(nilai / kelipatan) * kelipatan;
-            }
-            
-            // 3. Tentukan kelipatan berdasarkan total belanja
-            let kelipatanDasar = 1000;
-            
-            if (total < 5000) {
-                kelipatanDasar = 500;
-            } else if (total < 20000) {
-                kelipatanDasar = 1000;
-            } else if (total < 50000) {
-                kelipatanDasar = 5000;
-            } else if (total < 100000) {
-                kelipatanDasar = 10000;
-            } else if (total < 500000) {
-                kelipatanDasar = 10000;
-            } else {
-                kelipatanDasar = 50000;
-            }
-            
-            // 4. Tambahkan pembulatan ke kelipatan dasar
-            let bulat1 = bulatkan(total, kelipatanDasar);
-            if (bulat1 > total) hasil.add(bulat1);
-            
-            // 5. Tambahkan pembulatan ke 2x kelipatan dasar
-            let bulat2 = bulatkan(total, kelipatanDasar * 2);
-            if (bulat2 > total && bulat2 !== bulat1) hasil.add(bulat2);
-            
-            // 6. Tambahkan pembulatan ke 5x kelipatan dasar
-            let bulat5 = bulatkan(total, kelipatanDasar * 5);
-            if (bulat5 > total && bulat5 !== bulat1 && bulat5 !== bulat2) hasil.add(bulat5);
-            
-            // 7. Tambahkan pecahan standar yang >= total (maksimal 2 pecahan)
-            let pecahanCocok = PECAHAN_UANG.filter(p => p >= total && !hasil.has(p));
-            let tambahPecahan = pecahanCocok.slice(0, 2);
-            for (let p of tambahPecahan) {
-                hasil.add(p);
-            }
-            
-            // 8. Untuk total di atas 50rb, tambahkan opsi tambahan
-            if (total > 50000) {
-                let tambahan = [];
-                
-                // Tambahkan total + 50.000
-                let plus50 = total + 50000;
-                if (plus50 > total && !hasil.has(plus50)) {
-                    tambahan.push(plus50);
-                }
-                
-                // Tambahkan 150rb dan 200rb
-                if (total < 200000) {
-                    if (150000 >= total && !hasil.has(150000)) tambahan.push(150000);
-                    if (200000 >= total && !hasil.has(200000)) tambahan.push(200000);
-                }
-                
-                // Ambil 2 tambahan terbaik
-                for (let t of tambahan) {
-                    if (hasil.size < 6) {
-                        hasil.add(t);
-                    }
-                }
-            }
-            
-            // 9. Untuk total di bawah 50rb, tambahkan opsi yang wajar
-            if (total < 50000) {
-                let tambahanKecil = [];
-                
-                // Tambahkan total + 5000
-                let plus5 = total + 5000;
-                if (plus5 > total && !hasil.has(plus5) && plus5 < 100000) {
-                    tambahanKecil.push(plus5);
-                }
-                
-                // Tambahkan total + 10000
-                let plus10 = total + 10000;
-                if (plus10 > total && !hasil.has(plus10) && plus10 < 100000) {
-                    tambahanKecil.push(plus10);
-                }
-                
-                // Tambahkan pecahan 20rb, 50rb, 100rb jika relevan
-                let pecahanTambahan = [20000, 50000, 100000];
-                for (let p of pecahanTambahan) {
-                    if (p >= total && !hasil.has(p)) {
-                        tambahanKecil.push(p);
-                        break;
-                    }
-                }
-                
-                for (let t of tambahanKecil) {
-                    if (hasil.size < 6) {
-                        hasil.add(t);
-                    }
-                }
-            }
-            
-            // 10. Urutkan dan ambil maksimal 5 pilihan (termasuk PAS)
-            let sorted = Array.from(hasil).sort((a, b) => a - b);
-            
-            // Pastikan PAS tetap di urutan pertama
-            let pasIndex = sorted.indexOf(total);
-            if (pasIndex > 0) {
-                sorted.splice(pasIndex, 1);
-                sorted.unshift(total);
-            }
-            
-            // Ambil maksimal 5 pilihan
-            return sorted.slice(0, 5);
+// ========== LOGIKA PILIHAN UANG YANG LEBIH TEPAT ==========
+function generatePilihanUang(total) {
+    let hasil = new Set();
+    
+    // 1. PAS (tepat sesuai total) - PRIORITAS UTAMA
+    hasil.add(total);
+    
+    // 2. Fungsi untuk membulatkan ke kelipatan
+    function bulatkan(nilai, kelipatan) {
+        return Math.ceil(nilai / kelipatan) * kelipatan;
+    }
+    
+    // 3. Tentukan kelipatan berdasarkan total belanja
+    let kelipatanDasar = 1000;
+    
+    if (total < 5000) {
+        kelipatanDasar = 500;
+    } else if (total < 20000) {
+        kelipatanDasar = 1000;
+    } else if (total < 50000) {
+        kelipatanDasar = 5000;
+    } else if (total < 100000) {
+        kelipatanDasar = 10000;
+    } else if (total < 500000) {
+        kelipatanDasar = 10000;
+    } else {
+        kelipatanDasar = 50000;
+    }
+    
+    // 4. Tambahkan pembulatan ke kelipatan dasar (HANYA jika hasilnya != total)
+    let bulat1 = bulatkan(total, kelipatanDasar);
+    if (bulat1 > total) hasil.add(bulat1);
+    
+    // 5. Tambahkan pembulatan ke 2x kelipatan dasar (jika berbeda)
+    let bulat2 = bulatkan(total, kelipatanDasar * 2);
+    if (bulat2 > total && bulat2 !== bulat1) hasil.add(bulat2);
+    
+    // 6. Tambahkan pembulatan ke 5x kelipatan dasar (jika berbeda)
+    let bulat5 = bulatkan(total, kelipatanDasar * 5);
+    if (bulat5 > total && bulat5 !== bulat1 && bulat5 !== bulat2) hasil.add(bulat5);
+    
+    // 7. TAMBAHKAN PECAHAN STANDAR YANG TERSEDIA (hanya yang >= total)
+    // TAPI JIKA TOTAL SUDAH SAMA DENGAN PECAHAN, JANGAN TAMBAHKAN DUPLIKAT
+    let pecahanTersedia = PECAHAN_UANG.filter(p => {
+        // Hanya tambahkan pecahan yang >= total dan belum ada di hasil
+        return p >= total && !hasil.has(p);
+    });
+    
+    // Ambil maksimal 2 pecahan standar (yang paling dekat dengan total)
+    for (let p of pecahanTersedia) {
+        if (hasil.size < 6) {
+            hasil.add(p);
         }
-
-        document.addEventListener("DOMContentLoaded", () => {
-            updateInfoBuka();
-            setInterval(updateInfoBuka, 60000);
-            setDefaultTanggal();
-            muatMenu();
-            updateBadgeBulan();
-            isiSelectTahun();
-        });
+    }
+    
+    // 8. Untuk total di bawah 50rb, tambahkan opsi yang masuk akal
+    if (total < 50000) {
+        // Hanya tambahkan jika total BUKAN pecahan standar
+        let isPecahanStandar = PECAHAN_UANG.includes(total);
+        
+        if (!isPecahanStandar) {
+            // Tambahkan total + 5000 (jika masuk akal)
+            let plus5 = total + 5000;
+            if (plus5 > total && !hasil.has(plus5) && plus5 < 100000) {
+                hasil.add(plus5);
+            }
+            
+            // Tambahkan total + 10000 (jika masuk akal)
+            let plus10 = total + 10000;
+            if (plus10 > total && !hasil.has(plus10) && plus10 < 100000) {
+                hasil.add(plus10);
+            }
+        }
+    }
+    
+    // 9. Untuk total di atas 50rb, tambahkan opsi tambahan
+    if (total > 50000) {
+        // Tambahkan total + 50.000
+        let plus50 = total + 50000;
+        if (plus50 > total && !hasil.has(plus50)) {
+            hasil.add(plus50);
+        }
+        
+        // Tambahkan 150rb dan 200rb (jika relevan)
+        if (total < 200000) {
+            if (150000 >= total && !hasil.has(150000)) {
+                hasil.add(150000);
+            }
+            if (200000 >= total && !hasil.has(200000)) {
+                hasil.add(200000);
+            }
+        }
+    }
+    
+    // 10. Urutkan dan ambil maksimal 5 pilihan
+    let sorted = Array.from(hasil).sort((a, b) => a - b);
+    
+    // Pastikan PAS tetap di urutan pertama
+    let pasIndex = sorted.indexOf(total);
+    if (pasIndex > 0) {
+        sorted.splice(pasIndex, 1);
+        sorted.unshift(total);
+    }
+    
+    // Ambil maksimal 5 pilihan
+    let finalPilihan = sorted.slice(0, 5);
+    
+    // LOG: Untuk debugging (bisa dihapus)
+    console.log(`Total: ${total}, Pilihan: ${finalPilihan.join(', ')}`);
+    
+    return finalPilihan;
+}
 
         function updateInfoBuka() {
             const sekarang = new Date();
@@ -2042,6 +2028,7 @@
             renderUangRupiah();
         }
 
+        // ========== RENDER UANG RUPIAH YANG DIPERBAIKI ==========
         function renderUangRupiah() {
             let container = document.getElementById("rupiah-grid");
             if (!container) return;
@@ -2057,7 +2044,7 @@
             
             let html = '';
             
-            // Tampilkan pilihan uang (tanpa informasi kembalian di tombol)
+            // Tampilkan pilihan uang
             for (let i = 0; i < pilihan.length; i++) {
                 let nominal = pilihan[i];
                 let isPas = (nominal === grandTotal);
