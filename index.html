@@ -1265,7 +1265,7 @@
                         </div>
 
                         <div id="area-qris" class="hidden p-2 bg-white/70 rounded-xl border border-slate-200 text-center">
-                            <p class="text-xs text-slate-500 font-bold leading-relaxed">Bayar <span id="qris-amount-text" class="text-amber-600 font-black">Rp 0</span> via QRIS</p>
+                            <p class="text-xs text-slate-500 font-bold leading-relaxed">Pastikan Uang Sebesar <span id="qris-amount-text" class="text-amber-600 font-black">Rp 0</span> via QRIS Telah Diterima</p>
                         </div>
 
                         <button onclick="bayarSekarang()" class="btn-bayar-mobile w-full mt-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-white font-black text-sm p-3.5 rounded-xl shadow-md active:scale-95 transition hover:shadow-lg">
@@ -1657,33 +1657,31 @@ function generatePilihanUang(total) {
     if (bulat5 > total && bulat5 !== bulat1 && bulat5 !== bulat2) hasil.add(bulat5);
     
     // 7. TAMBAHKAN PECAHAN STANDAR YANG TERSEDIA (hanya yang >= total)
-    // TAPI JIKA TOTAL SUDAH SAMA DENGAN PECAHAN, JANGAN TAMBAHKAN DUPLIKAT
-    let pecahanTersedia = PECAHAN_UANG.filter(p => {
-        // Hanya tambahkan pecahan yang >= total dan belum ada di hasil
+    let pecahanTersedia = PECAHAN_UANG.filter(function(p) {
         return p >= total && !hasil.has(p);
     });
     
     // Ambil maksimal 2 pecahan standar (yang paling dekat dengan total)
-    for (let p of pecahanTersedia) {
+    for (var i = 0; i < pecahanTersedia.length; i++) {
         if (hasil.size < 6) {
-            hasil.add(p);
+            hasil.add(pecahanTersedia[i]);
         }
     }
     
     // 8. Untuk total di bawah 50rb, tambahkan opsi yang masuk akal
     if (total < 50000) {
         // Hanya tambahkan jika total BUKAN pecahan standar
-        let isPecahanStandar = PECAHAN_UANG.includes(total);
+        var isPecahanStandar = PECAHAN_UANG.indexOf(total) !== -1;
         
         if (!isPecahanStandar) {
             // Tambahkan total + 5000 (jika masuk akal)
-            let plus5 = total + 5000;
+            var plus5 = total + 5000;
             if (plus5 > total && !hasil.has(plus5) && plus5 < 100000) {
                 hasil.add(plus5);
             }
             
             // Tambahkan total + 10000 (jika masuk akal)
-            let plus10 = total + 10000;
+            var plus10 = total + 10000;
             if (plus10 > total && !hasil.has(plus10) && plus10 < 100000) {
                 hasil.add(plus10);
             }
@@ -1693,7 +1691,7 @@ function generatePilihanUang(total) {
     // 9. Untuk total di atas 50rb, tambahkan opsi tambahan
     if (total > 50000) {
         // Tambahkan total + 50.000
-        let plus50 = total + 50000;
+        var plus50 = total + 50000;
         if (plus50 > total && !hasil.has(plus50)) {
             hasil.add(plus50);
         }
@@ -1710,20 +1708,19 @@ function generatePilihanUang(total) {
     }
     
     // 10. Urutkan dan ambil maksimal 5 pilihan
-    let sorted = Array.from(hasil).sort((a, b) => a - b);
+    var sorted = Array.from(hasil).sort(function(a, b) {
+        return a - b;
+    });
     
     // Pastikan PAS tetap di urutan pertama
-    let pasIndex = sorted.indexOf(total);
+    var pasIndex = sorted.indexOf(total);
     if (pasIndex > 0) {
         sorted.splice(pasIndex, 1);
         sorted.unshift(total);
     }
     
     // Ambil maksimal 5 pilihan
-    let finalPilihan = sorted.slice(0, 5);
-    
-    // LOG: Untuk debugging (bisa dihapus)
-    console.log(`Total: ${total}, Pilihan: ${finalPilihan.join(', ')}`);
+    var finalPilihan = sorted.slice(0, 5);
     
     return finalPilihan;
 }
